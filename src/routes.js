@@ -6,6 +6,9 @@ import Discharged from "views/Discharged/Discharged";
 import Consumptions from "views/Consumptions/Consumptions";
 import LoginPage from "views/Pages/LoginPage";
 import Channels from "views/Channels/Chanels";
+import Map from "@material-ui/icons/Map";
+import Clients from "views/Clients/Clients";
+import Sellers from "views/Sellers/Sellers";
 
 // @material-ui/icons
 import AttachMoney from "@material-ui/icons/AttachMoney";
@@ -14,11 +17,8 @@ import SpeakerPhone from "@material-ui/icons/SpeakerPhone";
 import AssignmentTurnedIn from "@material-ui/icons/AssignmentTurnedIn";
 import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import Group from "@material-ui/icons/Group";
-import Map from "@material-ui/icons/Map";
-import Clients from "views/Clients/Clients";
-import Sellers from "views/Sellers/Sellers";
-
-
+import People from "@material-ui/icons/People";
+import ExitToApp from "@material-ui/icons/ExitToApp";
 
 
 const dashRoutes = [
@@ -74,7 +74,7 @@ const dashRoutes = [
     path: "/clientes",
     name: "Clientes",
     rtlName: "Clientes",
-    icon: Group,
+    icon: People,
     component: Clients,
     layout: "/admin"
   },
@@ -88,9 +88,9 @@ const dashRoutes = [
   },
   {
     path: "/login",
-    name: "Login",
-    rtlName: "Login",
-    icon: Group,
+    name: "Logout",
+    rtlName: "Logout",
+    icon: ExitToApp,
     component: LoginPage,
     layout: "/auth"
   },
