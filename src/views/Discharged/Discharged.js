@@ -30,6 +30,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 // Validations
 import { validateLength, validateRepited, validateIntField } from 'helpers/validations.js'
+import Axios from "axios";
 
 const customStyles = {
     ...styles,
@@ -61,6 +62,14 @@ export default function Discahrged() {
 
     const handleFileChange = async (dischargedFile) => {
         await setFile(dischargedFile.data)
+    }
+
+    const insertDischarged = async () => {
+        console.log("ENTRO");
+        const response = await Axios.post(`http://localhost:3000/altas`, {
+            altas: processedFile
+        })
+        console.log("RESPONSE", response);
     }
 
     const validateFile = () => {
@@ -175,7 +184,7 @@ export default function Discahrged() {
                             }
                             {
                                 processedFile && processedFile.length > 0 &&
-                                <Button color="success">Guardar datos Procesados</Button>
+                                <Button color="success" onClick={insertDischarged}>Guardar datos Procesados</Button>
                             }
                         </CardBody>
                     </Card>

@@ -26,7 +26,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 // Validations
 import { validateLength, validateRepited, validateIntField, validateLessLength } from 'helpers/validations.js'
-// import axios from 'axios';
+import axios from 'axios';
 
 const customStyles = {
     ...styles,
@@ -65,6 +65,14 @@ export default function FastTrack() {
 
     //     })
     // })
+
+    const insertFastTracks = async () => {
+        console.log("ENTRO");
+        const response = await axios.post(`http://localhost:3000/fast-tracks`, {
+            fastTracks: processedFile
+        })
+        console.log("RESPONSE", response.data);
+    }
 
     const handleFileChange = async (fastTrackFile) => {
         await setFile(fastTrackFile.data)
@@ -187,7 +195,7 @@ export default function FastTrack() {
                             {
                                 processedFile && processedFile.length > 0 &&
                                 errors && errors.length === 0 &&
-                                <Button color="success">Guardar datos Procesados</Button>
+                                <Button color="success" onClick={insertFastTracks}>Guardar datos Procesados</Button>
                             }
                         </CardBody>
                     </Card>
