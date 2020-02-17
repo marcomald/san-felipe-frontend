@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 //  Icons
 import CloudUpload from "@material-ui/icons/CloudUpload";
 import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import InfoIcon from "@material-ui/icons/Info";
-
 // Components
 import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
@@ -18,7 +17,7 @@ import Button from "components/CustomButtons/Button.js";
 import FileUpload from 'components/CustomUpload/FileUpload1.js';
 import Snackbar from "components/Snackbar/Snackbar.js";
 import Loader from 'components/Loader/Loader.js'
-
+import Axios from 'axios';
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -26,9 +25,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
-
-// Validations
-import { validateLength, validateRepited, validateIntField } from 'helpers/validations.js'
 
 const customStyles = {
     ...styles,
@@ -52,75 +48,46 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function Purchase() {
     const classes = useStyles();
     const [file, setFile] = React.useState([])
-    const [processedFile, setProcessedFile] = React.useState([])
     const [errors, setErrors] = React.useState([])
     const [modal, setModal] = React.useState(false);
     const [loading, setLoading] = React.useState(false)
     const [notification, setNotification] = React.useState(false);
+    const [reloadData, setReloadData] = React.useState(false)
+    const [logCarga, setLogCarga] = React.useState([])
+
+    useEffect(() => {
+        Axios.get("http://localhost:3000/log-carga?origen=compras")
+            .then(response => {
+                setLogCarga(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+    }, [reloadData])
 
     const handleFileChange = (purchasesFile) => {
         setFile(purchasesFile.data)
     }
-    const validateFile = () => {
-        setLoading(true)
-        const processArray = []
-        const errorsArray = []
-        file.forEach((purchase, i) => {
-            const index = i + 2
-            if (!validateLength(purchase.SERIE, 19)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'SERIE' no posee 19 caracteres.`, row: JSON.stringify(purchase) })
-            }
-
-            if (!validateLength(purchase.DN, 9)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'DN' no posee 9 caracteres.`, row: JSON.stringify(purchase) })
-            }
-
-            if (!validateIntField(purchase.SERIE, 19)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'SERIE' no es de tipo numerico.`, row: JSON.stringify(purchase) })
-            }
-
-            if (!validateIntField(purchase.DN, 9)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'DN' no es de tipo numerico.`, row: JSON.stringify(purchase) })
-            }
-
-            if (index === 0) {
-                processArray.push(purchase)
-            } else {
-                const serieRepited = validateRepited(processArray, "SERIE", purchase.SERIE)
-                const dnRepited = validateRepited(processArray, "DN", purchase.DN)
-
-                if (serieRepited) {
-                    errorsArray.push({ error: `Error en la linea ${index}, el campo 'SERIE' se encuentra repetido.`, row: JSON.stringify(purchase) })
-                }
-                if (dnRepited) {
-                    errorsArray.push({ error: `Error en la linea ${index}, el campo 'DN' se encuentra repetido.`, row: JSON.stringify(purchase) })
-                }
-                processArray.push(purchase)
-            }
-        })
-        setLoading(false)
-        setProcessedFile(processArray)
-        setErrors(errorsArray)
-
-        if (errorsArray.length > 0) {
-            setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 6000);
-        } else {
-            setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 6000);
-        }
-    }
 
     const processFile = async () => {
-        setLoading(true)
-        setTimeout(() => {
-            validateFile()
-            setLoading(false)
-        }, 100);
+        setLoading(true);
+        await Axios.post(`http://localhost:3000/compras`, {
+            compras: file
+        }).then(async data => {
+            const response = await data.data;
+            if (response.errors) {
+                setErrors(response.data);
+            }
+            setNotification(true)
+            setTimeout(function () {
+                setNotification(false)
+            }, 10000);
+            setReloadData(!reloadData);
+            setLoading(false);
+        }).catch(err => {
+            console.error("SE PRODUJO UN ERROR: ", err);
+            alert("Se produjo un error al procesar los datos. Intentelo de nuevo, si el problema persiste, pongase en contacto los desarrolladores");
+            setLoading(false);
+        })
     }
 
     return (
@@ -140,14 +107,18 @@ export default function Purchase() {
                             <Table
                                 tableHeaderColor="primary"
                                 tableHead={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
-                                tableData={[
-                                    ["1", "14/01/2020", "Marco Lozano", "20/12/2019", "10/01/2020", "420"],
-                                    ["2", "14/02/2020", "Diego Perez", "11/01/2020", "10/02/2020", "350"],
-                                    ["3", "14/03/2020", "Estafania Obando", "11/02/2020", "10/03/2020", "380"],
-                                ]}
-                                coloredColls={[3]}
-                                colorsColls={["primary"]}
+                                tableData={logCarga.map((log, index) => {
+                                    return [
+                                        (index + 1),
+                                        new Date(log.fecha_carga).toLocaleDateString(),
+                                        "Administrador",
+                                        new Date(log.fecha_desde).toLocaleDateString(),
+                                        new Date(log.fecha_hasta).toLocaleDateString(),
+                                        log.rows
+                                    ]
+                                })}
                             />
+                            {logCarga.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>
@@ -187,17 +158,13 @@ export default function Purchase() {
                         </CardHeader>
                         <CardBody>
                             <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {processedFile && processedFile.length}</h4></li>
-                                <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>
+                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
+                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
                             </ul>
                             {
-                                errors && errors.length > 0 && <Button color="success" onClick={() => setModal(true)}>Ver Errores</Button>
+                                errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
                             }
-                            {
-                                processedFile && processedFile.length > 0 &&
-                                errors && errors.length === 0 &&
-                                <Button color="success">Guardar datos Procesados</Button>
-                            }
+
                         </CardBody>
                     </Card>
                 </GridItem>
@@ -228,16 +195,14 @@ export default function Purchase() {
                     id="modal-slide-description"
                     className={classes.modalBody}
                 >
-                    <ul>
-                        {errors.map((error, index) => {
-                            return (<li key={index}>
-                                <div>
-                                    <h4><b>{index + 1}. </b>{error.error}</h4>
-                                    <h5>{error.row}</h5>
-                                </div>
-                            </li>)
-                        })}
-                    </ul>
+                    {errors && errors.map((error, index) => {
+                        return (
+                            <div key={index}>
+                                <h4><b>{index + 1}. </b>{error.error}</h4>
+                                <h5>{error.row}</h5>
+                            </div>
+                        )
+                    })}
                 </DialogContent>
                 <DialogActions
                     className={classes.modalFooter + " " + classes.modalFooterCenter}
@@ -250,7 +215,7 @@ export default function Purchase() {
                 place="br"
                 color={errors && errors.length > 0 ? "danger" : "info"}
                 message={errors && errors.length > 0 ? "Al procesar el archivo se econtraron algunos errores, intentelo de nuevo." :
-                    "Exito! no se encontraron errores en el archivo procesado."}
+                    "Exito! el archivo se proceso correctamente."}
                 open={notification}
                 closeNotification={() => setNotification(true)}
                 close

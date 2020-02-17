@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 //  Icons
 import CloudUpload from "@material-ui/icons/CloudUpload";
 import InfoIcon from "@material-ui/icons/Info";
@@ -17,6 +17,7 @@ import Button from "components/CustomButtons/Button.js";
 import FileUpload from 'components/CustomUpload/FileUpload1.js';
 import Loader from 'components/Loader/Loader.js'
 import Snackbar from "components/Snackbar/Snackbar.js";
+import Axios from 'axios';
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -24,9 +25,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
-// Validations
-import { validateLength, validateRepited, validateIntField, validateLessLength } from 'helpers/validations.js'
-import axios from 'axios';
 
 const customStyles = {
     ...styles,
@@ -50,77 +48,47 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function FastTrack() {
     const classes = useStyles();
     const [file, setFile] = React.useState([])
-    const [processedFile, setProcessedFile] = React.useState([])
     const [errors, setErrors] = React.useState([])
     const [modal, setModal] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const [notification, setNotification] = React.useState(false);
+    const [logCarga, setLogCarga] = React.useState([])
+    const [reloadData, setReloadData] = React.useState(false)
 
-    // useEffect(()=>{
-    //     axios.get(`https://jsonplaceholder.typicode.com/users`)
-    //     .then(res => {
-    //       const persons = res.data;
-    //       console.log("---------------->");
-    //       console.log(persons);
+    useEffect(() => {
+        Axios.get("http://localhost:3000/log-carga?origen=fast%20track")
+            .then(response => {
+                setLogCarga(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+    }, [reloadData])
 
-    //     })
-    // })
-
-    const insertFastTracks = async () => {
-        console.log("ENTRO");
-        const response = await axios.post(`http://localhost:3000/fast-tracks`, {
-            fastTracks: processedFile
-        })
-        console.log("RESPONSE", response.data);
+    const handleFileChange = (fastTrackFile) => {
+        setFile(fastTrackFile.data)
     }
 
-    const handleFileChange = async (fastTrackFile) => {
-        await setFile(fastTrackFile.data)
-    }
-
-    const processFile = () => {
-        setLoading(true)
-        const processArray = []
-        const errorsArray = []
-        file.forEach((ft, i) => {
-
-            const index = i + 2
-            if (!validateLength(ft.ICCID, 19)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICCID' no posee 19 caracteres.`, row: JSON.stringify(ft) })
+    const processFile = async () => {
+        setLoading(true);
+        await Axios.post(`http://localhost:3000/fast-tracks`, {
+            fastTracks: file
+        }).then(async data => {
+            const response = await data.data;
+            if (response.errors) {
+                setErrors(response.data);
             }
-
-            if (!validateIntField(ft.ICCID)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICCID' no es de tipo numerico.`, row: JSON.stringify(ft) })
-            }
-
-            if (!validateLessLength(ft.PRODUCTO, 30)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'PRODUCTO' posee mas de 30 caracteres.`, row: JSON.stringify(ft) })
-            }
-
-            const iccidRepited = validateRepited(processArray, "ICCID", ft.ICCID)
-            if (iccidRepited) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICCID'  se encuentra repetido.`, row: JSON.stringify(ft) })
-            }
-            processArray.push(ft)
-        })
-
-        setProcessedFile(processArray)
-        setErrors(errorsArray)
-        setLoading(false)
-
-        if (errorsArray.length > 0) {
             setNotification(true)
             setTimeout(function () {
                 setNotification(false)
-            }, 6000);
-        } else {
-            setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 6000);
-        }
+            }, 10000);
+            setReloadData(!reloadData);
+            setLoading(false);
+        }).catch(err => {
+            console.error("SE PRODUJO UN ERROR: ", err);
+            alert("Se produjo un error al procesar los datos. Intentelo de nuevo, si el problema persiste, pongase en contacto los desarrolladores");
+            setLoading(false);
+        })
     }
-
 
     return (
         <React.Fragment>
@@ -139,14 +107,20 @@ export default function FastTrack() {
                             <Table
                                 tableHeaderColor="primary"
                                 tableHead={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
-                                tableData={[
-                                    ["1", "14/01/2020", "Marco Lozano", "20/12/2019", "10/01/2020", "420"],
-                                    ["2", "14/02/2020", "Diego Perez", "11/01/2020", "10/02/2020", "350"],
-                                    ["3", "14/03/2020", "Estafania Obando", "11/02/2020", "10/03/2020", "380"],
-                                ]}
-                                coloredColls={[3]}
-                                colorsColls={["primary"]}
+                                tableData={
+                                    logCarga.map((log, index) => {
+                                        return [
+                                            (index + 1),
+                                            new Date(log.fecha_carga).toLocaleDateString(),
+                                            "Administrador",
+                                            new Date(log.fecha_desde).toLocaleDateString(),
+                                            new Date(log.fecha_hasta).toLocaleDateString(),
+                                            log.rows
+                                        ]
+                                    })
+                                }
                             />
+                            {logCarga.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>
@@ -171,7 +145,6 @@ export default function FastTrack() {
                                         </div>
                                     </GridItem>
                                 </GridContainer>
-                                {/* <Button color="success">Submit</Button> */}
                             </form>
                         </CardBody>
                     </Card>
@@ -186,16 +159,11 @@ export default function FastTrack() {
                         </CardHeader>
                         <CardBody>
                             <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {processedFile && processedFile.length}</h4></li>
-                                <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>
+                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
+                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
                             </ul>
                             {
-                                errors && errors.length > 0 && <Button color="success" onClick={() => setModal(true)}>Ver Errores</Button>
-                            }
-                            {
-                                processedFile && processedFile.length > 0 &&
-                                errors && errors.length === 0 &&
-                                <Button color="success" onClick={insertFastTracks}>Guardar datos Procesados</Button>
+                                errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
                             }
                         </CardBody>
                     </Card>
@@ -227,16 +195,14 @@ export default function FastTrack() {
                     id="modal-slide-description"
                     className={classes.modalBody}
                 >
-                    <ul>
-                        {errors && errors.map((error, index) => {
-                            return (
-                                <div>
-                                    <h4><b>{index + 1}. </b>{error.error}</h4>
-                                    <h5>{error.row}</h5>
-                                </div>
-                            )
-                        })}
-                    </ul>
+                    {errors && errors.map((error, index) => {
+                        return (
+                            <div key={index}>
+                                <h4><b>{index + 1}. </b>{error.error}</h4>
+                                <h5>{error.row}</h5>
+                            </div>
+                        )
+                    })}
                 </DialogContent>
                 <DialogActions
                     className={classes.modalFooter + " " + classes.modalFooterCenter}

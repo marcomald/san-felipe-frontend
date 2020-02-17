@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 //  Icons
 import CloudUpload from "@material-ui/icons/CloudUpload";
 import SimCard from "@material-ui/icons/SimCard";
 import InfoIcon from "@material-ui/icons/Info";
-
 // Components
 import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
@@ -17,10 +16,8 @@ import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
 import FileUpload from 'components/CustomUpload/FileUpload1.js';
 import Snackbar from "components/Snackbar/Snackbar.js";
-
-// import Loader from '../Components/Loader'
+import Axios from "axios";
 import Loader from 'components/Loader/Loader.js'
-
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -28,9 +25,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
-// Validations
-import { validateLength, validateRepited, validateIntField } from 'helpers/validations.js'
-import Axios from "axios";
 
 const customStyles = {
     ...styles,
@@ -54,65 +48,46 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function Discahrged() {
     const classes = useStyles();
     const [file, setFile] = React.useState([])
-    const [processedFile, setProcessedFile] = React.useState([])
     const [errors, setErrors] = React.useState([])
     const [modal, setModal] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const [notification, setNotification] = React.useState(false);
+    const [reloadData, setReloadData] = React.useState(false)
+    const [logCarga, setLogCarga] = React.useState([])
 
-    const handleFileChange = async (dischargedFile) => {
-        await setFile(dischargedFile.data)
-    }
+    useEffect(() => {
+        Axios.get("http://localhost:3000/log-carga?origen=altas")
+            .then(response => {
+                setLogCarga(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+    }, [reloadData])
 
-    const insertDischarged = async () => {
-        console.log("ENTRO");
-        const response = await Axios.post(`http://localhost:3000/altas`, {
-            altas: processedFile
-        })
-        console.log("RESPONSE", response);
-    }
-
-    const validateFile = () => {
-        setLoading(true)
-        const processArray = []
-        const errorsArray = []
-        file.forEach((discharged, i) => {
-            const index = i + 2
-            if (!validateLength(discharged.ICCID, 19)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICCID' no posee 19 caracteres.`, row: JSON.stringify(discharged) })
-            }
-            if (!validateIntField(discharged.ICCID)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICCID' no es de tipo numerico.`, row: JSON.stringify(discharged) })
-            }
-            const iccidRepited = validateRepited(processArray, "ICCID", discharged.ICCID)
-            if (iccidRepited) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICCID' se encuentra repetido.`, row: JSON.stringify(discharged) })
-            }
-            processArray.push(discharged)
-        })
-        setProcessedFile(processArray)
-        setErrors(errorsArray)
-        setLoading(false)
-
-        if (errorsArray.length > 0) {
-            setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 6000);
-        } else {
-            setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 6000);
-        }
+    const handleFileChange = (dischargedFile) => {
+        setFile(dischargedFile.data)
     }
 
     const processFile = async () => {
-        setLoading(true)
-        setTimeout(() => {
-            validateFile()
-            setLoading(false)
-        }, 100);
+        setLoading(true);
+        await Axios.post(`http://localhost:3000/altas`, {
+            altas: file
+        }).then(async data => {
+            const response = await data.data;
+            if (response.errors) {
+                setErrors(response.data);
+            }
+            setNotification(true)
+            setTimeout(function () {
+                setNotification(false)
+            }, 10000);
+            setReloadData(!reloadData);
+            setLoading(false);
+        }).catch(err => {
+            console.error("SE PRODUJO UN ERROR: ", err);
+            alert("Se produjo un error al procesar los datos. Intentelo de nuevo, si el problema persiste, pongase en contacto los desarrolladores");
+            setLoading(false);
+        })
     }
 
     return (
@@ -132,12 +107,18 @@ export default function Discahrged() {
                             <Table
                                 tableHeaderColor="primary"
                                 tableHead={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
-                                tableData={[
-                                    ["1", "14/01/2020", "Marco Lozano", "20/12/2019", "10/01/2020", "420"],
-                                    ["2", "14/02/2020", "Diego Perez", "11/01/2020", "10/02/2020", "350"],
-                                    ["3", "14/03/2020", "Estafania Obando", "11/02/2020", "10/03/2020", "380"],
-                                ]}
+                                tableData={logCarga.map((log, index) => {
+                                    return [
+                                        (index + 1),
+                                        new Date(log.fecha_carga).toLocaleDateString(),
+                                        "Administrador",
+                                        new Date(log.fecha_desde).toLocaleDateString(),
+                                        new Date(log.fecha_hasta).toLocaleDateString(),
+                                        log.rows
+                                    ]
+                                })}
                             />
+                            {logCarga.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>
@@ -176,15 +157,11 @@ export default function Discahrged() {
                         </CardHeader>
                         <CardBody>
                             <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {processedFile && processedFile.length}</h4></li>
-                                <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>
+                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
+                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
                             </ul>
                             {
                                 errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
-                            }
-                            {
-                                processedFile && processedFile.length > 0 &&
-                                <Button color="success" onClick={insertDischarged}>Guardar datos Procesados</Button>
                             }
                         </CardBody>
                     </Card>
@@ -216,16 +193,14 @@ export default function Discahrged() {
                     id="modal-slide-description"
                     className={classes.modalBody}
                 >
-                    <ul>
-                        {errors && errors.map((error, index) => {
-                            return (
-                                <div>
-                                    <h4><b>{index + 1}. </b>{error.error}</h4>
-                                    <h5>{error.row}</h5>
-                                </div>
-                            )
-                        })}
-                    </ul>
+                    {errors && errors.map((error, index) => {
+                        return (
+                            <div key={index}>
+                                <h4><b>{index + 1}. </b>{error.error}</h4>
+                                <h5>{error.row}</h5>
+                            </div>
+                        )
+                    })}
                 </DialogContent>
                 <DialogActions
                     className={classes.modalFooter + " " + classes.modalFooterCenter}
@@ -238,7 +213,7 @@ export default function Discahrged() {
                 place="br"
                 color={errors && errors.length > 0 ? "danger" : "info"}
                 message={errors && errors.length > 0 ? "Al procesar el archivo se econtraron algunos errores, intentelo de nuevo." :
-                    "Exito! no se encontraron errores en el archivo procesado."}
+                    "Exito! el archivo se proceso correctamente."}
                 open={notification}
                 closeNotification={() => setNotification(true)}
                 close

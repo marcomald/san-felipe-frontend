@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 //  Icons
 import CloudUpload from "@material-ui/icons/CloudUpload";
 import AttachMoney from "@material-ui/icons/AttachMoney";
@@ -14,12 +14,9 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
-import FileUpload from 'components/CustomUpload/FileUpload.js';
-import CustomSelector from "components/CustomDropdown/CustomSelector";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
+import FileUpload from 'components/CustomUpload/FileUpload1.js';
+import Selector from "components/CustomDropdown/CustomSelector";
+import Axios from 'axios';
 import Snackbar from "components/Snackbar/Snackbar.js";
 import Loader from 'components/Loader/Loader.js'
 // Modal
@@ -30,9 +27,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 // Styles
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
-import FormStyles from "assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.js";
-import { channelZones } from "helpers/selectOptions"
-import { validateLength, validateRepited, validateIntField } from 'helpers/validations.js'
 
 const customStyles = {
     ...styles,
@@ -48,86 +42,136 @@ const customStyles = {
 };
 
 const useStyles = makeStyles(customStyles);
-const useStylesForm = makeStyles(FormStyles);
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
 export default function Purchase() {
-    const [file, setFile] = React.useState([])
-    const [processedFile, setProcessedFile] = React.useState([])
-    const [errors, setErrors] = React.useState([])
+    const [file, setFile] = React.useState([]);
+    const [errors, setErrors] = React.useState([]);
     const [modal, setModal] = React.useState(false);
-    const [simpleSelect, setSimpleSelect] = React.useState("");
-    const [loading, setLoading] = React.useState(false)
-    const [notification, setNotification] = React.useState(false);
-
+    const [loading, setLoading] = React.useState(false);
+    const [logCarga, setLogCarga] = React.useState([]);
+    const [canales, setCanales] = React.useState([]);
+    const [vendedores, setVendedores] = React.useState([]);
+    const [venta, setVenta] = React.useState({});
+    const [reloadData, setReloadData] = React.useState(false);
+    const [notification, setNotification] = React.useState({
+        color: "info",
+        text: "",
+        open: false,
+    });
     const classes = useStyles();
-    const FormClasses = useStylesForm();
+
+    useEffect(() => {
+        Axios.get("http://localhost:3000/log-carga?origen=ventas")
+            .then(response => {
+                setLogCarga(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+
+        Axios.get("http://localhost:3000/canales")
+            .then(response => {
+                setCanales(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+
+        Axios.get("http://localhost:3000/vendedores")
+            .then(response => {
+                setVendedores(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+    }, [reloadData])
+
+    const handleSearchCanal = (nombreCanal) => {
+        Axios.get("http://localhost:3000/canales?nombre=" + nombreCanal)
+            .then(response => {
+                setCanales(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+    }
+
+    const handleSearchVendedores = (nombreVendedor) => {
+        Axios.get("http://localhost:3000/vendedores?nombre=" + nombreVendedor)
+            .then(response => {
+                setVendedores(response.data)
+            }).catch(e => {
+                console.error(e)
+            })
+    }
+
+    const handleVentasChange = (property, value) => {
+        console.log(property, value);
+        const newVenta = { ...venta };
+        newVenta[property] = value
+        setVenta(newVenta);
+    };
+
 
     const handleFileChange = (salesFile) => {
-        setFile(salesFile)
-    }
-    const validateFile = () => {
-        setLoading(true)
-        const processArray = []
-        const errorsArray = []
-        file.forEach((sale, i) => {
-            const index = i + 2
-
-            if (!validateLength(sale.icc, 19)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICC' no posee 19 caracteres.`, row: JSON.stringify(sale) })
-            }
-            if (!validateLength(sale.dn, 9)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'DN' no posee 9 caracteres.`, row: JSON.stringify(sale) })
-            }
-            if (!validateIntField(sale.icc)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICC' no es de tipo numerico.`, row: JSON.stringify(sale) })
-            }
-            if (!validateIntField(sale.dn)) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'DN' no es de tipo numerico.`, row: JSON.stringify(sale) })
-            }
-
-            const iccRepited = validateRepited(processArray, "SERIE", sale.icc)
-            const dnRepited = validateRepited(processArray, "DN", sale.dn)
-
-            if (iccRepited) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'ICC' se encuentra repetido.`, row: JSON.stringify(sale) })
-            }
-            if (dnRepited) {
-                errorsArray.push({ error: `Error en la linea ${index}, el campo 'DN' se encuentra repetido.`, row: JSON.stringify(sale) })
-            }
-            processArray.push(sale)
-        })
-        setLoading(false)
-        setProcessedFile(processArray)
-        setErrors(errorsArray)
-
-        if (errorsArray.length > 0) {
-            setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 6000);
-        } else {
-            setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 6000);
-        }
+        setFile(salesFile.data)
     }
 
     const processFile = async () => {
-        setLoading(true)
-        setTimeout(() => {
-            validateFile()
-            setLoading(false)
-        }, 100);
-    }
+        setLoading(true);
+        const zona = canales.filter(ch => ch.id_canal === venta.canal.value)[0]
+        await Axios.post(`http://localhost:3000/despachos`, {
+            ventas: file,
+            id_canal: venta.canal.value,
+            id_vendedor: venta.vendedor.value,
+            zona: zona.zonificacion,
+        }).then(async data => {
+            const response = await data.data;
+            setLoading(false);
+            if (response.errors) {
+                setErrors(response.data);
+                setNotification({
+                    color: 'danger',
+                    text: 'Error! Se encontraron algunos errores al subir el archivo de ventas.',
+                    open: true
+                })
+                setTimeout(function () {
+                    setNotification({
+                        ...notification,
+                        open: false
+                    })
+                }, 10000);
+            } else {
+                setReloadData(!reloadData);
+                setNotification({
+                    color: 'info',
+                    text: 'Exito! Ventas ingresadas',
+                    open: true
+                })
+                setTimeout(function () {
+                    setNotification({
+                        ...notification,
+                        open: false
+                    })
+                }, 10000);
+            }
 
-    const handleSimple = event => {
-        setSimpleSelect(event.target.value);
-    };
+        }).catch(err => {
+            setLoading(false);
+            console.error("Error al subir el archivo de ventas: ", err);
+            setNotification({
+                color: 'danger',
+                text: 'Error! Se produjo un error al subir las ventas.',
+                open: true
+            })
+            setTimeout(function () {
+                setNotification({
+                    ...notification,
+                    open: false
+                })
+            }, 10000);
+        })
+    }
 
     return (
         <React.Fragment>
@@ -146,14 +190,18 @@ export default function Purchase() {
                             <Table
                                 tableHeaderColor="primary"
                                 tableHead={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
-                                tableData={[
-                                    ["1", "14/01/2020", "Marco Lozano", "20/12/2019", "10/01/2020", "420"],
-                                    ["2", "14/02/2020", "Diego Perez", "11/01/2020", "10/02/2020", "350"],
-                                    ["3", "14/03/2020", "Estafania Obando", "11/02/2020", "10/03/2020", "380"],
-                                ]}
-                                coloredColls={[3]}
-                                colorsColls={["primary"]}
+                                tableData={logCarga.map((log, index) => {
+                                    return [
+                                        (index + 1),
+                                        new Date(log.fecha_carga).toLocaleDateString(),
+                                        "Administrador",
+                                        new Date(log.fecha_desde).toLocaleDateString(),
+                                        new Date(log.fecha_hasta).toLocaleDateString(),
+                                        log.rows
+                                    ]
+                                })}
                             />
+                            {logCarga.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>
@@ -170,63 +218,45 @@ export default function Purchase() {
                         <CardBody>
                             <form>
                                 <br />
-                                {/* <Button color="rose">Submit</Button> */}
-                                <CustomSelector>
-                                </CustomSelector>
-                                <FormControl
-                                    fullWidth
-                                    className={FormClasses.selectFormControl}
-                                >
-                                    <InputLabel
-                                        htmlFor="simple-select"
-                                        className={FormClasses.selectLabel}
-                                    >
-                                        Canal
-                                    </InputLabel>
-                                    <Select
-                                        MenuProps={{
-                                            className: FormClasses.selectMenu
-                                        }}
-                                        classes={{
-                                            select: FormClasses.select
-                                        }}
-                                        value={simpleSelect}
-                                        onChange={handleSimple}
-                                        inputProps={{
-                                            name: "simpleSelect",
-                                            id: "simple-select"
-                                        }}
-                                    >
-                                        <MenuItem
-                                            disabled
-                                            classes={{
-                                                root: FormClasses.selectMenuItem
-                                            }}
-                                        >
-                                            Eliga un canal
-                                        </MenuItem>
-                                        {
-                                            channelZones.map((zone, index) => {
-                                                return (
-                                                    <MenuItem
-                                                        key={index}
-                                                        classes={{
-                                                            root: FormClasses.selectMenuItem,
-                                                            selected: FormClasses.selectMenuItemSelected
-                                                        }}
-                                                        value={zone.value}
-                                                    >
-                                                        {zone.label}
-                                                    </MenuItem>
-                                                )
-                                            })
+                                <Selector
+                                    placeholder="Canales"
+                                    options={canales.map(canal => {
+                                        return {
+                                            value: canal.id_canal,
+                                            label: canal.nombre + " - " + canal.ciudad + " - " + canal.zonificacion,
                                         }
-                                    </Select>
-                                </FormControl>
+                                    })}
+                                    onInputChange={(value) => handleSearchCanal(value)}
+                                    onChange={(value) => handleVentasChange("canal", value)}
+                                    value={venta.canal}
+                                />
+                                <br />
+                                <Selector
+                                    placeholder="Vendendor"
+                                    options={vendedores.map(vendedor => {
+                                        return {
+                                            value: vendedor.id_vendedor,
+                                            label: vendedor.nombre_completo,
+                                        }
+                                    })}
+                                    onInputChange={(value) => handleSearchVendedores(value)}
+                                    onChange={(value) => handleVentasChange("vendedor", value)}
+                                    value={venta.vendedor}
+                                />
                                 <GridContainer>
                                     <GridItem xs={12}>
                                         <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <FileUpload handleFile={handleFileChange} />
+                                            <FileUpload
+                                                disabled={
+                                                    !venta.canal ||
+                                                    !venta.canal.value ||
+                                                    venta.canal.value === "" ||
+                                                    !venta.vendedor ||
+                                                    !venta.vendedor.value ||
+                                                    venta.vendedor.value === ""
+                                                }
+                                                handleFile={handleFileChange}
+                                            />
                                             {file && file.length > 0 && <Button color="rose" onClick={processFile}>Procesar Archivo</Button>}
                                         </div>
                                     </GridItem>
@@ -245,16 +275,11 @@ export default function Purchase() {
                         </CardHeader>
                         <CardBody>
                             <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {processedFile && processedFile.length}</h4></li>
-                                <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>
+                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
+                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
                             </ul>
                             {
                                 errors && errors.length > 0 && <Button color="rose" onClick={() => setModal(true)}>Ver Errores</Button>
-                            }
-                            {
-                                processedFile && processedFile.length > 0 &&
-                                errors && errors.length === 0 &&
-                                <Button color="rose">Guardar datos Procesados</Button>
                             }
                         </CardBody>
                     </Card>
@@ -286,11 +311,14 @@ export default function Purchase() {
                     id="modal-slide-description"
                     className={classes.modalBody}
                 >
-                    <ul>
-                        {errors && errors.map((error, index) => {
-                            return (<li key={index}><h4><b>{index + 1}. </b>{error}</h4></li>)
-                        })}
-                    </ul>
+                    {errors && errors.map((error, index) => {
+                        return (
+                            <div key={index}>
+                                <h4><b>{index + 1}. </b>{error.error}</h4>
+                                <h5>{error.row}</h5>
+                            </div>
+                        )
+                    })}
                 </DialogContent>
                 <DialogActions
                     className={classes.modalFooter + " " + classes.modalFooterCenter}
@@ -301,11 +329,13 @@ export default function Purchase() {
             {loading && <Loader show={loading} />}
             <Snackbar
                 place="br"
-                color={errors && errors.length > 0 ? "danger" : "info"}
-                message={errors && errors.length > 0 ? "Al procesar el archivo se econtraron algunos errores, intentelo de nuevo." :
-                    "Exito! no se encontraron errores en el archivo procesado."}
-                open={notification}
-                closeNotification={() => setNotification(true)}
+                color={notification.color}
+                message={notification.text}
+                open={notification.open}
+                closeNotification={() => {
+                    const noti = { ...notification, open: false }
+                    setNotification(noti)
+                }}
                 close
             />
         </React.Fragment>

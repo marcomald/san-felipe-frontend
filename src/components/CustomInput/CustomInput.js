@@ -28,6 +28,7 @@ export default function CustomInput(props) {
     success,
     helperText,
     onChange,
+    value
   } = props;
 
   const labelClasses = classNames({
@@ -80,6 +81,7 @@ export default function CustomInput(props) {
         }}
         id={id}
         {...inputProps}
+        value={value || ''}
         onChange={onChange}
       />
       {helperText !== undefined ? (
@@ -101,5 +103,6 @@ CustomInput.propTypes = {
   error: PropTypes.bool,
   success: PropTypes.bool,
   white: PropTypes.bool,
-  helperText: PropTypes.node
+  helperText: PropTypes.node,
+  value: PropTypes.string,
 };

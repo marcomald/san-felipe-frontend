@@ -1,5 +1,5 @@
 import React from 'react'
-import Select from 'react-select'
+import CreatableSelect from 'react-select/creatable'
 
 const customStyles = {
     option: (provided, { data, isDisabled, isFocused, isSelected }) => ({
@@ -41,13 +41,16 @@ const customStyles = {
 
 }
 
-export default function Selector(props) {
-    return <Select
-        onChange={props.onChange}
-        onInputChange={props.onInputChange}
-        styles={customStyles}
-        options={props.options}
-        placeholder={props.placeholder}
-        value={props.value ? props.value : ""}
-    />
+export default function CreatableSelecttor(props) {
+    return (
+        <CreatableSelect
+            isClearable
+            onChange={props.onChange}
+            onInputChange={props.onInputChange}
+            styles={customStyles}
+            options={props.options}
+            placeholder={props.placeholder}
+            value={props.value ? props.value : ""}
+        // input
+        />)
 }

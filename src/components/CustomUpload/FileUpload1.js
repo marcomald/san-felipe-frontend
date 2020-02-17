@@ -43,10 +43,15 @@ export default function FileUpload(props) {
         props.handleFile([])
     };
 
-    let { avatar, addButtonProps, changeButtonProps, removeButtonProps } = props;
+    let { avatar, addButtonProps, changeButtonProps, removeButtonProps, disabled } = props;
     return (
         <div className="fileinput text-center">
-            <input type="file" onChange={handleImageChange} ref={fileInput} accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            <input
+                disabled={disabled ? disabled : false}
+                type="file"
+                onChange={handleImageChange}
+                ref={fileInput}
+                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
             <h4>{file && file.name}</h4>
             <div>
                 {file === null ? (
