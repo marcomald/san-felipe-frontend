@@ -42,12 +42,16 @@ const customStyles = {
 }
 
 export default function Selector(props) {
-    return <Select
-        onChange={props.onChange}
-        onInputChange={props.onInputChange}
-        styles={customStyles}
-        options={props.options}
-        placeholder={props.placeholder}
-        value={props.value ? props.value : ""}
-    />
+    return <React.Fragment>
+        {props.label && <label style={{ fontSize: '12px' }}>{props.label}</label>}
+        <Select
+            onChange={props.onChange}
+            onInputChange={props.onInputChange}
+            styles={customStyles}
+            options={props.options}
+            placeholder={props.placeholder}
+            isMulti={props.isMulti ? true : false}
+            value={props.value ? props.value : ""}
+        />
+    </React.Fragment>
 }

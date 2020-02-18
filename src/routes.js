@@ -9,7 +9,8 @@ import Channels from "views/Channels/Chanels";
 import Map from "@material-ui/icons/Map";
 import Clients from "views/Clients/Clients";
 import Sellers from "views/Sellers/Sellers";
-
+import Users from "views/Users/Users"
+import Roles from "views/Roles/Roles"
 // @material-ui/icons
 import AttachMoney from "@material-ui/icons/AttachMoney";
 import SimCard from "@material-ui/icons/SimCard";
@@ -17,9 +18,10 @@ import SpeakerPhone from "@material-ui/icons/SpeakerPhone";
 import AssignmentTurnedIn from "@material-ui/icons/AssignmentTurnedIn";
 import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import Group from "@material-ui/icons/Group";
-import People from "@material-ui/icons/People";
 import ExitToApp from "@material-ui/icons/ExitToApp";
-
+import Settings from "@material-ui/icons/Settings"
+import AssignmentInd from "@material-ui/icons/AssignmentInd"
+import Work from "@material-ui/icons/Work"
 
 const dashRoutes = [
   {
@@ -74,7 +76,7 @@ const dashRoutes = [
     path: "/clientes",
     name: "Clientes",
     rtlName: "Clientes",
-    icon: People,
+    icon: AssignmentInd,
     component: Clients,
     layout: "/admin"
   },
@@ -82,8 +84,24 @@ const dashRoutes = [
     path: "/vendedores",
     name: "Vendedores",
     rtlName: "Vendedores",
-    icon: Group,
+    icon: Work,
     component: Sellers,
+    layout: "/admin"
+  },
+  {
+    path: "/usuarios",
+    name: "Usuarios",
+    rtlName: "Usuarios",
+    icon: Group,
+    component: Users,
+    layout: "/admin"
+  },
+  {
+    path: "/roles",
+    name: "Roles",
+    rtlName: "Roles",
+    icon: Settings,
+    component: Roles,
     layout: "/admin"
   },
   {
