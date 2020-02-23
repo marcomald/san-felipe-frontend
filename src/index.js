@@ -16,28 +16,33 @@
 */
 import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserHistory } from "history";
-import { Router, Route, Switch, Redirect } from "react-router-dom";
-
-import AuthLayout from "layouts/Auth.js";
-import RtlLayout from "layouts/RTL.js";
-import AdminLayout from "layouts/Admin.js";
-
-import PurchaseLayout from "layouts/Admin.js";
-
 import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
+import App from './App';
+// const hist = createBrowserHistory();
+// axios.defaults.baseURL = process.env.REACT_APP_DISRTIMARKET_BACKEND_URL
+// const accessToken = window.sessionStorage.getItem("accessToken")
+// const user = window.sessionStorage.getItem("user")
 
-const hist = createBrowserHistory();
+// const [login, setLogin] = useState({ token: accessToken })
+
+// ReactDOM.render(
+//   <AuthContext>
+//     <Router history={hist}>
+//       <Switch>
+//         <Route path="/rtl" component={RtlLayout} />
+//         <Route path="/auth" component={AuthLayout} />
+//         <Route path="/admin" component={AdminLayout} />
+//         <Route path="/purchase" component={PurchaseLayout} />
+//         <Redirect from="/" to="/admin/dashboard" />
+//       </Switch>
+//     </Router>
+//   </AuthContext>
+//   ,
+//   document.getElementById("root")
+// );
+
 
 ReactDOM.render(
-  <Router history={hist}>
-    <Switch>
-      <Route path="/rtl" component={RtlLayout} />
-      <Route path="/auth" component={AuthLayout} />
-      <Route path="/admin" component={AdminLayout} />
-      <Route path="/purchase" component={PurchaseLayout} />
-      <Redirect from="/" to="/admin/dashboard" />
-    </Switch>
-  </Router>,
-  document.getElementById("root")
+  <App />,
+  document.getElementById('root')
 );

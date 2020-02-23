@@ -23,94 +23,140 @@ import Settings from "@material-ui/icons/Settings"
 import AssignmentInd from "@material-ui/icons/AssignmentInd"
 import Work from "@material-ui/icons/Work"
 
-const dashRoutes = [
-  {
-    path: "/compras",
-    name: "Compras",
-    rtlName: "Compras",
-    icon: ShoppingCart,
-    component: Purchase,
-    layout: "/admin"
-  },
-  {
-    path: "/altas",
-    name: "Altas",
-    rtlName: "Altas",
-    icon: SimCard,
-    component: Discharged,
-    layout: "/admin"
-  },
-  {
-    path: "/consumos",
-    name: "Consumos",
-    rtlName: "Consumos",
-    icon: SpeakerPhone,
-    component: Consumptions,
-    layout: "/admin"
-  },
-  {
-    path: "/despachos-ventas",
-    name: "Despachos y ventas",
-    rtlName: "Despachos y ventas",
-    icon: AttachMoney,
-    component: Sales,
-    layout: "/admin"
-  },
-  {
-    path: "/fast-track",
-    name: "Fast Track",
-    rtlName: "Fast Track",
-    icon: AssignmentTurnedIn,
-    component: FastTrack,
-    layout: "/admin"
-  },
-  {
-    path: "/canales",
-    name: "Canales",
-    rtlName: "Canales",
-    icon: Map,
-    component: Channels,
-    layout: "/admin"
-  },
-  {
-    path: "/clientes",
-    name: "Clientes",
-    rtlName: "Clientes",
-    icon: AssignmentInd,
-    component: Clients,
-    layout: "/admin"
-  },
-  {
-    path: "/vendedores",
-    name: "Vendedores",
-    rtlName: "Vendedores",
-    icon: Work,
-    component: Sellers,
-    layout: "/admin"
-  },
-  {
-    path: "/usuarios",
-    name: "Usuarios",
-    rtlName: "Usuarios",
-    icon: Group,
-    component: Users,
-    layout: "/admin"
-  },
-  {
-    path: "/roles",
-    name: "Roles",
-    rtlName: "Roles",
-    icon: Settings,
-    component: Roles,
-    layout: "/admin"
-  },
-  {
+const filterPermissions = () => {
+  const user = window.sessionStorage.getItem("user");
+  const urlPath = window.location.pathname;
+  if (!user) {
+    if (urlPath !== '/auth/login') {
+      window.location.replace('/auth/login');
+    }
+    return [{
+      path: "/login",
+      name: "Logout",
+      rtlName: "Logout",
+      icon: ExitToApp,
+      component: LoginPage,
+      layout: "/auth"
+    }]
+  }
+  const userDecode = JSON.parse(window.atob(user));
+  const allowedRoutes = []
+
+  userDecode.permissions.forEach(permission => {
+    switch (permission) {
+      case "altas":
+        allowedRoutes.push({
+          path: "/altas",
+          name: "Altas",
+          rtlName: "Altas",
+          icon: SimCard,
+          component: Discharged,
+          layout: "/admin"
+        })
+        break;
+      case "canales":
+        allowedRoutes.push({
+          path: "/canales",
+          name: "Canales",
+          rtlName: "Canales",
+          icon: Map,
+          component: Channels,
+          layout: "/admin"
+        })
+        break;
+      case "clientes":
+        allowedRoutes.push({
+          path: "/clientes",
+          name: "Clientes",
+          rtlName: "Clientes",
+          icon: AssignmentInd,
+          component: Clients,
+          layout: "/admin"
+        })
+        break;
+      case "compras":
+        allowedRoutes.push({
+          path: "/compras",
+          name: "Compras",
+          rtlName: "Compras",
+          icon: ShoppingCart,
+          component: Purchase,
+          layout: "/admin"
+        })
+        break;
+      case "consumos":
+        allowedRoutes.push({
+          path: "/consumos",
+          name: "Consumos",
+          rtlName: "Consumos",
+          icon: SpeakerPhone,
+          component: Consumptions,
+          layout: "/admin"
+        })
+        break;
+      case "fasttrack":
+        allowedRoutes.push({
+          path: "/fast-track",
+          name: "Fast Track",
+          rtlName: "Fast Track",
+          icon: AssignmentTurnedIn,
+          component: FastTrack,
+          layout: "/admin"
+        })
+        break;
+      case "roles":
+        allowedRoutes.push({
+          path: "/roles",
+          name: "Roles",
+          rtlName: "Roles",
+          icon: Settings,
+          component: Roles,
+          layout: "/admin"
+        })
+        break;
+      case "usuarios":
+        allowedRoutes.push({
+          path: "/usuarios",
+          name: "Usuarios",
+          rtlName: "Usuarios",
+          icon: Group,
+          component: Users,
+          layout: "/admin"
+        })
+        break;
+      case "vendedores":
+        allowedRoutes.push({
+          path: "/vendedores",
+          name: "Vendedores",
+          rtlName: "Vendedores",
+          icon: Work,
+          component: Sellers,
+          layout: "/admin"
+        })
+        break;
+      case "ventas":
+        allowedRoutes.push({
+          path: "/despachos-ventas",
+          name: "Despachos y ventas",
+          rtlName: "Despachos y ventas",
+          icon: AttachMoney,
+          component: Sales,
+          layout: "/admin"
+        })
+        break;
+      default:
+        break;
+    }
+  });
+  allowedRoutes.push({
     path: "/login",
     name: "Logout",
     rtlName: "Logout",
     icon: ExitToApp,
     component: LoginPage,
     layout: "/auth"
-  },
-]
-export default dashRoutes;
+  });
+  return allowedRoutes
+}
+
+export default filterPermissions();

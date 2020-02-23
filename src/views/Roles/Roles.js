@@ -84,7 +84,7 @@ export default function Roles() {
         { name: "Acceso a Ventas", key: "ventas" },
     ]
     useEffect(() => {
-        Axios.get("http://localhost:3000/roles")
+        Axios.get("/roles")
             .then(response => {
                 setRoles(response.data)
             }).catch(e => {
@@ -144,7 +144,7 @@ export default function Roles() {
     };
 
     const createRol = () => {
-        Axios.post("http://localhost:3000/roles", {
+        Axios.post("/roles", {
             nombre: rol.nombre,
             descripcion: rol.descripcion,
             permisos: rol.permisos.map(per => per.value),
@@ -195,7 +195,7 @@ export default function Roles() {
     }
 
     const updateRol = () => {
-        Axios.put("http://localhost:3000/roles", {
+        Axios.put("/roles", {
             id: rolEdit.id,
             nombre: rolEdit.nombre,
             descripcion: rolEdit.descripcion,

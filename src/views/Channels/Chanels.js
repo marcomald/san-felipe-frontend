@@ -79,14 +79,14 @@ export default function Channels() {
     });
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/canales/ciudades")
+        Axios.get("/canales/ciudades")
             .then(response => {
                 setCities(response.data)
             }).catch(e => {
                 console.error(e)
             })
 
-        Axios.get("http://localhost:3000/canales")
+        Axios.get("/canales")
             .then(response => {
                 setChannels(response.data)
             }).catch(e => {
@@ -191,7 +191,7 @@ export default function Channels() {
     }
 
     const deleteChannel = () => {
-        Axios.delete("http://localhost:3000/canales/" + channelEdit.id_canal, {
+        Axios.delete("/canales/" + channelEdit.id_canal, {
             id: channelEdit.id_canal,
         }).then(response => {
             setDeleteModal(false)
@@ -224,7 +224,7 @@ export default function Channels() {
     }
 
     const editChannel = () => {
-        Axios.put("http://localhost:3000/canales", {
+        Axios.put("/canales", {
             id: channelEdit.id_canal,
             nombre: channelEdit.nombre,
             zonificacion: channelEdit.zonificacion,
@@ -261,7 +261,7 @@ export default function Channels() {
     }
 
     const createChannel = () => {
-        Axios.post("http://localhost:3000/canales", {
+        Axios.post("/canales", {
             nombre: channel.nombre,
             zonificacion: channel.zone,
             ciudad: channel.ciudad.value,
@@ -371,8 +371,9 @@ export default function Channels() {
                                 type: "text"
                             }}
                             onChange={(e) => handleChannelChange("nombre", e.target.value)}
+                            value={channel.nombre}
                         />
-
+                        <br></br>
                         <CreatableSelector
                             options={cities.map(city => {
                                 return {
@@ -502,7 +503,8 @@ export default function Channels() {
                             value={channelEdit.nombre}
                             onChange={(e) => handleChannelEditChange("nombre", e.target.value)}
                         />
-
+                        <br></br>
+                        <br></br>
                         <CreatableSelector
                             options={cities.map(city => {
                                 return {
@@ -516,7 +518,7 @@ export default function Channels() {
                             placeholder="Seleccione una ciudad"
                             value={channelEdit.ciudad}
                         />
-
+                        <br></br>
                         <FormControl
                             fullWidth
                             className={FormClasses.selectFormControl}

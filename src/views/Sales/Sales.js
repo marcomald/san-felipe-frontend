@@ -65,21 +65,21 @@ export default function Purchase() {
     const classes = useStyles();
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/log-carga?origen=ventas")
+        Axios.get("/log-carga?origen=ventas")
             .then(response => {
                 setLogCarga(response.data)
             }).catch(e => {
                 console.error(e)
             })
 
-        Axios.get("http://localhost:3000/canales")
+        Axios.get("/canales")
             .then(response => {
                 setCanales(response.data)
             }).catch(e => {
                 console.error(e)
             })
 
-        Axios.get("http://localhost:3000/vendedores")
+        Axios.get("/vendedores")
             .then(response => {
                 setVendedores(response.data)
             }).catch(e => {
@@ -88,7 +88,7 @@ export default function Purchase() {
     }, [reloadData])
 
     const handleSearchCanal = (nombreCanal) => {
-        Axios.get("http://localhost:3000/canales?nombre=" + nombreCanal)
+        Axios.get("/canales?nombre=" + nombreCanal)
             .then(response => {
                 setCanales(response.data)
             }).catch(e => {
@@ -97,7 +97,7 @@ export default function Purchase() {
     }
 
     const handleSearchVendedores = (nombreVendedor) => {
-        Axios.get("http://localhost:3000/vendedores?nombre=" + nombreVendedor)
+        Axios.get("/vendedores?nombre=" + nombreVendedor)
             .then(response => {
                 setVendedores(response.data)
             }).catch(e => {
@@ -120,7 +120,7 @@ export default function Purchase() {
     const processFile = async () => {
         setLoading(true);
         const zona = canales.filter(ch => ch.id_canal === venta.canal.value)[0]
-        await Axios.post(`http://localhost:3000/despachos`, {
+        await Axios.post(`/despachos`, {
             ventas: file,
             id_canal: venta.canal.value,
             id_vendedor: venta.vendedor.value,

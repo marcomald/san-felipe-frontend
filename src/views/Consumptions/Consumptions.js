@@ -56,7 +56,7 @@ export default function Consumptions() {
     const [reloadData, setReloadData] = React.useState(false)
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/log-carga?origen=consumos")
+        Axios.get("/log-carga?origen=consumos")
             .then(response => {
                 setLogCarga(response.data)
             }).catch(e => {
@@ -70,7 +70,7 @@ export default function Consumptions() {
 
     const processFile = async () => {
         setLoading(true);
-        await Axios.post(`http://localhost:3000/consumos`, {
+        await Axios.post(`/consumos`, {
             consumos: file
         }).then(async data => {
             const response = await data.data;

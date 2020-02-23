@@ -79,7 +79,7 @@ export default function Usuarios() {
     const modalClasses = useStylesModal();
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/roles")
+        Axios.get("/roles")
             .then(async response => {
                 const rolesAux = await response.data.map(r => {
                     return {
@@ -92,7 +92,7 @@ export default function Usuarios() {
                 console.error(e)
             })
 
-        Axios.get("http://localhost:3000/users")
+        Axios.get("/users")
             .then(async response => {
                 setUsers(response.data)
             }).catch(e => {
@@ -196,7 +196,7 @@ export default function Usuarios() {
             return
         }
 
-        Axios.post("http://localhost:3000/users", {
+        Axios.post("/users", {
             nombre_completo: user.nombre_completo,
             nombre_usuario: user.email,
             email: user.email,
@@ -249,7 +249,7 @@ export default function Usuarios() {
     }
 
     const deleteUser = () => {
-        Axios.delete("http://localhost:3000/users/" + userEdit.user_id, {
+        Axios.delete("/users/" + userEdit.user_id, {
             id: userEdit.user_id,
         }).then(response => {
             setDeleteModal(false)
@@ -298,7 +298,7 @@ export default function Usuarios() {
             return
         }
 
-        Axios.put("http://localhost:3000/users", {
+        Axios.put("/users", {
             id: userEdit.user_id,
             nombre_completo: userEdit.nombre_completo,
             nombre_usuario: userEdit.nombre_completo,
@@ -352,7 +352,7 @@ export default function Usuarios() {
             return
         }
 
-        Axios.put("http://localhost:3000/users/password", {
+        Axios.put("/users/password", {
             id: userEdit.user_id,
             password: userEdit.password,
         }).then(async data => {

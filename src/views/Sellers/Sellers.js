@@ -85,7 +85,7 @@ export default function Sellers() {
     const FormClasses = useStylesForm();
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/vendedores")
+        Axios.get("/vendedores")
             .then(response => {
                 setSellers(response.data)
             }).catch(e => {
@@ -111,7 +111,7 @@ export default function Sellers() {
 
 
     const processFile = async () => {
-        Axios.post("http://localhost:3000/vendedores/bulk", {
+        Axios.post("/vendedores/bulk", {
             vendedores: file
         }).then(async data => {
             const response = await data.data;
@@ -162,7 +162,7 @@ export default function Sellers() {
 
 
     const updateSeller = () => {
-        Axios.put("http://localhost:3000/vendedores", {
+        Axios.put("/vendedores", {
             id: sellerEdit.id_vendedor,
             nombre: sellerEdit.nombre_completo,
             estado: sellerEdit.estado,
@@ -197,7 +197,7 @@ export default function Sellers() {
     }
 
     const createSeller = () => {
-        Axios.post("http://localhost:3000/vendedores", {
+        Axios.post("/vendedores", {
             nombre: seller.nombre,
         }).then(response => {
             setModal(false)
@@ -231,7 +231,7 @@ export default function Sellers() {
     }
 
     const deleteClient = () => {
-        Axios.delete("http://localhost:3000/vendedores/" + sellerEdit.id_vendedor, {
+        Axios.delete("/vendedores/" + sellerEdit.id_vendedor, {
             id: sellerEdit.id_cliente,
         }).then(response => {
             setDeleteModal(false)

@@ -56,7 +56,7 @@ export default function Discahrged() {
     const [logCarga, setLogCarga] = React.useState([])
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/log-carga?origen=altas")
+        Axios.get("/log-carga?origen=altas")
             .then(response => {
                 setLogCarga(response.data)
             }).catch(e => {
@@ -70,7 +70,7 @@ export default function Discahrged() {
 
     const processFile = async () => {
         setLoading(true);
-        await Axios.post(`http://localhost:3000/altas`, {
+        await Axios.post(`/altas`, {
             altas: file
         }).then(async data => {
             const response = await data.data;
@@ -215,7 +215,7 @@ export default function Discahrged() {
                 message={errors && errors.length > 0 ? "Al procesar el archivo se econtraron algunos errores, intentelo de nuevo." :
                     "Exito! el archivo se proceso correctamente."}
                 open={notification}
-                closeNotification={() => setNotification(true)}
+                closeNotification={() => setNotification(false)}
                 close
             />
         </React.Fragment>

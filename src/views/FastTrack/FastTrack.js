@@ -56,7 +56,7 @@ export default function FastTrack() {
     const [reloadData, setReloadData] = React.useState(false)
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/log-carga?origen=fast%20track")
+        Axios.get("/log-carga?origen=fast%20track")
             .then(response => {
                 setLogCarga(response.data)
             }).catch(e => {
@@ -70,7 +70,7 @@ export default function FastTrack() {
 
     const processFile = async () => {
         setLoading(true);
-        await Axios.post(`http://localhost:3000/fast-tracks`, {
+        await Axios.post(`/fast-tracks`, {
             fastTracks: file
         }).then(async data => {
             const response = await data.data;

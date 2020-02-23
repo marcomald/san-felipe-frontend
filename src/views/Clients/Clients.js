@@ -84,7 +84,7 @@ export default function Clients() {
     });
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/clientes")
+        Axios.get("/clientes")
             .then(response => {
                 setClients(response.data)
             }).catch(e => {
@@ -142,7 +142,7 @@ export default function Clients() {
     };
 
     const deleteClient = () => {
-        Axios.delete("http://localhost:3000/clientes/" + clientEdit.id_cliente, {
+        Axios.delete("/clientes/" + clientEdit.id_cliente, {
             id: clientEdit.id_cliente,
         }).then(response => {
             setDeleteModal(false)
@@ -175,7 +175,7 @@ export default function Clients() {
     }
 
     const editClient = () => {
-        Axios.put("http://localhost:3000/clientes", {
+        Axios.put("/clientes", {
             id: clientEdit.id_cliente,
             nombre: clientEdit.nombre_completo,
             identificacion: clientEdit.identificacion,
@@ -211,7 +211,7 @@ export default function Clients() {
     }
 
     const createClient = () => {
-        Axios.post("http://localhost:3000/clientes", {
+        Axios.post("/clientes", {
             nombre: client.nombre,
             identificacion: client.identificacion,
         }).then(response => {
@@ -247,7 +247,7 @@ export default function Clients() {
     }
 
     const processFile = async () => {
-        Axios.post("http://localhost:3000/clientes/bulk", {
+        Axios.post("/clientes/bulk", {
             clientes: file
         }).then(async data => {
             const response = await data.data;

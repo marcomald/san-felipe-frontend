@@ -56,7 +56,7 @@ export default function Purchase() {
     const [logCarga, setLogCarga] = React.useState([])
 
     useEffect(() => {
-        Axios.get("http://localhost:3000/log-carga?origen=compras")
+        Axios.get("/log-carga?origen=compras")
             .then(response => {
                 setLogCarga(response.data)
             }).catch(e => {
@@ -70,7 +70,7 @@ export default function Purchase() {
 
     const processFile = async () => {
         setLoading(true);
-        await Axios.post(`http://localhost:3000/compras`, {
+        await Axios.post(`/compras`, {
             compras: file
         }).then(async data => {
             const response = await data.data;

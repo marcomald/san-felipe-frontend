@@ -98,7 +98,7 @@ export default function Dashboard(props) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
-        logoText={"Distri Mark"}
+        logoText={"Distri Market"}
         logo={logo}
         image={image}
         handleDrawerToggle={handleDrawerToggle}
@@ -109,13 +109,6 @@ export default function Dashboard(props) {
         {...rest}
       />
       <div className={mainPanelClasses} ref={mainPanel}>
-        {/* {<AdminNavbar
-          sidebarMinimize={sidebarMinimize.bind(this)}
-          miniActive={miniActive}
-          brandText={getActiveRoute(routes)}
-          handleDrawerToggle={handleDrawerToggle}
-          {...rest}
-        /> */}
         {getRoute() ? (
           <div>
             <div className={classes.container}>
