@@ -14,6 +14,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Hidden from "@material-ui/core/Hidden";
 import Collapse from "@material-ui/core/Collapse";
 import Icon from "@material-ui/core/Icon";
+import IconPerson from "@material-ui/icons/Person";
 //  Views 
 import Purchase from "views/Purchases/Purchase.js";
 import Sales from "views/Sales/Sales";
@@ -127,12 +128,13 @@ class Sidebar extends React.Component {
 
     const { classes, color, rtlActive } = this.props;
     const user = window.sessionStorage.getItem("user")
-    if (!user) {
+    const token = window.sessionStorage.getItem("accessToken")
+    if (!user || !token) {
       this.props.history.push('/auth/login');
       return
     }
     const userDecode = JSON.parse(window.atob(user));
-    const allowedRoutes = []
+    const allowedRoutes = [];
     userDecode.permissions.forEach(permission => {
       switch (permission) {
         case "altas":
@@ -431,6 +433,7 @@ class Sidebar extends React.Component {
     });
   };
   render() {
+    const userLogged = JSON.parse(atob(window.sessionStorage.getItem("user")));
     const {
       classes,
       logo,
@@ -485,9 +488,6 @@ class Sidebar extends React.Component {
       });
     var user = (
       <div className={userWrapperClass}>
-        <div className={photo}>
-          <img src={avatar} className={classes.avatarImg} alt="..." />
-        </div>
         <List className={classes.list}>
           <ListItem className={classes.item + " " + classes.userItem}>
             <NavLink
@@ -496,7 +496,7 @@ class Sidebar extends React.Component {
               onClick={() => this.openCollapse("openAvatar")}
             >
               <ListItemText
-                primary={rtlActive ? "تانيا أندرو" : "Tania Andrew"}
+                primary={userLogged.userName}
                 secondary={
                   <b
                     className={
@@ -522,46 +522,10 @@ class Sidebar extends React.Component {
                     }
                   >
                     <span className={collapseItemMini}>
-                      {rtlActive ? "مع" : "MP"}
+                      <IconPerson />
                     </span>
                     <ListItemText
-                      primary={rtlActive ? "ملفي" : "My Profile"}
-                      disableTypography={true}
-                      className={collapseItemText}
-                    />
-                  </NavLink>
-                </ListItem>
-                <ListItem className={classes.collapseItem}>
-                  <NavLink
-                    to="#"
-                    className={
-                      classes.itemLink + " " + classes.userCollapseLinks
-                    }
-                  >
-                    <span className={collapseItemMini}>
-                      {rtlActive ? "هوع" : "EP"}
-                    </span>
-                    <ListItemText
-                      primary={
-                        rtlActive ? "تعديل الملف الشخصي" : "Edit Profile"
-                      }
-                      disableTypography={true}
-                      className={collapseItemText}
-                    />
-                  </NavLink>
-                </ListItem>
-                <ListItem className={classes.collapseItem}>
-                  <NavLink
-                    to="#"
-                    className={
-                      classes.itemLink + " " + classes.userCollapseLinks
-                    }
-                  >
-                    <span className={collapseItemMini}>
-                      {rtlActive ? "و" : "S"}
-                    </span>
-                    <ListItemText
-                      primary={rtlActive ? "إعدادات" : "Settings"}
+                      primary="Mi perfil"
                       disableTypography={true}
                       className={collapseItemText}
                     />

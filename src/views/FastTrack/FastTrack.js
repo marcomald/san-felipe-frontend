@@ -111,7 +111,9 @@ export default function FastTrack() {
                                     logCarga.map((log, index) => {
                                         return [
                                             (index + 1),
-                                            new Date(log.fecha_carga).toLocaleDateString(),
+                                            new Date(log.fecha_carga).toLocaleDateString() +
+                                            ' ' +
+                                            new Date(log.fecha_carga).toLocaleTimeString(),
                                             "Administrador",
                                             new Date(log.fecha_desde).toLocaleDateString(),
                                             new Date(log.fecha_hasta).toLocaleDateString(),
@@ -155,15 +157,27 @@ export default function FastTrack() {
                             <CardIcon color="success">
                                 <InfoIcon />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Informacion de procesamiento</h4>
+                            <h4 className={classes.cardIconTitle}>Informacion y reglas de procesamiento</h4>
                         </CardHeader>
                         <CardBody>
-                            <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
-                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
-                            </ul>
+                            <div>
+                                <p>Los titulos de la tabla deben estar en mayusculas y deben ser los siguientes:</p>
+                                <ul>
+                                    <li>ICCID: Debe ser de campo numerico, con una longitud de 19 caracteres.</li>
+                                    <li>FECHA: Debe ser de tipo fecha.</li>
+                                    <li>PRODUCTO: Debe ser de tipo texto y debe tener como maximo 30 caracteres.</li>
+                                </ul>
+                            </div>
+                            <hr />
                             {
-                                errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
+                                file && file.length > 0 &&
+                                <div>
+                                    <h4><b>Resgistros encontrados:</b> {file && file.length}</h4>
+                                    {errors && errors.length > 0 && <h4><b>Errores:</b> {errors && errors.length}</h4>}
+                                    {
+                                        errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
+                                    }
+                                </div>
                             }
                         </CardBody>
                     </Card>
@@ -217,7 +231,7 @@ export default function FastTrack() {
                 message={errors && errors.length > 0 ? "Al procesar el archivo se econtraron algunos errores, intentelo de nuevo." :
                     "Exito! no se encontraron errores en el archivo procesado."}
                 open={notification}
-                closeNotification={() => setNotification(true)}
+                closeNotification={() => setNotification(false)}
                 close
             />
         </React.Fragment>

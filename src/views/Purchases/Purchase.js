@@ -110,7 +110,9 @@ export default function Purchase() {
                                 tableData={logCarga.map((log, index) => {
                                     return [
                                         (index + 1),
-                                        new Date(log.fecha_carga).toLocaleDateString(),
+                                        new Date(log.fecha_carga).toLocaleDateString() +
+                                        ' ' +
+                                        new Date(log.fecha_carga).toLocaleTimeString(),
                                         "Administrador",
                                         new Date(log.fecha_desde).toLocaleDateString(),
                                         new Date(log.fecha_hasta).toLocaleDateString(),
@@ -143,7 +145,6 @@ export default function Purchase() {
                                         </div>
                                     </GridItem>
                                 </GridContainer>
-                                {/* <Button color="success">Submit</Button> */}
                             </form>
                         </CardBody>
                     </Card>
@@ -154,17 +155,28 @@ export default function Purchase() {
                             <CardIcon color="success">
                                 <InfoIcon />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Informacion de procesamiento</h4>
+                            <h4 className={classes.cardIconTitle}>Informacion y reglas de procesamiento</h4>
                         </CardHeader>
                         <CardBody>
-                            <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
-                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
-                            </ul>
+                            <div>
+                                <p>Los titulos de la tabla deben estar en mayusculas y deben ser los siguientes:</p>
+                                <ul>
+                                    <li>SERIE: Debe ser de campo numerico, con una longitud de 19 caracteres.</li>
+                                    <li>DN: Debe ser de campo numerico, con una longitud de 9 caracteres.</li>
+                                    <li>FECHA: Debe ser de tipo fecha.</li>
+                                </ul>
+                            </div>
+                            <hr />
                             {
-                                errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
+                                file && file.length > 0 &&
+                                <div>
+                                    <h4><b>Resgistros encontrados:</b> {file && file.length}</h4>
+                                    {errors && errors.length > 0 && <h4><b>Errores:</b> {errors && errors.length}</h4>}
+                                    {
+                                        errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
+                                    }
+                                </div>
                             }
-
                         </CardBody>
                     </Card>
                 </GridItem>
@@ -217,7 +229,7 @@ export default function Purchase() {
                 message={errors && errors.length > 0 ? "Al procesar el archivo se econtraron algunos errores, intentelo de nuevo." :
                     "Exito! el archivo se proceso correctamente."}
                 open={notification}
-                closeNotification={() => setNotification(true)}
+                closeNotification={() => setNotification(false)}
                 close
             />
         </React.Fragment>

@@ -193,7 +193,9 @@ export default function Purchase() {
                                 tableData={logCarga.map((log, index) => {
                                     return [
                                         (index + 1),
-                                        new Date(log.fecha_carga).toLocaleDateString(),
+                                        new Date(log.fecha_carga).toLocaleDateString() +
+                                        ' ' +
+                                        new Date(log.fecha_carga).toLocaleTimeString(),
                                         "Administrador",
                                         new Date(log.fecha_desde).toLocaleDateString(),
                                         new Date(log.fecha_hasta).toLocaleDateString(),
@@ -274,12 +276,27 @@ export default function Purchase() {
                             <h4 className={classes.cardIconTitle}>Informacion de procesamiento</h4>
                         </CardHeader>
                         <CardBody>
-                            <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
-                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
-                            </ul>
+                            <div>
+                                <p>Los titulos de la tabla deben estar en mayusculas y deben ser los siguientes:</p>
+                                <ul>
+                                    <li>ICC: Debe ser de campo numerico, con una longitud de 19 caracteres.</li>
+                                    <li>DN: Debe ser de campo numerico, con una longitud de 9 caracteres.</li>
+                                    <li>FECHA: Debe ser de tipo fecha.</li>
+                                    <li>IDENTIFICACION: Debe tener una longitud de hasta 13 caracteres.
+                                        Debe coincidir con el numero de identificacion registrado en clientes.
+                                        Este campo es opcional solo si el canal seleccionado tiene una zona distinta de "S".</li>
+                                </ul>
+                            </div>
+                            <hr />
                             {
-                                errors && errors.length > 0 && <Button color="rose" onClick={() => setModal(true)}>Ver Errores</Button>
+                                file && file.length > 0 &&
+                                <div>
+                                    <h4><b>Resgistros encontrados:</b> {file && file.length}</h4>
+                                    {errors && errors.length > 0 && <h4><b>Errores:</b> {errors && errors.length}</h4>}
+                                    {
+                                        errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
+                                    }
+                                </div>
                             }
                         </CardBody>
                     </Card>

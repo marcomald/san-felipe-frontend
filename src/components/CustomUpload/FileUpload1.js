@@ -19,7 +19,7 @@ export default function FileUpload(props) {
         let file = e.target.files[0];
         reader.onloadend = async (event) => {
             const data = reader.result;
-            const workBook = XLSX.read(data, { type: 'binary' });
+            const workBook = XLSX.read(data, { type: 'binary', cellDates: true });
             const jsonData = await workBook.SheetNames.reduce((initial, name) => {
                 const sheet = workBook.Sheets[name];
                 initial["data"] = XLSX.utils.sheet_to_json(sheet);

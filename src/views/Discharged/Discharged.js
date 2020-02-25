@@ -110,7 +110,9 @@ export default function Discahrged() {
                                 tableData={logCarga.map((log, index) => {
                                     return [
                                         (index + 1),
-                                        new Date(log.fecha_carga).toLocaleDateString(),
+                                        new Date(log.fecha_carga).toLocaleDateString() +
+                                        ' ' +
+                                        new Date(log.fecha_carga).toLocaleTimeString(),
                                         "Administrador",
                                         new Date(log.fecha_desde).toLocaleDateString(),
                                         new Date(log.fecha_hasta).toLocaleDateString(),
@@ -153,20 +155,31 @@ export default function Discahrged() {
                             <CardIcon color="success">
                                 <InfoIcon />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Informacion de procesamiento</h4>
+                            <h4 className={classes.cardIconTitle}>Reglas de procesamiento</h4>
                         </CardHeader>
                         <CardBody>
-                            <ul>
-                                <li><h4><b>Resgistros encontrados:</b> {file && file.length}</h4></li>
-                                {errors && errors.length > 0 && <li><h4><b>Errores:</b> {errors && errors.length}</h4></li>}
-                            </ul>
+                            <div>
+                                <p>Los titulos de la tabla deben estar en mayusculas y deben ser los siguientes:</p>
+                                <ul>
+                                    <li>ICCID: Debe ser de campo numerico, con una longitud de 19 caracteres.</li>
+                                    <li>FECHA: Debe ser de tipo fecha.</li>
+                                </ul>
+                            </div>
+                            <hr />
                             {
-                                errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
+                                file && file.length > 0 &&
+                                <div>
+                                    <h4><b>Resgistros encontrados:</b> {file && file.length}</h4>
+                                    {errors && errors.length > 0 && <h4><b>Errores:</b> {errors && errors.length}</h4>}
+                                    {
+                                        errors && errors.length > 0 && <Button color="danger" onClick={() => setModal(true)}>Ver Errores</Button>
+                                    }
+                                </div>
                             }
                         </CardBody>
                     </Card>
                 </GridItem>
-            </GridContainer>
+            </GridContainer >
 
             <Dialog
                 classes={{
@@ -218,6 +231,6 @@ export default function Discahrged() {
                 closeNotification={() => setNotification(false)}
                 close
             />
-        </React.Fragment>
+        </React.Fragment >
     )
 }
