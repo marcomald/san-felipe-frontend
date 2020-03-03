@@ -25,6 +25,8 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import AdminLayout from "layouts/Admin";
+import { getUserId } from "helpers/utils";
 
 const customStyles = {
     ...styles,
@@ -45,7 +47,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function FastTrack() {
+export default function FastTrack(props) {
     const classes = useStyles();
     const [file, setFile] = React.useState([])
     const [errors, setErrors] = React.useState([])
@@ -61,17 +63,27 @@ export default function FastTrack() {
                 setLogCarga(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
-    }, [reloadData])
+    }, [reloadData, props])
 
     const handleFileChange = (fastTrackFile) => {
-        setFile(fastTrackFile.data)
+        setErrors([])
+        if (fastTrackFile.data) {
+            setFile(fastTrackFile.data)
+            return
+        }
+        setFile(fastTrackFile)
     }
 
     const processFile = async () => {
         setLoading(true);
         await Axios.post(`/fast-tracks`, {
-            fastTracks: file
+            fastTracks: file,
+            userId: getUserId(),
         }).then(async data => {
             const response = await data.data;
             if (response.errors) {
@@ -85,13 +97,17 @@ export default function FastTrack() {
             setLoading(false);
         }).catch(err => {
             console.error("SE PRODUJO UN ERROR: ", err);
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             alert("Se produjo un error al procesar los datos. Intentelo de nuevo, si el problema persiste, pongase en contacto los desarrolladores");
             setLoading(false);
         })
     }
 
     return (
-        <React.Fragment>
+        <AdminLayout>
             <h1>Subida de archivos de <b>Fast Track</b>.</h1>
             <h4>A continuacion se muestra el resumen de los ulitmos 3 archivos subidos:</h4>
             <GridContainer>
@@ -111,13 +127,13 @@ export default function FastTrack() {
                                     logCarga.map((log, index) => {
                                         return [
                                             (index + 1),
-                                            new Date(log.fecha_carga).toLocaleDateString() +
+                                            new Date(log.log_carga_fecha_carga).toLocaleDateString() +
                                             ' ' +
-                                            new Date(log.fecha_carga).toLocaleTimeString(),
-                                            "Administrador",
-                                            new Date(log.fecha_desde).toLocaleDateString(),
-                                            new Date(log.fecha_hasta).toLocaleDateString(),
-                                            log.rows
+                                            new Date(log.log_carga_fecha_carga).toLocaleTimeString(),
+                                            log.usuario_nombre_completo,
+                                            new Date(log.log_carga_fecha_desde).toLocaleDateString(),
+                                            new Date(log.log_carga_fecha_hasta).toLocaleDateString(),
+                                            log.log_carga_rows,
                                         ]
                                     })
                                 }
@@ -234,6 +250,6 @@ export default function FastTrack() {
                 closeNotification={() => setNotification(false)}
                 close
             />
-        </React.Fragment>
+        </AdminLayout>
     )
 }

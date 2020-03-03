@@ -35,6 +35,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import FormStyles from "assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.js";
+import AdminLayout from "layouts/Admin";
+import { getUserId } from "helpers/utils";
 
 const customStyles = {
     ...styles,
@@ -62,7 +64,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function Sellers() {
+export default function Sellers(props) {
     const [modal, setModal] = React.useState(false)
     const [editModal, setEditModal] = React.useState(false);
     const [deleteModal, setDeleteModal] = React.useState(false);
@@ -90,11 +92,20 @@ export default function Sellers() {
                 setSellers(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
-    }, [reloadData])
+    }, [reloadData, props])
 
     const handleFileChange = (sellersFile) => {
-        setFile(sellersFile.data)
+        setErrors([])
+        if (sellersFile.data) {
+            setFile(sellersFile.data)
+            return
+        }
+        setFile(sellersFile)
     }
 
     const handleSellerChange = (property, value) => {
@@ -112,7 +123,8 @@ export default function Sellers() {
 
     const processFile = async () => {
         Axios.post("/vendedores/bulk", {
-            vendedores: file
+            vendedores: file,
+            userId: getUserId(),
         }).then(async data => {
             const response = await data.data;
             setLoading(false);
@@ -146,6 +158,10 @@ export default function Sellers() {
             }
         }).catch(err => {
             console.error("Error al subir vendedores: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al subir los vendedores.',
@@ -166,6 +182,7 @@ export default function Sellers() {
             id: sellerEdit.id_vendedor,
             nombre: sellerEdit.nombre_completo,
             estado: sellerEdit.estado,
+            userId: getUserId(),
         }).then(response => {
             setEditModal(false)
             setReloadData(!reloadData);
@@ -182,6 +199,10 @@ export default function Sellers() {
             }, 6000);
         }).catch(err => {
             console.error("Error al editar vendedor: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al editar el vendedor.',
@@ -199,6 +220,7 @@ export default function Sellers() {
     const createSeller = () => {
         Axios.post("/vendedores", {
             nombre: seller.nombre,
+            userId: getUserId(),
         }).then(response => {
             setModal(false)
             setSeller({})
@@ -216,6 +238,10 @@ export default function Sellers() {
             }, 6000);
         }).catch(err => {
             console.error("Error al crear vendedor: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al crear vendedor.',
@@ -232,7 +258,10 @@ export default function Sellers() {
 
     const deleteClient = () => {
         Axios.delete("/vendedores/" + sellerEdit.id_vendedor, {
-            id: sellerEdit.id_cliente,
+            data: {
+                id: sellerEdit.id_cliente,
+                userId: getUserId(),
+            },
         }).then(response => {
             setDeleteModal(false)
             setReloadData(!reloadData);
@@ -249,6 +278,10 @@ export default function Sellers() {
             }, 6000);
         }).catch(err => {
             console.error("Error al eliminar vendedor: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al eliminar el vendedor.',
@@ -293,7 +326,7 @@ export default function Sellers() {
     };
 
     return (
-        <React.Fragment>
+        <AdminLayout>
             <GridContainer>
                 <GridItem xs={12} sm={6}>
                     <h1>Vendedores</h1>
@@ -633,6 +666,6 @@ export default function Sellers() {
                 }}
                 close
             />
-        </React.Fragment>
+        </AdminLayout>
     )
 }

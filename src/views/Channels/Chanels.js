@@ -34,7 +34,9 @@ import styles from "assets/jss/material-dashboard-pro-react/views/extendedTables
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import FormStyles from "assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.js";
 // Helper
-import { channelZones } from "helpers/selectOptions"
+import { channelZones, getUserId } from "helpers/utils"
+import AdminLayout from "layouts/Admin";
+
 const customStyles = {
     ...styles,
     customCardContentClass: {
@@ -62,7 +64,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function Channels() {
+export default function Channels(props) {
     const [modal, setModal] = React.useState(false);
     const [editModal, setEditModal] = React.useState(false);
     const [deleteModal, setDeleteModal] = React.useState(false);
@@ -84,6 +86,10 @@ export default function Channels() {
                 setCities(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
 
         Axios.get("/canales")
@@ -91,8 +97,12 @@ export default function Channels() {
                 setChannels(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
-    }, [reloadData])
+    }, [reloadData, props])
 
     const classes = useStyles();
     const modalClasses = useStylesModal();
@@ -192,7 +202,10 @@ export default function Channels() {
 
     const deleteChannel = () => {
         Axios.delete("/canales/" + channelEdit.id_canal, {
-            id: channelEdit.id_canal,
+            data: {
+                id: channelEdit.id_canal,
+                userId: getUserId(),
+            },
         }).then(response => {
             setDeleteModal(false)
             setReloadData(!reloadData);
@@ -209,6 +222,10 @@ export default function Channels() {
             }, 6000);
         }).catch(err => {
             console.error("Error al eliminar canal: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al eliminar el canal.',
@@ -230,6 +247,7 @@ export default function Channels() {
             zonificacion: channelEdit.zonificacion,
             ciudad: channelEdit.ciudad.value,
             estado: channelEdit.estado,
+            userId: getUserId(),
         }).then(response => {
             setEditModal(false)
             setReloadData(!reloadData);
@@ -246,6 +264,10 @@ export default function Channels() {
             }, 6000);
         }).catch(err => {
             console.error("Error al editar canal: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al editar el canal.',
@@ -265,6 +287,7 @@ export default function Channels() {
             nombre: channel.nombre,
             zonificacion: channel.zone,
             ciudad: channel.ciudad.value,
+            userId: getUserId(),
         }).then(response => {
             const channelsList = channels
             channelsList.push(response.data)
@@ -285,6 +308,10 @@ export default function Channels() {
             }, 6000);
         }).catch(err => {
             console.error("Error al crear canal: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al crear el canal.',
@@ -300,7 +327,7 @@ export default function Channels() {
     }
 
     return (
-        <React.Fragment>
+        <AdminLayout>
             <GridContainer>
                 <GridItem xs={12} sm={6}>
                     <h1>Canales por ciudad</h1>
@@ -703,6 +730,6 @@ export default function Channels() {
                 }}
                 close
             />
-        </React.Fragment>
+        </AdminLayout>
     )
 }

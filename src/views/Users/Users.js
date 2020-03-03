@@ -30,6 +30,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import TableStyles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
+import AdminLayout from "../../layouts/Admin";
+import { getUserId } from "helpers/utils";
 
 const customStyles = {
     ...styles,
@@ -57,7 +59,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function Usuarios() {
+export default function Usuarios(props) {
     const classes = useStyles();
     const classesTable = useTableStyles();
     const [modal, setModal] = React.useState(false);
@@ -90,6 +92,10 @@ export default function Usuarios() {
                 setRoles(rolesAux)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
 
         Axios.get("/users")
@@ -97,8 +103,12 @@ export default function Usuarios() {
                 setUsers(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
-    }, [reloadData])
+    }, [reloadData, props])
 
     const handleUserChange = (property, value) => {
         const newUser = { ...user };
@@ -202,6 +212,7 @@ export default function Usuarios() {
             email: user.email,
             password: user.password,
             rolId: user.rol.value,
+            userId: getUserId(),
         }).then(async data => {
             const response = await data.data;
             setLoading(false);
@@ -234,6 +245,10 @@ export default function Usuarios() {
             }
         }).catch(err => {
             console.error("Error al crear usuario: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Error! Al crear usuario.',
@@ -250,7 +265,10 @@ export default function Usuarios() {
 
     const deleteUser = () => {
         Axios.delete("/users/" + userEdit.user_id, {
-            id: userEdit.user_id,
+            data: {
+                id: userEdit.user_id,
+                userId: getUserId(),
+            },
         }).then(response => {
             setDeleteModal(false)
             setReloadData(!reloadData);
@@ -267,6 +285,10 @@ export default function Usuarios() {
             }, 6000);
         }).catch(err => {
             console.error("Error al eliminar usuario: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al eliminar el usuario.',
@@ -305,6 +327,7 @@ export default function Usuarios() {
             email: userEdit.email,
             estado: userEdit.estado.value,
             rolId: userEdit.rol.value,
+            userId: getUserId(),
         }).then(() => {
             setLoading(false);
             setEditModal(false)
@@ -322,6 +345,10 @@ export default function Usuarios() {
             setReloadData(!reloadData);
         }).catch(err => {
             console.error("Error al actualizar usuario: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al actualizar el usuario.',
@@ -355,6 +382,7 @@ export default function Usuarios() {
         Axios.put("/users/password", {
             id: userEdit.user_id,
             password: userEdit.password,
+            userId: getUserId(),
         }).then(async data => {
             setLoading(false);
             setEditPasswordModal(false)
@@ -372,6 +400,10 @@ export default function Usuarios() {
             setReloadData(!reloadData);
         }).catch(err => {
             console.error("Error al actualizar contrasena: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al actualizar la contrasena.',
@@ -387,379 +419,382 @@ export default function Usuarios() {
     }
 
     return (
-        <React.Fragment>
-            <GridContainer>
-                <GridItem xs={12} sm={6}>
-                    <h1>Administracion de <b>Usuarios.</b></h1>
-                </GridItem>
-                <GridItem xs={12} sm={6}>
-                    <div className={classes.buttonContainer}>
-                        <Button color="primary" key="AddButton1" onClick={() => setModal(true)}>
-                            <Add /> Agregar Usuario
+        <AdminLayout>
+
+            <React.Fragment>
+                <GridContainer>
+                    <GridItem xs={12} sm={6}>
+                        <h1>Administracion de <b>Usuarios.</b></h1>
+                    </GridItem>
+                    <GridItem xs={12} sm={6}>
+                        <div className={classes.buttonContainer}>
+                            <Button color="primary" key="AddButton1" onClick={() => setModal(true)}>
+                                <Add /> Agregar Usuario
                         </Button>
-                    </div>
-                </GridItem>
-            </GridContainer>
-            <GridContainer>
-                <GridItem xs={12}>
-                    <Card>
-                        <CardHeader color="success" icon>
-                            <CardIcon color="success">
-                                <AssignmentTurnedIn />
-                            </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Usuarios registrados</h4>
-                        </CardHeader>
-                        <CardBody>
-                            <Table
-                                tableHeaderColor="primary"
-                                tableHead={["N#", "Nombre Completo", "Email", "Fecha de Creacion", "Rol", "Estado", "Acciones"]}
-                                tableData={
-                                    users && users.map((us, index) => {
-                                        return [
-                                            (index + 1),
-                                            us.user_nombre_completo,
-                                            us.user_email,
-                                            new Date(us.user_fecha_creacion).toLocaleDateString(),
-                                            us.rol_nombre,
-                                            us.user_estado.toUpperCase(),
-                                            fillButtons(index)
-                                        ]
-                                    })
-                                }
-                            />
-                            {users.length === 0 && <small>No existen datos ingresados.</small>}
-                        </CardBody>
-                    </Card>
-                </GridItem>
-            </GridContainer>
+                        </div>
+                    </GridItem>
+                </GridContainer>
+                <GridContainer>
+                    <GridItem xs={12}>
+                        <Card>
+                            <CardHeader color="success" icon>
+                                <CardIcon color="success">
+                                    <AssignmentTurnedIn />
+                                </CardIcon>
+                                <h4 className={classes.cardIconTitle}>Usuarios registrados</h4>
+                            </CardHeader>
+                            <CardBody>
+                                <Table
+                                    tableHeaderColor="primary"
+                                    tableHead={["N#", "Nombre Completo", "Email", "Fecha de Creacion", "Rol", "Estado", "Acciones"]}
+                                    tableData={
+                                        users && users.map((us, index) => {
+                                            return [
+                                                (index + 1),
+                                                us.user_nombre_completo,
+                                                us.user_email,
+                                                new Date(us.user_fecha_creacion).toLocaleDateString(),
+                                                us.rol_nombre,
+                                                us.user_estado.toUpperCase(),
+                                                fillButtons(index)
+                                            ]
+                                        })
+                                    }
+                                />
+                                {users.length === 0 && <small>No existen datos ingresados.</small>}
+                            </CardBody>
+                        </Card>
+                    </GridItem>
+                </GridContainer>
 
-            <Dialog
-                classes={{
-                    root: modalClasses.center,
-                    paper: modalClasses.modal,
-                }}
-                open={modal}
-                transition={Transition}
-                keepMounted
-                onClose={() => setModal(false)}
-                aria-labelledby="modal-slide-title"
-                aria-describedby="modal-slide-description"
-                maxWidth="md"
-                fullWidth={true}
-            >
-                <DialogTitle
-                    id="classic-modal-slide-title"
-                    disableTypography
-                    className={modalClasses.modalHeader}
+                <Dialog
+                    classes={{
+                        root: modalClasses.center,
+                        paper: modalClasses.modal,
+                    }}
+                    open={modal}
+                    transition={Transition}
+                    keepMounted
+                    onClose={() => setModal(false)}
+                    aria-labelledby="modal-slide-title"
+                    aria-describedby="modal-slide-description"
+                    maxWidth="md"
+                    fullWidth={true}
                 >
-                    <h3 className={modalClasses.modalTitle}>Ingreso de nuevo usuario</h3>
-                </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={modalClasses.modalBody}
-                >
-                    <form>
-                        <CustomInput
-                            labelText="Nombre Completo"
-                            id="name_user"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "text"
-                            }}
-                            value={user.nombre_completo}
-                            onChange={(e) => handleUserChange("nombre_completo", e.target.value)}
-                        />
-                        <CustomInput
-                            labelText="Email"
-                            id="email_user"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "email"
-                            }}
-                            value={user.email}
-                            onChange={(e) => handleUserChange("email", e.target.value)}
-                        />
-                        <CustomInput
-                            labelText="Contrasena"
-                            id="password_user"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "password"
-                            }}
-                            value={user.password}
-                            onChange={(e) => handleUserChange("password", e.target.value)}
-                        />
-                        <CustomInput
-                            labelText="Confirmar Contrasena"
-                            id="password_confirmation_user"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "password"
-                            }}
-                            value={user.passwordConfirmation}
-                            onChange={(e) => handleUserChange("passwordConfirmation", e.target.value)}
-                        />
-                        <br />
-                        <br />
-                        <Selector
-                            placeholder="Roles"
-                            options={roles}
-                            onChange={(value) => handleUserChange("rol", value)}
-                            value={user.rol}
-                        />
-                        <br />
-                        <br />
-                    </form>
-                </DialogContent>
-                <DialogActions
-                    className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
-                >
-                    <Button
-                        color="rose"
-                        disabled={
-                            !user.nombre_completo ||
-                            user.nombre_completo === "" ||
-                            !user.email ||
-                            user.email === "" ||
-                            !user.password ||
-                            user.password === "" ||
-                            !user.passwordConfirmation ||
-                            user.passwordConfirmation === "" ||
-                            !user.rol ||
-                            !user.rol.value ||
-                            user.rol.value === ""
-                        }
-                        onClick={createUser}>Ingresar</Button>
-                    <Button onClick={() => setModal(false)}>Cancelar</Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                classes={{
-                    root: modalClasses.center,
-                    paper: modalClasses.modal,
-                }}
-                open={editModal}
-                transition={Transition}
-                keepMounted
-                onClose={() => setEditModal(false)}
-                aria-labelledby="modal-slide-title"
-                aria-describedby="modal-slide-description"
-                maxWidth="md"
-                fullWidth={true}
-            >
-                <DialogTitle
-                    id="classic-modal-slide-title"
-                    disableTypography
-                    className={modalClasses.modalHeader}
-                >
-                    <h3 className={modalClasses.modalTitle}>Actualizar usuario <b>{userEditAux.nombre_completo}</b></h3>
-                </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={modalClasses.modalBody}
-                >
-                    <form>
-                        <CustomInput
-                            labelText="Nombre Completo"
-                            id="name_user_edit"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "text"
-                            }}
-                            value={userEdit.nombre_completo}
-                            onChange={(e) => handleEditUserChange("nombre_completo", e.target.value)}
-                        />
-                        <CustomInput
-                            labelText="Email"
-                            id="email_user_edit"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "email"
-                            }}
-                            value={userEdit.email}
-                            onChange={(e) => handleEditUserChange("email", e.target.value)}
-                        />
-                        <br />
-                        <Selector
-                            label="Rol"
-                            placeholder="Roles"
-                            options={roles}
-                            onChange={(value) => handleEditUserChange("rol", value)}
-                            value={userEdit.rol}
-                        />
-                        <br />
-                        <Selector
-                            label="Estado"
-                            placeholder="Estado"
-                            options={[{
-                                value: 'activo', label: 'Activo'
-                            }, { value: 'inactivo', label: 'Inactivo' }]}
-                            onChange={(value) => handleEditUserChange("estado", value)}
-                            value={userEdit.estado}
-                        />
-                        <br />
-                        <br />
-                    </form>
-                </DialogContent>
-                <DialogActions
-                    className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
-                >
-                    <Button
-                        color="rose"
-                        disabled={
-                            !userEdit.nombre_completo ||
-                            userEdit.nombre_completo === "" ||
-                            !userEdit.email ||
-                            userEdit.email === "" ||
-                            !userEdit.estado ||
-                            !userEdit.estado.value ||
-                            userEdit.estado.value === "" ||
-                            !userEdit.rol ||
-                            !userEdit.rol.value ||
-                            userEdit.rol.value === ""
-                        }
-                        onClick={updateUser}>Actualizar</Button>
-                    <Button onClick={() => setEditModal(false)}>Cancelar</Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                classes={{
-                    root: modalClasses.center,
-                    paper: modalClasses.modal,
-                }}
-                open={editPasswordModal}
-                transition={Transition}
-                keepMounted
-                onClose={() => setEditPasswordModal(false)}
-                aria-labelledby="modal-slide-title"
-                aria-describedby="modal-slide-description"
-                maxWidth="md"
-                fullWidth={true}
-            >
-                <DialogTitle
-                    id="classic-modal-slide-title"
-                    disableTypography
-                    className={modalClasses.modalHeader}
-                >
-                    <h3 className={modalClasses.modalTitle}>Actualizar contrasena para usuario <b>{userEditAux.nombre_completo}</b></h3>
-                </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={modalClasses.modalBody}
-                >
-                    <form>
-                        <CustomInput
-                            labelText="Contrasena"
-                            id="password_user_edit"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "password"
-                            }}
-                            value={userEdit.password}
-                            onChange={(e) => handleEditUserChange("password", e.target.value)}
-                        />
-                        <CustomInput
-                            labelText="Confirmar Contrasena"
-                            id="password_confirmation_user_edit"
-                            formControlProps={{
-                                fullWidth: true
-                            }}
-                            inputProps={{
-                                type: "password"
-                            }}
-                            value={userEdit.passwordConfirmation}
-                            onChange={(e) => handleEditUserChange("passwordConfirmation", e.target.value)}
-                        />
-                        <br />
-                        <br />
-                    </form>
-                </DialogContent>
-                <DialogActions
-                    className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
-                >
-                    <Button
-                        color="rose"
-                        disabled={
-                            !userEdit.password ||
-                            userEdit.password === "" ||
-                            !userEdit.passwordConfirmation ||
-                            userEdit.passwordConfirmation === ""
-                        }
-                        onClick={updatePasswordUser}>Actualizar Contrasena</Button>
-                    <Button onClick={() => setEditPasswordModal(false)}>Cancelar</Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                classes={{
-                    root: modalClasses.center,
-                    paper: modalClasses.modal,
-                }}
-                open={deleteModal}
-                transition={Transition}
-                keepMounted
-                onClose={() => setDeleteModal(false)}
-                aria-labelledby="modal-slide-title"
-                aria-describedby="modal-slide-description"
-                maxWidth="md"
-                fullWidth={true}
-            >
-                <DialogTitle
-                    id="classic-modal-slide-title"
-                    disableTypography
-                    className={modalClasses.modalHeader}
-                >
-                    <h3 className={modalClasses.modalTitle}>Eliminar usuario <b>{userEditAux.nombre_completo}</b></h3>
-                </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={modalClasses.modalBody}
-                >
-                    <h4>Esta seguro que desea <b>eliminar</b> el usuario?</h4>
-                </DialogContent>
-                <DialogActions
-                    className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
-                >
-                    <Button
-                        color="danger"
-                        onClick={deleteUser}
+                    <DialogTitle
+                        id="classic-modal-slide-title"
+                        disableTypography
+                        className={modalClasses.modalHeader}
                     >
-                        Eliminar
-                    </Button>
-                    <Button onClick={() => {
-                        setDeleteModal(false)
-                    }}>Cancelar</Button>
-                </DialogActions>
-            </Dialog>
+                        <h3 className={modalClasses.modalTitle}>Ingreso de nuevo usuario</h3>
+                    </DialogTitle>
+                    <DialogContent
+                        id="modal-slide-description"
+                        className={modalClasses.modalBody}
+                    >
+                        <form>
+                            <CustomInput
+                                labelText="Nombre Completo"
+                                id="name_user"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "text"
+                                }}
+                                value={user.nombre_completo}
+                                onChange={(e) => handleUserChange("nombre_completo", e.target.value)}
+                            />
+                            <CustomInput
+                                labelText="Email"
+                                id="email_user"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "email"
+                                }}
+                                value={user.email}
+                                onChange={(e) => handleUserChange("email", e.target.value)}
+                            />
+                            <CustomInput
+                                labelText="Contrasena"
+                                id="password_user"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "password"
+                                }}
+                                value={user.password}
+                                onChange={(e) => handleUserChange("password", e.target.value)}
+                            />
+                            <CustomInput
+                                labelText="Confirmar Contrasena"
+                                id="password_confirmation_user"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "password"
+                                }}
+                                value={user.passwordConfirmation}
+                                onChange={(e) => handleUserChange("passwordConfirmation", e.target.value)}
+                            />
+                            <br />
+                            <br />
+                            <Selector
+                                placeholder="Roles"
+                                options={roles}
+                                onChange={(value) => handleUserChange("rol", value)}
+                                value={user.rol}
+                            />
+                            <br />
+                            <br />
+                        </form>
+                    </DialogContent>
+                    <DialogActions
+                        className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
+                    >
+                        <Button
+                            color="rose"
+                            disabled={
+                                !user.nombre_completo ||
+                                user.nombre_completo === "" ||
+                                !user.email ||
+                                user.email === "" ||
+                                !user.password ||
+                                user.password === "" ||
+                                !user.passwordConfirmation ||
+                                user.passwordConfirmation === "" ||
+                                !user.rol ||
+                                !user.rol.value ||
+                                user.rol.value === ""
+                            }
+                            onClick={createUser}>Ingresar</Button>
+                        <Button onClick={() => setModal(false)}>Cancelar</Button>
+                    </DialogActions>
+                </Dialog>
 
-            {loading && <Loader show={loading} />}
-            <Snackbar
-                place="br"
-                color={notification.color}
-                message={notification.text}
-                open={notification.open}
-                closeNotification={() => {
-                    const noti = { ...notification, open: false }
-                    setNotification(noti)
-                }}
-                close
-            />
-        </React.Fragment>
+                <Dialog
+                    classes={{
+                        root: modalClasses.center,
+                        paper: modalClasses.modal,
+                    }}
+                    open={editModal}
+                    transition={Transition}
+                    keepMounted
+                    onClose={() => setEditModal(false)}
+                    aria-labelledby="modal-slide-title"
+                    aria-describedby="modal-slide-description"
+                    maxWidth="md"
+                    fullWidth={true}
+                >
+                    <DialogTitle
+                        id="classic-modal-slide-title"
+                        disableTypography
+                        className={modalClasses.modalHeader}
+                    >
+                        <h3 className={modalClasses.modalTitle}>Actualizar usuario <b>{userEditAux.nombre_completo}</b></h3>
+                    </DialogTitle>
+                    <DialogContent
+                        id="modal-slide-description"
+                        className={modalClasses.modalBody}
+                    >
+                        <form>
+                            <CustomInput
+                                labelText="Nombre Completo"
+                                id="name_user_edit"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "text"
+                                }}
+                                value={userEdit.nombre_completo}
+                                onChange={(e) => handleEditUserChange("nombre_completo", e.target.value)}
+                            />
+                            <CustomInput
+                                labelText="Email"
+                                id="email_user_edit"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "email"
+                                }}
+                                value={userEdit.email}
+                                onChange={(e) => handleEditUserChange("email", e.target.value)}
+                            />
+                            <br />
+                            <Selector
+                                label="Rol"
+                                placeholder="Roles"
+                                options={roles}
+                                onChange={(value) => handleEditUserChange("rol", value)}
+                                value={userEdit.rol}
+                            />
+                            <br />
+                            <Selector
+                                label="Estado"
+                                placeholder="Estado"
+                                options={[{
+                                    value: 'activo', label: 'Activo'
+                                }, { value: 'inactivo', label: 'Inactivo' }]}
+                                onChange={(value) => handleEditUserChange("estado", value)}
+                                value={userEdit.estado}
+                            />
+                            <br />
+                            <br />
+                        </form>
+                    </DialogContent>
+                    <DialogActions
+                        className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
+                    >
+                        <Button
+                            color="rose"
+                            disabled={
+                                !userEdit.nombre_completo ||
+                                userEdit.nombre_completo === "" ||
+                                !userEdit.email ||
+                                userEdit.email === "" ||
+                                !userEdit.estado ||
+                                !userEdit.estado.value ||
+                                userEdit.estado.value === "" ||
+                                !userEdit.rol ||
+                                !userEdit.rol.value ||
+                                userEdit.rol.value === ""
+                            }
+                            onClick={updateUser}>Actualizar</Button>
+                        <Button onClick={() => setEditModal(false)}>Cancelar</Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog
+                    classes={{
+                        root: modalClasses.center,
+                        paper: modalClasses.modal,
+                    }}
+                    open={editPasswordModal}
+                    transition={Transition}
+                    keepMounted
+                    onClose={() => setEditPasswordModal(false)}
+                    aria-labelledby="modal-slide-title"
+                    aria-describedby="modal-slide-description"
+                    maxWidth="md"
+                    fullWidth={true}
+                >
+                    <DialogTitle
+                        id="classic-modal-slide-title"
+                        disableTypography
+                        className={modalClasses.modalHeader}
+                    >
+                        <h3 className={modalClasses.modalTitle}>Actualizar contrasena para usuario <b>{userEditAux.nombre_completo}</b></h3>
+                    </DialogTitle>
+                    <DialogContent
+                        id="modal-slide-description"
+                        className={modalClasses.modalBody}
+                    >
+                        <form>
+                            <CustomInput
+                                labelText="Contrasena"
+                                id="password_user_edit"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "password"
+                                }}
+                                value={userEdit.password}
+                                onChange={(e) => handleEditUserChange("password", e.target.value)}
+                            />
+                            <CustomInput
+                                labelText="Confirmar Contrasena"
+                                id="password_confirmation_user_edit"
+                                formControlProps={{
+                                    fullWidth: true
+                                }}
+                                inputProps={{
+                                    type: "password"
+                                }}
+                                value={userEdit.passwordConfirmation}
+                                onChange={(e) => handleEditUserChange("passwordConfirmation", e.target.value)}
+                            />
+                            <br />
+                            <br />
+                        </form>
+                    </DialogContent>
+                    <DialogActions
+                        className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
+                    >
+                        <Button
+                            color="rose"
+                            disabled={
+                                !userEdit.password ||
+                                userEdit.password === "" ||
+                                !userEdit.passwordConfirmation ||
+                                userEdit.passwordConfirmation === ""
+                            }
+                            onClick={updatePasswordUser}>Actualizar Contrasena</Button>
+                        <Button onClick={() => setEditPasswordModal(false)}>Cancelar</Button>
+                    </DialogActions>
+                </Dialog>
+
+                <Dialog
+                    classes={{
+                        root: modalClasses.center,
+                        paper: modalClasses.modal,
+                    }}
+                    open={deleteModal}
+                    transition={Transition}
+                    keepMounted
+                    onClose={() => setDeleteModal(false)}
+                    aria-labelledby="modal-slide-title"
+                    aria-describedby="modal-slide-description"
+                    maxWidth="md"
+                    fullWidth={true}
+                >
+                    <DialogTitle
+                        id="classic-modal-slide-title"
+                        disableTypography
+                        className={modalClasses.modalHeader}
+                    >
+                        <h3 className={modalClasses.modalTitle}>Eliminar usuario <b>{userEditAux.nombre_completo}</b></h3>
+                    </DialogTitle>
+                    <DialogContent
+                        id="modal-slide-description"
+                        className={modalClasses.modalBody}
+                    >
+                        <h4>Esta seguro que desea <b>eliminar</b> el usuario?</h4>
+                    </DialogContent>
+                    <DialogActions
+                        className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
+                    >
+                        <Button
+                            color="danger"
+                            onClick={deleteUser}
+                        >
+                            Eliminar
+                    </Button>
+                        <Button onClick={() => {
+                            setDeleteModal(false)
+                        }}>Cancelar</Button>
+                    </DialogActions>
+                </Dialog>
+
+                {loading && <Loader show={loading} />}
+                <Snackbar
+                    place="br"
+                    color={notification.color}
+                    message={notification.text}
+                    open={notification.open}
+                    closeNotification={() => {
+                        const noti = { ...notification, open: false }
+                        setNotification(noti)
+                    }}
+                    close
+                />
+            </React.Fragment>
+        </AdminLayout>
     )
 }

@@ -27,6 +27,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import TableStyles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import AdminLayout from "layouts/Admin";
 
 const customStyles = {
     ...styles,
@@ -54,7 +55,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function Roles() {
+export default function Roles(props) {
     const classes = useStyles();
     const classesTable = useTableStyles();
     const [modal, setModal] = React.useState(false);
@@ -89,8 +90,12 @@ export default function Roles() {
                 setRoles(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
-    }, [reloadData])
+    }, [reloadData, props])
 
     const fillButtons = (indexRol) => {
         return [
@@ -180,6 +185,10 @@ export default function Roles() {
             }
         }).catch(err => {
             console.error("Error al crear rol: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al crear rol.',
@@ -232,6 +241,10 @@ export default function Roles() {
             }
         }).catch(err => {
             console.error("Error al editar rol: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al editar rol.',
@@ -247,7 +260,7 @@ export default function Roles() {
     }
 
     return (
-        <React.Fragment>
+        <AdminLayout>
             <GridContainer>
                 <GridItem xs={12} sm={6}>
                     <h1>Administracion de <b>Roles.</b></h1>
@@ -476,6 +489,6 @@ export default function Roles() {
                 }}
                 close
             />
-        </React.Fragment>
+        </AdminLayout>
     )
 }

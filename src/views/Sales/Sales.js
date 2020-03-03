@@ -27,6 +27,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 // Styles
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import AdminLayout from "layouts/Admin";
+import { getUserId } from "helpers/utils";
 
 const customStyles = {
     ...styles,
@@ -47,7 +49,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function Purchase() {
+export default function Purchase(props) {
     const [file, setFile] = React.useState([]);
     const [errors, setErrors] = React.useState([]);
     const [modal, setModal] = React.useState(false);
@@ -70,6 +72,10 @@ export default function Purchase() {
                 setLogCarga(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
 
         Axios.get("/canales")
@@ -77,6 +83,10 @@ export default function Purchase() {
                 setCanales(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
 
         Axios.get("/vendedores")
@@ -84,8 +94,12 @@ export default function Purchase() {
                 setVendedores(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
-    }, [reloadData])
+    }, [reloadData, props])
 
     const handleSearchCanal = (nombreCanal) => {
         Axios.get("/canales?nombre=" + nombreCanal)
@@ -93,6 +107,10 @@ export default function Purchase() {
                 setCanales(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
     }
 
@@ -102,11 +120,14 @@ export default function Purchase() {
                 setVendedores(response.data)
             }).catch(e => {
                 console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
     }
 
     const handleVentasChange = (property, value) => {
-        console.log(property, value);
         const newVenta = { ...venta };
         newVenta[property] = value
         setVenta(newVenta);
@@ -114,7 +135,12 @@ export default function Purchase() {
 
 
     const handleFileChange = (salesFile) => {
-        setFile(salesFile.data)
+        setErrors([])
+        if (salesFile.data) {
+            setFile(salesFile.data)
+            return
+        }
+        setFile(salesFile)
     }
 
     const processFile = async () => {
@@ -125,6 +151,7 @@ export default function Purchase() {
             id_canal: venta.canal.value,
             id_vendedor: venta.vendedor.value,
             zona: zona.zonificacion,
+            userId: getUserId(),
         }).then(async data => {
             const response = await data.data;
             setLoading(false);
@@ -159,6 +186,10 @@ export default function Purchase() {
         }).catch(err => {
             setLoading(false);
             console.error("Error al subir el archivo de ventas: ", err);
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Error! Se produjo un error al subir las ventas.',
@@ -174,7 +205,7 @@ export default function Purchase() {
     }
 
     return (
-        <React.Fragment>
+        <AdminLayout>
             <h1>Subida de archivos de <b>Ventas</b>.</h1>
             <h4>A continuacion se muestra el resumen de los ulitmos 3 archivos subidos:</h4>
             <GridContainer>
@@ -193,13 +224,13 @@ export default function Purchase() {
                                 tableData={logCarga.map((log, index) => {
                                     return [
                                         (index + 1),
-                                        new Date(log.fecha_carga).toLocaleDateString() +
+                                        new Date(log.log_carga_fecha_carga).toLocaleDateString() +
                                         ' ' +
-                                        new Date(log.fecha_carga).toLocaleTimeString(),
-                                        "Administrador",
-                                        new Date(log.fecha_desde).toLocaleDateString(),
-                                        new Date(log.fecha_hasta).toLocaleDateString(),
-                                        log.rows
+                                        new Date(log.log_carga_fecha_carga).toLocaleTimeString(),
+                                        log.usuario_nombre_completo,
+                                        new Date(log.log_carga_fecha_desde).toLocaleDateString(),
+                                        new Date(log.log_carga_fecha_hasta).toLocaleDateString(),
+                                        log.log_carga_rows,
                                     ]
                                 })}
                             />
@@ -355,6 +386,6 @@ export default function Purchase() {
                 }}
                 close
             />
-        </React.Fragment>
+        </AdminLayout>
     )
 }

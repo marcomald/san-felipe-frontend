@@ -15,6 +15,7 @@ import Hidden from "@material-ui/core/Hidden";
 import Collapse from "@material-ui/core/Collapse";
 import Icon from "@material-ui/core/Icon";
 import IconPerson from "@material-ui/icons/Person";
+// import ExitToApp from "@material-ui/icons/ExitToApp";
 //  Views 
 import Purchase from "views/Purchases/Purchase.js";
 import Sales from "views/Sales/Sales";
@@ -123,14 +124,14 @@ class Sidebar extends React.Component {
     st[collapse] = !this.state[collapse];
     this.setState(st);
   }
-  // this function creates the links and collapses that appear in the sidebar (left menu)
-  createLinks = routes => {
 
+  // this function creates the links and collapses that appear in the sidebar (left menu)
+  createLinks = () => {
     const { classes, color, rtlActive } = this.props;
     const user = window.sessionStorage.getItem("user")
     const token = window.sessionStorage.getItem("accessToken")
     if (!user || !token) {
-      this.props.history.push('/auth/login');
+      this.props.history.push('/login');
       return
     }
     const userDecode = JSON.parse(window.atob(user));
@@ -144,7 +145,7 @@ class Sidebar extends React.Component {
             rtlName: "Altas",
             icon: SimCard,
             component: Discharged,
-            layout: "/admin"
+            layout: "/procesos"
           })
           break;
         case "canales":
@@ -154,7 +155,7 @@ class Sidebar extends React.Component {
             rtlName: "Canales",
             icon: Map,
             component: Channels,
-            layout: "/admin"
+            layout: "/mantenimiento"
           })
           break;
         case "clientes":
@@ -164,7 +165,7 @@ class Sidebar extends React.Component {
             rtlName: "Clientes",
             icon: AssignmentInd,
             component: Clients,
-            layout: "/admin"
+            layout: "/mantenimiento"
           })
           break;
         case "compras":
@@ -174,7 +175,7 @@ class Sidebar extends React.Component {
             rtlName: "Compras",
             icon: ShoppingCart,
             component: Purchase,
-            layout: "/admin"
+            layout: "/procesos"
           })
           break;
         case "consumos":
@@ -184,17 +185,17 @@ class Sidebar extends React.Component {
             rtlName: "Consumos",
             icon: SpeakerPhone,
             component: Consumptions,
-            layout: "/admin"
+            layout: "/procesos"
           })
           break;
         case "fasttrack":
           allowedRoutes.push({
-            path: "/fast-track",
+            path: "/fast-tracks",
             name: "Fast Track",
             rtlName: "Fast Track",
             icon: AssignmentTurnedIn,
             component: FastTrack,
-            layout: "/admin"
+            layout: "/procesos"
           })
           break;
         case "roles":
@@ -204,7 +205,7 @@ class Sidebar extends React.Component {
             rtlName: "Roles",
             icon: Settings,
             component: Roles,
-            layout: "/admin"
+            layout: "/mantenimiento"
           })
           break;
         case "usuarios":
@@ -214,7 +215,7 @@ class Sidebar extends React.Component {
             rtlName: "Usuarios",
             icon: Group,
             component: Users,
-            layout: "/admin"
+            layout: "/mantenimiento"
           })
           break;
         case "vendedores":
@@ -224,7 +225,7 @@ class Sidebar extends React.Component {
             rtlName: "Vendedores",
             icon: Work,
             component: Sellers,
-            layout: "/admin"
+            layout: "/mantenimiento"
           })
           break;
         case "ventas":
@@ -234,7 +235,7 @@ class Sidebar extends React.Component {
             rtlName: "Despachos y ventas",
             icon: AttachMoney,
             component: Sales,
-            layout: "/admin"
+            layout: "/procesos"
           })
           break;
         default:
@@ -242,7 +243,15 @@ class Sidebar extends React.Component {
       }
     });
 
-    allowedRoutes.push(routes.filter(r => r.name === "Logout")[0])
+    allowedRoutes.push({
+      path: "/login",
+      name: "Cerrar sesion",
+      rtlName: "Cerrar sesion",
+      icon: ExitToApp,
+      component: LoginPage,
+      layout: ""
+    })
+
     return allowedRoutes.map((prop, key) => {
       if (prop.redirect) {
         return null;
@@ -432,7 +441,9 @@ class Sidebar extends React.Component {
       );
     });
   };
+  // --------------------------------------------------------------------
   render() {
+
     const userLogged = JSON.parse(atob(window.sessionStorage.getItem("user")));
     const {
       classes,

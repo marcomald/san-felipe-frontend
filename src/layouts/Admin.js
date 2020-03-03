@@ -1,19 +1,11 @@
 import React from "react";
 import cx from "classnames";
-import { Switch, Route, Redirect } from "react-router-dom";
-// creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
-
-// @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-
-// core components
 import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
-
 import routes from "routes.js";
-
 import styles from "assets/jss/material-dashboard-pro-react/layouts/adminStyle.js";
 
 var ps;
@@ -22,15 +14,14 @@ const useStyles = makeStyles(styles);
 
 export default function Dashboard(props) {
   const { ...rest } = props;
-  // states and functions
+  const { children } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [miniActive] = React.useState(false);
   const [image] = React.useState(require("assets/img/tuentiFondo.jpeg"));
   const [color] = React.useState("blue");
   const [bgColor] = React.useState("black");
-  // const [hasImage, setHasImage] = React.useState(true);
   const [logo] = React.useState(require("assets/img/logo-white.svg"));
-  // styles
+
   const classes = useStyles();
   const mainPanelClasses =
     classes.mainPanel +
@@ -65,28 +56,6 @@ export default function Dashboard(props) {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-  const getRoute = () => {
-    return window.location.pathname !== "/admin/full-screen-maps";
-  };
-
-  const getRoutes = routes => {
-    return routes.map((prop, key) => {
-      if (prop.collapse) {
-        return getRoutes(prop.views);
-      }
-      if (prop.layout === "/admin") {
-        return (
-          <Route
-            path={prop.layout + prop.path}
-            component={prop.component}
-            key={key}
-          />
-        );
-      } else {
-        return null;
-      }
-    });
-  };
 
   const resizeFunction = () => {
     if (window.innerWidth >= 960) {
@@ -109,24 +78,12 @@ export default function Dashboard(props) {
         {...rest}
       />
       <div className={mainPanelClasses} ref={mainPanel}>
-        {getRoute() ? (
-          <div>
-            <div className={classes.container}>
-              <Switch>
-                {getRoutes(routes)}
-                <Redirect from="/admin" to="/admin/dashboard" />
-              </Switch>
-            </div>
+        <div style={{ minHeight: "99vh" }}>
+          <div style={{ display: "block", padding: "0 2rem" }}>
+            {children}
           </div>
-        ) : (
-            <div className={classes.map}>
-              <Switch>
-                {getRoutes(routes)}
-                <Redirect from="/admin" to="/admin/dashboard" />
-              </Switch>
-            </div>
-          )}
-        {getRoute() ? <Footer fluid /> : null}
+          <Footer fluid />
+        </div>
       </div>
     </div>
   );

@@ -35,6 +35,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import FormStyles from "assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.js";
+import AdminLayout from "layouts/Admin";
+import { getUserId } from "helpers/utils"
+
 // Helper
 const customStyles = {
     ...styles,
@@ -63,7 +66,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-export default function Clients() {
+export default function Clients(props) {
     const [modal, setModal] = React.useState(false)
     const [editModal, setEditModal] = React.useState(false);
     const [deleteModal, setDeleteModal] = React.useState(false);
@@ -88,13 +91,21 @@ export default function Clients() {
             .then(response => {
                 setClients(response.data)
             }).catch(e => {
-                console.error(e)
+                console.error(e);
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
             })
-    }, [reloadData])
+    }, [reloadData, props])
 
     const handleFileChange = (clientsFile) => {
-        setFile(clientsFile.data)
         setErrors([])
+        if (clientsFile.data) {
+            setFile(clientsFile.data)
+            return
+        }
+        setFile(clientsFile)
     }
 
     const classes = useStyles();
@@ -143,7 +154,10 @@ export default function Clients() {
 
     const deleteClient = () => {
         Axios.delete("/clientes/" + clientEdit.id_cliente, {
-            id: clientEdit.id_cliente,
+            data: {
+                id: clientEdit.id_cliente,
+                userId: getUserId(),
+            }
         }).then(response => {
             setDeleteModal(false)
             setReloadData(!reloadData);
@@ -160,6 +174,10 @@ export default function Clients() {
             }, 6000);
         }).catch(err => {
             console.error("Error al eliminar cliente: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al eliminar el cliente.',
@@ -180,6 +198,7 @@ export default function Clients() {
             nombre: clientEdit.nombre_completo,
             identificacion: clientEdit.identificacion,
             estado: clientEdit.estado,
+            userId: getUserId(),
         }).then(response => {
             setEditModal(false)
             setReloadData(!reloadData);
@@ -196,6 +215,10 @@ export default function Clients() {
             }, 6000);
         }).catch(err => {
             console.error("Error al editar cliente: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al editar el cliente.',
@@ -214,6 +237,7 @@ export default function Clients() {
         Axios.post("/clientes", {
             nombre: client.nombre,
             identificacion: client.identificacion,
+            userId: getUserId(),
         }).then(response => {
             const clientsList = clients
             clientsList.push(response.data)
@@ -232,6 +256,11 @@ export default function Clients() {
                 })
             }, 6000);
         }).catch(e => {
+            console.error(e)
+            if (e.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al crear cliente.',
@@ -248,7 +277,8 @@ export default function Clients() {
 
     const processFile = async () => {
         Axios.post("/clientes/bulk", {
-            clientes: file
+            clientes: file,
+            userId: getUserId(),
         }).then(async data => {
             const response = await data.data;
             setLoading(false);
@@ -282,6 +312,10 @@ export default function Clients() {
             }
         }).catch(err => {
             console.error("Error al subir clientes: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
             setNotification({
                 color: 'danger',
                 text: 'Se produjo un error al subir los clientes.',
@@ -382,7 +416,7 @@ export default function Clients() {
     }
 
     return (
-        <React.Fragment>
+        <AdminLayout>
             <GridContainer>
                 <GridItem xs={12} sm={6}>
                     <h1>Clientes</h1>
@@ -860,6 +894,6 @@ export default function Clients() {
                 }}
                 close
             />
-        </React.Fragment >
+        </AdminLayout >
     )
 }
