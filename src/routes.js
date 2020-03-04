@@ -27,8 +27,8 @@ const filterPermissions = () => {
   const user = window.sessionStorage.getItem("user");
   const urlPath = window.location.pathname;
   if (!user) {
-    if (urlPath !== '/auth/login') {
-      window.location.replace('/auth/login');
+    if (urlPath !== '/login') {
+      window.location.replace('/login');
     }
     return [{
       path: "/login",
