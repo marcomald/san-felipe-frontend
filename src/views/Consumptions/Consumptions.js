@@ -86,7 +86,6 @@ export default function Consumptions(props) {
             userId: getUserId(),
         }).then(async data => {
             const response = await data.data;
-            console.log(response);
             setLoading(false);
             if (response.errors) {
                 setErrors(response.data);

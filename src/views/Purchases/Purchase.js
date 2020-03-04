@@ -18,6 +18,11 @@ import FileUpload from 'components/CustomUpload/FileUpload1.js';
 import Snackbar from "components/Snackbar/Snackbar.js";
 import Loader from 'components/Loader/Loader.js'
 import Axios from 'axios';
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -25,8 +30,10 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import FormStyles from "assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.js";
+
 import AdminLayout from "layouts/Admin";
-import { getUserId } from "helpers/utils";
+import { getUserId, purchaseOrigin } from "helpers/utils";
 
 const customStyles = {
     ...styles,
@@ -42,13 +49,14 @@ const customStyles = {
 };
 
 const useStyles = makeStyles(customStyles);
+const useStylesForm = makeStyles(FormStyles);
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
 export default function Purchase(props) {
-    const classes = useStyles();
+
     const [file, setFile] = React.useState([])
     const [errors, setErrors] = React.useState([])
     const [modal, setModal] = React.useState(false);
@@ -56,6 +64,10 @@ export default function Purchase(props) {
     const [notification, setNotification] = React.useState(false);
     const [reloadData, setReloadData] = React.useState(false)
     const [logCarga, setLogCarga] = React.useState([])
+    const [origen, setOrigen] = React.useState("")
+
+    const classes = useStyles();
+    const FormClasses = useStylesForm();
 
     useEffect(() => {
         Axios.get("/log-carga?origen=compras")
@@ -84,6 +96,7 @@ export default function Purchase(props) {
         await Axios.post(`/compras`, {
             compras: file,
             userId: getUserId(),
+            origen,
         }).then(async data => {
             const response = await data.data;
             if (response.errors) {
@@ -152,11 +165,61 @@ export default function Purchase(props) {
                         </CardHeader>
                         <CardBody>
                             <form>
+                                <FormControl
+                                    fullWidth
+                                    className={FormClasses.selectFormControl}
+                                >
+                                    <InputLabel
+                                        htmlFor="simple-select"
+                                        className={FormClasses.selectLabel}
+                                    >
+                                        Origen
+                            </InputLabel>
+                                    <Select
+                                        MenuProps={{
+                                            className: FormClasses.selectMenu
+                                        }}
+                                        classes={{
+                                            select: FormClasses.select
+                                        }}
+                                        value={origen}
+                                        onChange={(e) => setOrigen(e.target.value)}
+                                        inputProps={{
+                                            name: "origenSelect",
+                                            id: "origen-select"
+                                        }}
+                                    >
+                                        <MenuItem
+                                            disabled
+                                            classes={{
+                                                root: FormClasses.selectMenuItem
+                                            }}
+                                        >
+                                            Eliga un origen
+                                </MenuItem>
+                                        {
+                                            purchaseOrigin.map((ori, index) => {
+                                                return (
+                                                    <MenuItem
+                                                        key={index}
+                                                        classes={{
+                                                            root: FormClasses.selectMenuItem,
+                                                            selected: FormClasses.selectMenuItemSelected
+                                                        }}
+                                                        value={ori.value}
+                                                    >
+                                                        {ori.label}
+                                                    </MenuItem>
+                                                )
+                                            })
+                                        }
+                                    </Select>
+                                </FormControl>
                                 <br />
                                 <GridContainer>
                                     <GridItem xs={12}>
                                         <div style={{ display: "flex", flexDirection: "column" }}>
-                                            <FileUpload handleFile={handleFileChange} />
+                                            <FileUpload handleFile={handleFileChange} disabled={origen === ""} />
                                             {file && file.length > 0 && <Button color="success" onClick={processFile}>Procesar Archivo</Button>}
                                         </div>
                                     </GridItem>

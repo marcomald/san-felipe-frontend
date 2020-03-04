@@ -14,6 +14,7 @@ import Ventas from '../views/Sales/Sales'
 import Login from '../views/Pages/LoginPage'
 import ErrorPage from '../views/Pages/ErrorPage'
 import Home from '../views/Pages/HomePage'
+import UserProfile from 'views/UserProfile/UserProfile'
 
 const PrivateRoutes = (permissions) => {
     const allowedRoutes = [];
@@ -60,6 +61,7 @@ const PrivateRoutes = (permissions) => {
                 {allowedRoutes}
                 <Route path="/login" exact component={Login} />
                 <Route path="/inicio" exact component={Home} />
+                <Route path="/perfil" exact component={UserProfile} />
                 <Route path="/not-found" exact component={ErrorPage} />
                 <Redirect to="/not-found" />
             </Switch>

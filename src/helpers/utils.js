@@ -15,12 +15,12 @@ export const channelZones = [
 
 export const purchaseOrigin = [
     {
-        value: "Chips",
-        label: "chip"
+        value: "CHIP",
+        label: "Chips"
     },
     {
-        value: "Portabilidades",
-        label: "portabilidad"
+        value: "PORTABILIDAD",
+        label: "Portabilidades"
     }
 ]
 
