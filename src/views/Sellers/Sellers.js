@@ -448,7 +448,7 @@ export default function Sellers(props) {
                     <form>
                         <CustomInput
                             labelText="Nombre"
-                            id="name_seller"
+                            id="name_seller_edit"
                             formControlProps={{
                                 fullWidth: true
                             }}

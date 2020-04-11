@@ -420,7 +420,7 @@ export default function Roles(props) {
                     <form>
                         <CustomInput
                             labelText="Nombre"
-                            id="name_rol"
+                            id="name_rol_edit"
                             formControlProps={{
                                 fullWidth: true
                             }}
@@ -432,7 +432,7 @@ export default function Roles(props) {
                         />
                         <CustomInput
                             labelText="Descripcion"
-                            id="description_rol"
+                            id="description_rol_edit"
                             formControlProps={{
                                 fullWidth: true
                             }}
