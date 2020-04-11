@@ -520,7 +520,7 @@ export default function Channels(props) {
                     <form>
                         <CustomInput
                             labelText="Nombre de canal"
-                            id="name_channel"
+                            id="name_channel_edit"
                             formControlProps={{
                                 fullWidth: true
                             }}
