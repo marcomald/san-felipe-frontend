@@ -8,7 +8,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
-import Table from "components/Table/Table.js";
+import CustomTable from "components/Table/CustomTable.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
@@ -63,14 +63,18 @@ export default function Purchase(props) {
     const [loading, setLoading] = React.useState(false)
     const [notification, setNotification] = React.useState(false);
     const [reloadData, setReloadData] = React.useState(false)
-    const [logCarga, setLogCarga] = React.useState([])
+    const [logCarga, setLogCarga] = React.useState({ logs: [], total: 0, })
     const [origen, setOrigen] = React.useState("")
+    const [offset, setOffset] = React.useState(0)
+    const [limit, setLimit] = React.useState(3)
 
     const classes = useStyles();
     const FormClasses = useStylesForm();
 
     useEffect(() => {
-        Axios.get("/log-carga?origen=compras")
+        const limite = limit ? "&limit=" + limit : ""
+        const offsetV = offset ? "&offset=" + offset : ""
+        Axios.get("/log-carga?origen=compras" + limite + offsetV)
             .then(response => {
                 setLogCarga(response.data)
             }).catch(e => {
@@ -80,7 +84,22 @@ export default function Purchase(props) {
                     return
                 }
             })
-    }, [reloadData, props])
+    }, [reloadData, props.history, offset, limit])
+
+    useEffect(() => {
+        const limite = limit ? "&limit=" + limit : ""
+        setOffset(0);
+        Axios.get("/log-carga?origen=compras" + limite)
+            .then(response => {
+                setLogCarga(response.data)
+            }).catch(e => {
+                console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
+            })
+    }, [limit, props.history])
 
     const handleFileChange = (purchasesFile) => {
         setErrors([])
@@ -103,9 +122,6 @@ export default function Purchase(props) {
                 setErrors(response.data);
             }
             setNotification(true)
-            setTimeout(function () {
-                setNotification(false)
-            }, 10000);
             setReloadData(!reloadData);
             setLoading(false);
         }).catch(err => {
@@ -133,10 +149,8 @@ export default function Purchase(props) {
                             <h4 className={classes.cardIconTitle}>Registro de archivos subidos</h4>
                         </CardHeader>
                         <CardBody>
-                            <Table
-                                tableHeaderColor="primary"
-                                tableHead={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
-                                tableData={logCarga.map((log, index) => {
+                            <CustomTable
+                                data={logCarga.logs.map((log, index) => {
                                     return [
                                         (index + 1),
                                         new Date(log.log_carga_fecha_carga).toLocaleDateString() +
@@ -148,8 +162,13 @@ export default function Purchase(props) {
                                         log.log_carga_rows,
                                     ]
                                 })}
+                                limite={3}
+                                headers={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
+                                onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
+                                total={logCarga.total}
+                                changeLimit={(limite) => { setLimit(limite) }}
+                                offset={offset}
                             />
-                            {logCarga.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>
@@ -174,7 +193,7 @@ export default function Purchase(props) {
                                         className={FormClasses.selectLabel}
                                     >
                                         Origen
-                            </InputLabel>
+                                    </InputLabel>
                                     <Select
                                         MenuProps={{
                                             className: FormClasses.selectMenu
