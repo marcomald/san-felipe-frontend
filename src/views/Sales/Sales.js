@@ -55,7 +55,6 @@ export default function Purchase(props) {
     const [modal, setModal] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [canales, setCanales] = React.useState([]);
-    const [vendedores, setVendedores] = React.useState([]);
     const [venta, setVenta] = React.useState({});
     const [reloadData, setReloadData] = React.useState(false);
     const [notification, setNotification] = React.useState({
@@ -91,16 +90,6 @@ export default function Purchase(props) {
                 }
             })
 
-        Axios.get("/vendedores")
-            .then(response => {
-                setVendedores(response.data)
-            }).catch(e => {
-                console.error(e)
-                if (e.request.status === 403) {
-                    props.history.push('/login');
-                    return
-                }
-            })
     }, [reloadData, props])
 
     useEffect(() => {
@@ -146,19 +135,6 @@ export default function Purchase(props) {
             })
     }
 
-    const handleSearchVendedores = (nombreVendedor) => {
-        Axios.get("/vendedores?nombre=" + nombreVendedor)
-            .then(response => {
-                setVendedores(response.data)
-            }).catch(e => {
-                console.error(e)
-                if (e.request.status === 403) {
-                    props.history.push('/login');
-                    return
-                }
-            })
-    }
-
     const handleVentasChange = (property, value) => {
         const newVenta = { ...venta };
         newVenta[property] = value
@@ -181,7 +157,6 @@ export default function Purchase(props) {
         await Axios.post(`/despachos`, {
             ventas: file,
             id_canal: venta.canal.value,
-            id_vendedor: venta.vendedor.value,
             zona: zona.zonificacion,
             userId: getUserId(),
         }).then(async data => {
@@ -299,18 +274,6 @@ export default function Purchase(props) {
                                     value={venta.canal}
                                 />
                                 <br />
-                                <Selector
-                                    placeholder="Vendendor"
-                                    options={vendedores.map(vendedor => {
-                                        return {
-                                            value: vendedor.id_vendedor,
-                                            label: vendedor.nombre_completo,
-                                        }
-                                    })}
-                                    onInputChange={(value) => handleSearchVendedores(value)}
-                                    onChange={(value) => handleVentasChange("vendedor", value)}
-                                    value={venta.vendedor}
-                                />
                                 <GridContainer>
                                     <GridItem xs={12}>
                                         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -318,10 +281,7 @@ export default function Purchase(props) {
                                                 disabled={
                                                     !venta.canal ||
                                                     !venta.canal.value ||
-                                                    venta.canal.value === "" ||
-                                                    !venta.vendedor ||
-                                                    !venta.vendedor.value ||
-                                                    venta.vendedor.value === ""
+                                                    venta.canal.value === ""
                                                 }
                                                 handleFile={handleFileChange}
                                             />
@@ -348,6 +308,7 @@ export default function Purchase(props) {
                                     <li>ICC: Debe ser de campo numerico, con una longitud de 19 caracteres.</li>
                                     <li>DN: Debe ser de campo numerico, con una longitud de 9 caracteres.</li>
                                     <li>FECHA: Debe ser de tipo fecha.</li>
+                                    <li>VENDEDOR: Debe ser de tipo numerico, y debe coincidir con el ya registrado.</li>
                                     <li>IDENTIFICACION: Debe tener una longitud de hasta 13 caracteres.
                                     Debe coincidir con el numero de identificacion registrado en clientes.
                                         Este campo es opcional solo si el canal seleccionado tiene una zona distinta de "S".</li>
