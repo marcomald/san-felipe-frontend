@@ -10,7 +10,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
-import Table from "components/Table/Table.js";
+import CustomTable from "components/Table/CustomTable.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
@@ -72,7 +72,7 @@ export default function Sellers(props) {
     const [modalUpload, setModalUpload] = React.useState(false)
     const [sellerEdit, setSellerEdit] = React.useState({});
     const [sellerEditAux, setSellerEditAux] = React.useState({});
-    const [sellers, setSellers] = React.useState([]);
+    const [sellers, setSellers] = React.useState({ sellers: [], total: 0 });
     const [seller, setSeller] = React.useState({});
     const [file, setFile] = React.useState([])
     const [loading, setLoading] = React.useState(false)
@@ -83,11 +83,15 @@ export default function Sellers(props) {
         text: "",
         open: false,
     });
+    const [sellerName, setSellerName] = React.useState("")
+    const [offset, setOffset] = React.useState(0)
+    const [limit, setLimit] = React.useState(10)
 
     const FormClasses = useStylesForm();
 
     useEffect(() => {
-        Axios.get("/vendedores")
+        const limite = limit ? "?limit=" + limit : ""
+        Axios.get("/vendedores" + limite)
             .then(response => {
                 setSellers(response.data)
             }).catch(e => {
@@ -97,7 +101,23 @@ export default function Sellers(props) {
                     return
                 }
             })
-    }, [reloadData, props])
+    }, [reloadData, props, limit])
+
+    useEffect(() => {
+        const limite = limit ? "&limit=" + limit : ""
+        const offsetV = offset ? "&offset=" + offset : ""
+        const nombre = sellerName !== "" ? sellerName : ""
+        Axios.get("/vendedores?nombre=" + nombre + limite + offsetV)
+            .then(response => {
+                setSellers(response.data)
+            }).catch(e => {
+                console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
+            })
+    }, [reloadData, props.history, offset, limit, sellerName])
 
     const handleFileChange = (sellersFile) => {
         setErrors([])
@@ -119,7 +139,6 @@ export default function Sellers(props) {
         newSeller[property] = value
         setSellerEdit(newSeller);
     };
-
 
     const processFile = async () => {
         Axios.post("/vendedores/bulk", {
@@ -352,14 +371,22 @@ export default function Sellers(props) {
                             <h4 className={classes.cardIconTitle}>Vendedores registrados</h4>
                         </CardHeader>
                         <CardBody>
-                            <Table
-                                tableHeaderColor="primary"
-                                tableHead={["N#", "Nombre", "Estado", "Acccion"]}
-                                tableData={sellers.map((sl, index) => {
-                                    return [index + 1, sl.nombre_completo, sl.estado.toUpperCase(), fillButtons(index)]
+                            <CustomTable
+                                data={sellers.sellers.map((sl, index) => {
+                                    return [sl.id_vendedorid, sl.nombre_completo, sl.estado.toUpperCase(), fillButtons(index)]
                                 })}
+                                limite={10}
+                                headers={["Codigo", "Nombre", "Estado", "Acccion"]}
+                                onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
+                                total={sellers.total}
+                                changeLimit={(limite) => { setLimit(limite) }}
+                                offset={offset}
+                                onSearchChange={(name => { setSellerName(name) })}
+                                searchValue={sellerName}
+                                showSearch={true}
+                                placeholderSearch={"Ejemplo: EDUARDO LOPEZ"}
+                                labelSearch={"Nombre de vendedor a buscar"}
                             />
-                            {sellers.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>
