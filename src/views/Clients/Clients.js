@@ -132,7 +132,7 @@ export default function Clients(props) {
     const modalClasses = useStylesModal();
     const FormClasses = useStylesForm();
 
-    const fillButtons = (indexClient) => {
+    const fillButtons = (cl) => {
         return [
             { color: "success", icon: Edit },
             { color: "danger", icon: Close }
@@ -144,12 +144,12 @@ export default function Clients(props) {
                     key={key}
                     onClick={() => {
                         setClientEdit({
-                            ...clients[indexClient],
-                            tipoIdentificacion: clients[indexClient].identificacion.length === 13 ? 'RUC' : 'CI'
+                            ...cl,
+                            tipoIdentificacion: cl.identificacion.length === 13 ? 'RUC' : 'CI'
                         })
                         setClientEditAux({
-                            ...clients[indexClient],
-                            tipoIdentificacion: clients[indexClient].identificacion.length === 13 ? 'RUC' : 'CI'
+                            ...cl,
+                            tipoIdentificacion: cl.identificacion.length === 13 ? 'RUC' : 'CI'
                         })
                         prop.color === "danger" ? setDeleteModal(true) : setEditModal(true)
                     }}
@@ -388,7 +388,7 @@ export default function Clients(props) {
             if (clientEdit.tipoIdentificacion === "CI" && clientEdit.identificacion.length !== 10) {
                 errorMessage = "El numero de identificacion no tiene 10 carcteres. ";
             }
-            if (clients.filter(cl => cl.identificacion === clientEdit.identificacion).length > 0) {
+            if (clients.clients.filter(cl => cl.identificacion === clientEdit.identificacion).length > 0) {
                 errorMessage = errorMessage + "Ya existe un cliente con ese numero de identificacion";
             }
 
@@ -464,7 +464,7 @@ export default function Clients(props) {
                         <CardBody>
                             <CustomTable
                                 data={clients.clients.map((cl, index) => {
-                                    return [cl.identificacion, cl.nombre_completo, cl.estado.toUpperCase(), fillButtons(index)]
+                                    return [cl.identificacion, cl.nombre_completo, cl.estado.toUpperCase(), fillButtons(cl)]
                                 })}
                                 limite={10}
                                 headers={["RUC/CI", "Nombre", "Estado", "Acccion"]}
