@@ -198,7 +198,7 @@ export default function Sellers(props) {
 
     const updateSeller = () => {
         Axios.put("/vendedores", {
-            id: sellerEdit.id_vendedor,
+            id: sellerEdit.id_vendedorid,
             nombre: sellerEdit.nombre_completo,
             estado: sellerEdit.estado,
             userId: getUserId(),
@@ -276,9 +276,9 @@ export default function Sellers(props) {
     }
 
     const deleteClient = () => {
-        Axios.delete("/vendedores/" + sellerEdit.id_vendedor, {
+        Axios.delete("/vendedores/" + sellerEdit.id_vendedorid, {
             data: {
-                id: sellerEdit.id_cliente,
+                id: sellerEdit.id_vendedorid,
                 userId: getUserId(),
             },
         }).then(response => {
@@ -318,7 +318,7 @@ export default function Sellers(props) {
     const classes = useStyles();
     const modalClasses = useStylesModal();
 
-    const fillButtons = (indexClient) => {
+    const fillButtons = (sellerSelected) => {
         return [
             { color: "success", icon: Edit },
             { color: "danger", icon: Close }
@@ -330,10 +330,10 @@ export default function Sellers(props) {
                     key={key}
                     onClick={() => {
                         setSellerEdit({
-                            ...sellers[indexClient],
+                            ...sellerSelected,
                         })
                         setSellerEditAux({
-                            ...sellers[indexClient],
+                            ...sellerSelected,
                         })
                         prop.color === "danger" ? setDeleteModal(true) : setEditModal(true)
                     }}
@@ -372,8 +372,8 @@ export default function Sellers(props) {
                         </CardHeader>
                         <CardBody>
                             <CustomTable
-                                data={sellers.sellers.map((sl, index) => {
-                                    return [sl.id_vendedorid, sl.nombre_completo, sl.estado.toUpperCase(), fillButtons(index)]
+                                data={sellers.sellers.map((sl) => {
+                                    return [sl.id_vendedorid, sl.nombre_completo, sl.estado.toUpperCase(), fillButtons(sl)]
                                 })}
                                 limite={10}
                                 headers={["Codigo", "Nombre", "Estado", "Acccion"]}
