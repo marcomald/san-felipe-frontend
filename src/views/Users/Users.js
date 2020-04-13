@@ -9,7 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
-import Table from "components/Table/Table.js";
+import CustomTable from "components/Table/CustomTable.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
@@ -68,11 +68,13 @@ export default function Usuarios(props) {
     const [deleteModal, setDeleteModal] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [reloadData, setReloadData] = React.useState(false);
-    const [users, setUsers] = React.useState([]);
+    const [users, setUsers] = React.useState({ users: [], total: 0 });
     const [userEdit, setUserEdit] = React.useState({});
     const [userEditAux, setUserEditAux] = React.useState({});
     const [user, setUser] = React.useState({});
     const [roles, setRoles] = React.useState([]);
+    const [offset, setOffset] = React.useState(0)
+    const [limit, setLimit] = React.useState(10)
     const [notification, setNotification] = React.useState({
         color: "info",
         text: "",
@@ -83,7 +85,7 @@ export default function Usuarios(props) {
     useEffect(() => {
         Axios.get("/roles")
             .then(async response => {
-                const rolesAux = await response.data.map(r => {
+                const rolesAux = await response.data.roles.map(r => {
                     return {
                         value: r.id,
                         label: r.nombre
@@ -98,7 +100,8 @@ export default function Usuarios(props) {
                 }
             })
 
-        Axios.get("/users")
+        const limite = limit ? "&limit=" + limit : ""
+        Axios.get("/users?" + limite)
             .then(async response => {
                 setUsers(response.data)
             }).catch(e => {
@@ -108,7 +111,22 @@ export default function Usuarios(props) {
                     return
                 }
             })
-    }, [reloadData, props])
+    }, [reloadData, props, limit])
+
+    useEffect(() => {
+        const limite = limit ? "&limit=" + limit : ""
+        const offsetV = offset ? "&offset=" + offset : ""
+        Axios.get("/users?" + limite + offsetV)
+            .then(response => {
+                setUsers(response.data)
+            }).catch(e => {
+                console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
+            })
+    }, [reloadData, props.history, offset, limit])
 
     const handleUserChange = (property, value) => {
         const newUser = { ...user };
@@ -122,7 +140,7 @@ export default function Usuarios(props) {
         setUserEdit(newUser);
     };
 
-    const fillButtons = (indexUser) => {
+    const fillButtons = (us) => {
         return [
             { color: "success", icon: Settings },
             { color: "info", icon: Edit },
@@ -134,7 +152,7 @@ export default function Usuarios(props) {
                     className={classesTable.actionButton}
                     key={key}
                     onClick={() => {
-                        const userSelected = users[indexUser]
+                        const userSelected = us
                         setUserEdit({
                             ...userSelected,
                             nombre_completo: userSelected.user_nombre_completo,
@@ -444,24 +462,25 @@ export default function Usuarios(props) {
                                 <h4 className={classes.cardIconTitle}>Usuarios registrados</h4>
                             </CardHeader>
                             <CardBody>
-                                <Table
-                                    tableHeaderColor="primary"
-                                    tableHead={["N#", "Nombre Completo", "Email", "Fecha de Creacion", "Rol", "Estado", "Acciones"]}
-                                    tableData={
-                                        users && users.map((us, index) => {
-                                            return [
-                                                (index + 1),
-                                                us.user_nombre_completo,
-                                                us.user_email,
-                                                new Date(us.user_fecha_creacion).toLocaleDateString(),
-                                                us.rol_nombre,
-                                                us.user_estado.toUpperCase(),
-                                                fillButtons(index)
-                                            ]
-                                        })
+                                <CustomTable
+                                    data={users && users.users.map((us) => {
+                                        return [
+                                            us.user_nombre_completo,
+                                            us.user_email,
+                                            new Date(us.user_fecha_creacion).toLocaleDateString(),
+                                            us.rol_nombre,
+                                            us.user_estado.toUpperCase(),
+                                            fillButtons(us)
+                                        ]
+                                    })
                                     }
+                                    limite={10}
+                                    headers={["Nombre Completo", "Email", "Fecha de Creacion", "Rol", "Estado", "Acciones"]}
+                                    onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
+                                    total={users.total}
+                                    changeLimit={(limite) => { setLimit(limite) }}
+                                    offset={offset}
                                 />
-                                {users.length === 0 && <small>No existen datos ingresados.</small>}
                             </CardBody>
                         </Card>
                     </GridItem>
