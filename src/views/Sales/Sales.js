@@ -54,7 +54,7 @@ export default function Purchase(props) {
     const [errors, setErrors] = React.useState([]);
     const [modal, setModal] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
-    const [canales, setCanales] = React.useState([]);
+    const [canales, setCanales] = React.useState({ channels: [], total: 0 });
     const [venta, setVenta] = React.useState({});
     const [reloadData, setReloadData] = React.useState(false);
     const [notification, setNotification] = React.useState({
@@ -153,7 +153,7 @@ export default function Purchase(props) {
 
     const processFile = async () => {
         setLoading(true);
-        const zona = canales.filter(ch => ch.id_canal === venta.canal.value)[0]
+        const zona = canales.channels.filter(ch => ch.id_canal === venta.canal.value)[0]
         await Axios.post(`/despachos`, {
             ventas: file,
             id_canal: venta.canal.value,
@@ -263,7 +263,7 @@ export default function Purchase(props) {
                                 <br />
                                 <Selector
                                     placeholder="Canales"
-                                    options={canales.map(canal => {
+                                    options={canales.channels.map(canal => {
                                         return {
                                             value: canal.id_canal,
                                             label: canal.nombre + " - " + canal.ciudad + " - " + canal.zonificacion,
