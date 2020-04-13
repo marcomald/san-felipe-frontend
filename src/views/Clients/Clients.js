@@ -10,7 +10,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
-import Table from "components/Table/Table.js";
+import CustomTable from "components/Table/CustomTable.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
@@ -72,7 +72,7 @@ export default function Clients(props) {
     const [deleteModal, setDeleteModal] = React.useState(false);
     const [modalErrors, setModalErros] = React.useState(false);
     const [modalUpload, setModalUpload] = React.useState(false)
-    const [clients, setClients] = React.useState([]);
+    const [clients, setClients] = React.useState({ clients: [], total: 0 });
     const [client, setClient] = React.useState({});
     const [clientEdit, setClientEdit] = React.useState({});
     const [clientEditAux, setClientEditAux] = React.useState({});
@@ -85,9 +85,13 @@ export default function Clients(props) {
         text: "",
         open: false,
     });
+    const [clientSearch, setClientSearch] = React.useState("")
+    const [offset, setOffset] = React.useState(0)
+    const [limit, setLimit] = React.useState(10)
 
     useEffect(() => {
-        Axios.get("/clientes")
+        const limite = limit ? "?limit=" + limit : ""
+        Axios.get("/clientes" + limite)
             .then(response => {
                 setClients(response.data)
             }).catch(e => {
@@ -97,7 +101,23 @@ export default function Clients(props) {
                     return
                 }
             })
-    }, [reloadData, props])
+    }, [reloadData, props, limit])
+
+    useEffect(() => {
+        const limite = limit ? "&limit=" + limit : ""
+        const offsetV = offset ? "&offset=" + offset : ""
+        const s = clientSearch !== "" ? clientSearch : ""
+        Axios.get("/clientes?s=" + s + limite + offsetV)
+            .then(response => {
+                setClients(response.data)
+            }).catch(e => {
+                console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
+            })
+    }, [reloadData, props.history, offset, limit, clientSearch])
 
     const handleFileChange = (clientsFile) => {
         setErrors([])
@@ -442,14 +462,22 @@ export default function Clients(props) {
                             <h4 className={classes.cardIconTitle}>Clientes registrados</h4>
                         </CardHeader>
                         <CardBody>
-                            <Table
-                                tableHeaderColor="primary"
-                                tableHead={["N", "RUC/CI", "Nombre", "Estado", "Acccion"]}
-                                tableData={clients.map((cl, index) => {
-                                    return [index + 1, cl.identificacion, cl.nombre_completo, cl.estado.toUpperCase(), fillButtons(index)]
+                            <CustomTable
+                                data={clients.clients.map((cl, index) => {
+                                    return [cl.identificacion, cl.nombre_completo, cl.estado.toUpperCase(), fillButtons(index)]
                                 })}
+                                limite={10}
+                                headers={["RUC/CI", "Nombre", "Estado", "Acccion"]}
+                                onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
+                                total={clients.total}
+                                changeLimit={(limite) => { setLimit(limite) }}
+                                offset={offset}
+                                onSearchChange={(name => { setClientSearch(name) })}
+                                searchValue={clientSearch}
+                                showSearch={true}
+                                placeholderSearch={"Ejemplo: EDUARDO LOPEZ O 172405872"}
+                                labelSearch={"Nombre de cliente o CI a buscar"}
                             />
-                            {clients.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>
