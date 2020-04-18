@@ -260,7 +260,7 @@ export default function Clients(props) {
             userId: getUserId(),
         }).then(response => {
             const clientsList = clients
-            clientsList.push(response.data)
+            clientsList.clients.push(response.data)
             setClients(clientsList)
             setClient({})
             setModal(false)
@@ -358,7 +358,7 @@ export default function Clients(props) {
         if (client.tipoIdentificacion === "CI" && client.identificacion.length !== 10) {
             errorMessage = "El numero de identificacion no tiene 10 carcteres. ";
         }
-        if (clients.filter(cl => cl.identificacion === client.identificacion).length > 0) {
+        if (clients.clients.filter(cl => cl.identificacion === client.identificacion).length > 0) {
             errorMessage = errorMessage + "Ya existe un cliente con ese numero de identificacion";
         }
 
