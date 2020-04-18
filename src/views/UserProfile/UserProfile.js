@@ -60,7 +60,7 @@ export default function UserProfile(props) {
     useEffect(() => {
         Axios.get("/roles")
             .then(async response => {
-                const rolesAux = await response.data.map(r => {
+                const rolesAux = await response.data.roles.map(r => {
                     return {
                         value: r.id,
                         label: r.nombre

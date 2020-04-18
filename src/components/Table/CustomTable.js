@@ -14,6 +14,7 @@ import {
     ContainerLimitTable,
     ContainerInputSearch,
     ContainerSelectLimit,
+    ContainerPagination,
 } from "./style"
 
 const useStylesForm = makeStyles(FormStyles);
@@ -38,21 +39,26 @@ export default function CustomTable(props) {
 
     const FormClasses = useStylesForm();
     const pagination = [
-        { text: "PREV" },
-        { text: "NEXT" }
+        { text: "ANTERIOR" },
+        { text: "SIGUIENTE" }
     ];
+
+    const totalPages = Math.ceil(total / limit)
+    const currentPage = Math.ceil((+offset - 1 / limit) / +limit) + 1;
+    const registersForPage = limit * currentPage <= total ? limit * currentPage : total
+
     const onClickPagination = (id) => {
         let offsetAux
         switch (id) {
-            case "PREV":
+            case "ANTERIOR":
                 offsetAux = +offset - limit;
                 if (offsetAux < 0) {
                     offsetAux = 0;
                 }
                 onOffsetChange(offsetAux);
                 break
-            case "NEXT":
-                if (+offset + data.length >= total) {
+            case "SIGUIENTE":
+                if (currentPage >= totalPages) {
                     onOffsetChange(offset);
                     return;
                 }
@@ -159,10 +165,14 @@ export default function CustomTable(props) {
         <div>
             {data.length === 0 && <small>No existen datos ingresados.</small>}
         </div>
-        <Pagination
-            pages={pagination}
-            color="primary"
-            onclickButton={onClickPagination}
-        />
+
+        {total > 0 && <ContainerPagination>
+            <Pagination
+                pages={pagination}
+                color="primary"
+                onclickButton={onClickPagination}
+            />
+            <h4>Pagina {currentPage} de {totalPages}, mostrando del {+offset + 1} al {registersForPage} de {total} registros.</h4>
+        </ContainerPagination>}
     </React.Fragment>)
 }

@@ -9,7 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
-import Table from "components/Table/Table.js";
+import CustomTable from "components/Table/CustomTable.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
@@ -72,15 +72,18 @@ export default function Channels(props) {
     const [channel, setChannel] = React.useState({});
     const [channelEdit, setChannelEdit] = React.useState({});
     const [channelEditAux, setChannelEditAux] = React.useState({});
-    const [channels, setChannels] = React.useState([]);
+    const [channels, setChannels] = React.useState({ channels: [], total: 0 });
     const [reloadData, setReloadData] = React.useState(false)
     const [notification, setNotification] = React.useState({
         color: "info",
         text: "",
         open: false,
     });
+    const [offset, setOffset] = React.useState(0)
+    const [limit, setLimit] = React.useState(10)
 
     useEffect(() => {
+        const limite = limit ? "?limit=" + limit : ""
         Axios.get("/canales/ciudades")
             .then(response => {
                 setCities(response.data)
@@ -92,7 +95,7 @@ export default function Channels(props) {
                 }
             })
 
-        Axios.get("/canales")
+        Axios.get("/canales" + limite)
             .then(response => {
                 setChannels(response.data)
             }).catch(e => {
@@ -102,13 +105,28 @@ export default function Channels(props) {
                     return
                 }
             })
-    }, [reloadData, props])
+    }, [reloadData, props, limit])
+
+    useEffect(() => {
+        const limite = limit ? "&limit=" + limit : ""
+        const offsetV = offset ? "&offset=" + offset : ""
+        Axios.get("/canales?" + limite + offsetV)
+            .then(response => {
+                setChannels(response.data)
+            }).catch(e => {
+                console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
+            })
+    }, [reloadData, props.history, offset, limit])
 
     const classes = useStyles();
     const modalClasses = useStylesModal();
     const FormClasses = useStylesForm();
 
-    const fillButtons = (indexChannel) => {
+    const fillButtons = (ch) => {
         return [
             { color: "success", icon: Edit },
             { color: "danger", icon: Close }
@@ -120,17 +138,17 @@ export default function Channels(props) {
                     key={key}
                     onClick={() => {
                         setChannelEdit({
-                            ...channels[indexChannel],
+                            ...ch,
                             ciudad: {
-                                value: channels[indexChannel].ciudad,
-                                label: channels[indexChannel].ciudad,
+                                value: ch.ciudad,
+                                label: ch.ciudad,
                             }
                         })
                         setChannelEditAux({
-                            ...channels[indexChannel],
+                            ...ch,
                             ciudad: {
-                                value: channels[indexChannel].ciudad,
-                                label: channels[indexChannel].ciudad,
+                                value: ch.ciudad,
+                                label: ch.ciudad,
                             }
                         })
                         prop.color === "danger" ? setDeleteModal(true) : setEditModal(true)
@@ -177,7 +195,7 @@ export default function Channels(props) {
 
     const validateEditChannel = () => {
         if (channelEdit.nombre !== channelEditAux.nombre) {
-            const aux = channels.filter(ch => ch.zonificacion === channelEdit.zonificacion &&
+            const aux = channels.channels.filter(ch => ch.zonificacion === channelEdit.zonificacion &&
                 ch.nombre === channelEdit.nombre &&
                 ch.ciudad === (channelEdit.ciudad && channelEdit.ciudad.value)).length
             if (aux === 0) {
@@ -350,12 +368,17 @@ export default function Channels(props) {
                             <h4 className={classes.cardIconTitle}>Canales por ciudad existentes</h4>
                         </CardHeader>
                         <CardBody>
-                            <Table
-                                tableHeaderColor="primary"
-                                tableHead={["ID", "Nombre", "Ciudad", "Zona", "Accion"]}
-                                tableData={channels.map((ch, index) => {
-                                    return [index, ch.nombre, ch.ciudad, ch.zonificacion, fillButtons(index)]
+                            <CustomTable
+                                data={channels.channels.map((ch, index) => {
+                                    return [ch.nombre, ch.ciudad, ch.zonificacion, fillButtons(ch)]
                                 })}
+                                limite={10}
+                                headers={["Nombre", "Ciudad", "Zona", "Accion"]}
+                                onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
+                                total={channels.total}
+                                changeLimit={(limite) => { setLimit(limite) }}
+                                offset={offset}
+                                showSearch={false}
                             />
                         </CardBody>
                     </Card>

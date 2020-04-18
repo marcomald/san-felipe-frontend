@@ -7,7 +7,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import GridItem from "components/Grid/GridItem.js";
-import Table from "components/Table/Table.js";
+import CustomTable from "components/Table/CustomTable.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
@@ -67,10 +67,12 @@ export default function Roles(props) {
         open: false,
     });
     const [reloadData, setReloadData] = React.useState(false);
-    const [roles, setRoles] = React.useState([]);
+    const [roles, setRoles] = React.useState({ roles: [], total: 0 });
     const [rolEdit, setRolEdit] = React.useState({});
     const [rolEditAux, setRolEditAux] = React.useState({});
     const [rol, setRol] = React.useState({});
+    const [offset, setOffset] = React.useState(0)
+    const [limit, setLimit] = React.useState(3)
     const modalClasses = useStylesModal();
     const permisos = [
         { name: "Acceso a Altas", key: "altas" },
@@ -84,8 +86,10 @@ export default function Roles(props) {
         { name: "Acceso a Vendedores", key: "vendedores" },
         { name: "Acceso a Ventas", key: "ventas" },
     ]
+
     useEffect(() => {
-        Axios.get("/roles")
+        const limite = limit ? "&limit=" + limit : ""
+        Axios.get("/roles?" + limite)
             .then(response => {
                 setRoles(response.data)
             }).catch(e => {
@@ -95,9 +99,24 @@ export default function Roles(props) {
                     return
                 }
             })
-    }, [reloadData, props])
+    }, [reloadData, props, limit])
 
-    const fillButtons = (indexRol) => {
+    useEffect(() => {
+        const limite = limit ? "&limit=" + limit : ""
+        const offsetV = offset ? "&offset=" + offset : ""
+        Axios.get("/roles?" + limite + offsetV)
+            .then(response => {
+                setRoles(response.data)
+            }).catch(e => {
+                console.error(e)
+                if (e.request.status === 403) {
+                    props.history.push('/login');
+                    return
+                }
+            })
+    }, [reloadData, props.history, offset, limit])
+
+    const fillButtons = (rl) => {
         return [
             { color: "success", icon: Edit },
         ].map((prop, key) => {
@@ -108,8 +127,8 @@ export default function Roles(props) {
                     key={key}
                     onClick={() => {
                         setRolEdit({
-                            ...roles[indexRol],
-                            permisos: roles[indexRol].permisos.map(per => {
+                            ...rl,
+                            permisos: rl.permisos.map(per => {
                                 const aux = permisos.filter(pe => pe.key === per)[0]
                                 return {
                                     value: aux.key,
@@ -118,8 +137,8 @@ export default function Roles(props) {
                             })
                         })
                         setRolEditAux({
-                            ...roles[indexRol],
-                            permisos: roles[indexRol].permisos.map(per => {
+                            ...rl,
+                            permisos: rl.permisos.map(per => {
                                 const aux = permisos.filter(pe => pe.key === per)[0]
                                 return {
                                     value: aux.key,
@@ -283,26 +302,26 @@ export default function Roles(props) {
                             <h4 className={classes.cardIconTitle}>Roles registrados</h4>
                         </CardHeader>
                         <CardBody>
-                            <Table
-                                tableHeaderColor="primary"
-                                tableHead={["N#", "Nombre", "Descripcion", "Permisos", "Acciones"]}
-                                tableData={
-                                    roles.map((rl, index) => {
-                                        return [
-                                            (index + 1),
-                                            rl.nombre,
-                                            rl.descripcion,
-                                            <ul>
-                                                {rl.permisos.map((per, index) => {
-                                                    return <li key={index}>{per}</li>
-                                                })}
-                                            </ul>,
-                                            fillButtons(index)
-                                        ]
-                                    })
-                                }
+                            <CustomTable
+                                data={roles.roles.map((rl, index) => {
+                                    return [
+                                        rl.nombre,
+                                        rl.descripcion,
+                                        <ul>
+                                            {rl.permisos.map((per, index) => {
+                                                return <li key={index}>{per}</li>
+                                            })}
+                                        </ul>,
+                                        fillButtons(rl)
+                                    ]
+                                })}
+                                limite={10}
+                                headers={["Nombre", "Descripcion", "Permisos", "Acciones"]}
+                                onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
+                                total={roles.total}
+                                changeLimit={(limite) => { setLimit(limite) }}
+                                offset={offset}
                             />
-                            {roles.length === 0 && <small>No existen datos ingresados.</small>}
                         </CardBody>
                     </Card>
                 </GridItem>

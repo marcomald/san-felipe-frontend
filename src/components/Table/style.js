@@ -12,6 +12,18 @@ export const ContainerInputSearch = styled.div`
     justify-content: flex-end;
 `
 
+export const ContainerPagination = styled.div`
+    width:100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h4 {
+        font-size: 1em;
+        margin:0;
+        padding:0;
+        color: #495057;
+    }
+`
 export const ContainerSelectLimit = styled.div`
     width:20%;
 `
