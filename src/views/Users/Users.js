@@ -21,6 +21,7 @@ import CustomInput from "components/CustomInput/CustomInput";
 import Selector from "components/CustomDropdown/CustomSelector";
 import { validateEmail } from "../../helpers/validations";
 import Axios from 'axios';
+import Tooltip from "@material-ui/core/Tooltip";
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -147,47 +148,55 @@ export default function Usuarios(props) {
             { color: "danger", icon: Close },
         ].map((prop, key) => {
             return (
-                <Button
-                    color={prop.color}
-                    className={classesTable.actionButton}
+                <Tooltip
+                    id="tooltip-top"
+                    title={prop.color === "danger" ? "Eliminar usuario" : prop.color === "success" ? "Editar usuario" : "Cambiar contrasena"}
+                    placement="top"
+                    classes={{ tooltip: classes.tooltip }}
                     key={key}
-                    onClick={() => {
-                        const userSelected = us
-                        setUserEdit({
-                            ...userSelected,
-                            nombre_completo: userSelected.user_nombre_completo,
-                            email: userSelected.user_email,
-                            estado:
-                            {
-                                value: userSelected.user_estado,
-                                label: userSelected.user_estado === 'activo'
-                                    ? 'Activo'
-                                    : 'Inactivo'
-                            },
-                            rol: { value: userSelected.rol_id, label: userSelected.rol_nombre },
-                        })
-                        setUserEditAux({
-                            ...userSelected,
-                            nombre_completo: userSelected.user_nombre_completo,
-                            email: userSelected.user_email,
-                            estado:
-                            {
-                                value: userSelected.user_estado,
-                                label: userSelected.user_estado === 'activo'
-                                    ? 'Activo'
-                                    : 'Inactivo'
-                            },
-                            rol: { value: userSelected.rol_id, label: userSelected.rol_nombre },
-                        })
-                        prop.color === "danger" ?
-                            setDeleteModal(true) :
-                            prop.color === "success" ?
-                                setEditModal(true) :
-                                setEditPasswordModal(true)
-                    }}
                 >
-                    <prop.icon className={classesTable.icon} />
-                </Button>
+                    <Button
+                        color={prop.color}
+                        className={classesTable.actionButton}
+                        key={key}
+                        onClick={() => {
+                            const userSelected = us
+                            setUserEdit({
+                                ...userSelected,
+                                nombre_completo: userSelected.user_nombre_completo,
+                                email: userSelected.user_email,
+                                estado:
+                                {
+                                    value: userSelected.user_estado,
+                                    label: userSelected.user_estado === 'activo'
+                                        ? 'Activo'
+                                        : 'Inactivo'
+                                },
+                                rol: { value: userSelected.rol_id, label: userSelected.rol_nombre },
+                            })
+                            setUserEditAux({
+                                ...userSelected,
+                                nombre_completo: userSelected.user_nombre_completo,
+                                email: userSelected.user_email,
+                                estado:
+                                {
+                                    value: userSelected.user_estado,
+                                    label: userSelected.user_estado === 'activo'
+                                        ? 'Activo'
+                                        : 'Inactivo'
+                                },
+                                rol: { value: userSelected.rol_id, label: userSelected.rol_nombre },
+                            })
+                            prop.color === "danger" ?
+                                setDeleteModal(true) :
+                                prop.color === "success" ?
+                                    setEditModal(true) :
+                                    setEditPasswordModal(true)
+                        }}
+                    >
+                        <prop.icon className={classesTable.icon} />
+                    </Button>
+                </Tooltip>
             );
         })
     };

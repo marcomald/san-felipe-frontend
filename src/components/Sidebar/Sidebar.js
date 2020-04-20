@@ -231,8 +231,8 @@ class Sidebar extends React.Component {
         case "ventas":
           allowedRoutes.push({
             path: "/despachos-ventas",
-            name: "Despachos y ventas",
-            rtlName: "Despachos y ventas",
+            name: "Ventas",
+            rtlName: "Ventas",
             icon: AttachMoney,
             component: Sales,
             layout: "/procesos"

@@ -23,6 +23,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Axios from "axios";
 import CreatableSelector from "components/CustomDropdown/CreatableSelector";
 import Snackbar from "components/Snackbar/Snackbar.js";
+import Tooltip from "@material-ui/core/Tooltip";
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -132,30 +133,38 @@ export default function Channels(props) {
             { color: "danger", icon: Close }
         ].map((prop, key) => {
             return (
-                <Button
-                    color={prop.color}
-                    className={classes.actionButton}
+                <Tooltip
+                    id="tooltip-top"
+                    title={prop.color === "danger" ? "Eliminar canal" : "Editar canal"}
+                    placement="top"
+                    classes={{ tooltip: classes.tooltip }}
                     key={key}
-                    onClick={() => {
-                        setChannelEdit({
-                            ...ch,
-                            ciudad: {
-                                value: ch.ciudad,
-                                label: ch.ciudad,
-                            }
-                        })
-                        setChannelEditAux({
-                            ...ch,
-                            ciudad: {
-                                value: ch.ciudad,
-                                label: ch.ciudad,
-                            }
-                        })
-                        prop.color === "danger" ? setDeleteModal(true) : setEditModal(true)
-                    }}
                 >
-                    <prop.icon className={classes.icon} />
-                </Button>
+                    <Button
+                        color={prop.color}
+                        className={classes.actionButton}
+                        key={key}
+                        onClick={() => {
+                            setChannelEdit({
+                                ...ch,
+                                ciudad: {
+                                    value: ch.ciudad,
+                                    label: ch.ciudad,
+                                }
+                            })
+                            setChannelEditAux({
+                                ...ch,
+                                ciudad: {
+                                    value: ch.ciudad,
+                                    label: ch.ciudad,
+                                }
+                            })
+                            prop.color === "danger" ? setDeleteModal(true) : setEditModal(true)
+                        }}
+                    >
+                        <prop.icon className={classes.icon} />
+                    </Button>
+                </Tooltip>
             );
         })
     };
