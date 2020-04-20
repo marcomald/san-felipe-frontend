@@ -18,6 +18,7 @@ import Snackbar from "components/Snackbar/Snackbar.js";
 import CustomInput from "components/CustomInput/CustomInput";
 import Selector from "components/CustomDropdown/CustomSelector";
 import Axios from 'axios';
+import Tooltip from "@material-ui/core/Tooltip";
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -121,36 +122,44 @@ export default function Roles(props) {
             { color: "success", icon: Edit },
         ].map((prop, key) => {
             return (
-                <Button
-                    color={prop.color}
-                    className={classesTable.actionButton}
+                <Tooltip
+                    id="tooltip-top"
+                    title="Editar rol"
+                    placement="top"
+                    classes={{ tooltip: classes.tooltip }}
                     key={key}
-                    onClick={() => {
-                        setRolEdit({
-                            ...rl,
-                            permisos: rl.permisos.map(per => {
-                                const aux = permisos.filter(pe => pe.key === per)[0]
-                                return {
-                                    value: aux.key,
-                                    label: aux.name,
-                                }
-                            })
-                        })
-                        setRolEditAux({
-                            ...rl,
-                            permisos: rl.permisos.map(per => {
-                                const aux = permisos.filter(pe => pe.key === per)[0]
-                                return {
-                                    value: aux.key,
-                                    label: aux.name,
-                                }
-                            })
-                        })
-                        setEditModal(true)
-                    }}
                 >
-                    <prop.icon className={classesTable.icon} />
-                </Button>
+                    <Button
+                        color={prop.color}
+                        className={classesTable.actionButton}
+                        key={key}
+                        onClick={() => {
+                            setRolEdit({
+                                ...rl,
+                                permisos: rl.permisos.map(per => {
+                                    const aux = permisos.filter(pe => pe.key === per)[0]
+                                    return {
+                                        value: aux.key,
+                                        label: aux.name,
+                                    }
+                                })
+                            })
+                            setRolEditAux({
+                                ...rl,
+                                permisos: rl.permisos.map(per => {
+                                    const aux = permisos.filter(pe => pe.key === per)[0]
+                                    return {
+                                        value: aux.key,
+                                        label: aux.name,
+                                    }
+                                })
+                            })
+                            setEditModal(true)
+                        }}
+                    >
+                        <prop.icon className={classesTable.icon} />
+                    </Button>
+                </Tooltip>
             );
         })
     };

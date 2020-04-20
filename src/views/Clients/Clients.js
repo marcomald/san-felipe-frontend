@@ -25,6 +25,7 @@ import FileUpload from 'components/CustomUpload/FileUpload1.js';
 import Loader from 'components/Loader/Loader.js'
 import Axios from 'axios';
 import Snackbar from "components/Snackbar/Snackbar.js";
+import Tooltip from "@material-ui/core/Tooltip";
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -138,24 +139,31 @@ export default function Clients(props) {
             { color: "danger", icon: Close }
         ].map((prop, key) => {
             return (
-                <Button
-                    color={prop.color}
-                    className={classes.actionButton}
+                <Tooltip
+                    id="tooltip-top"
+                    title={prop.color === "danger" ? "Eliminar cliente" : "Editar cliente"}
+                    placement="top"
+                    classes={{ tooltip: classes.tooltip }}
                     key={key}
-                    onClick={() => {
-                        setClientEdit({
-                            ...cl,
-                            tipoIdentificacion: cl.identificacion.length === 13 ? 'RUC' : 'CI'
-                        })
-                        setClientEditAux({
-                            ...cl,
-                            tipoIdentificacion: cl.identificacion.length === 13 ? 'RUC' : 'CI'
-                        })
-                        prop.color === "danger" ? setDeleteModal(true) : setEditModal(true)
-                    }}
                 >
-                    <prop.icon className={classes.icon} />
-                </Button>
+                    <Button
+                        color={prop.color}
+                        className={classes.actionButton}
+                        onClick={() => {
+                            setClientEdit({
+                                ...cl,
+                                tipoIdentificacion: cl.identificacion.length === 13 ? 'RUC' : 'CI'
+                            })
+                            setClientEditAux({
+                                ...cl,
+                                tipoIdentificacion: cl.identificacion.length === 13 ? 'RUC' : 'CI'
+                            })
+                            prop.color === "danger" ? setDeleteModal(true) : setEditModal(true)
+                        }}
+                    >
+                        <prop.icon className={classes.icon} />
+                    </Button>
+                </Tooltip>
             );
         })
     };

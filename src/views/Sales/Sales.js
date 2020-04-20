@@ -312,6 +312,10 @@ export default function Purchase(props) {
                                     <li>IDENTIFICACION: Debe tener una longitud de hasta 13 caracteres.
                                     Debe coincidir con el numero de identificacion registrado en clientes.
                                         Este campo es opcional solo si el canal seleccionado tiene una zona distinta de "S".</li>
+                                    <li>NOMBRE: Debe ser de tipo caracter, este campo se toma para crear un cliente asociado a
+                                    su numero de identificacion en caso de que no exista.
+                                    Este campo es opcional solo si el canal seleccionado tiene una zona distinta de "S".
+                                    </li>
                                 </ul>
                             </div>
                             <hr />
