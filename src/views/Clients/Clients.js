@@ -454,9 +454,9 @@ export default function Clients(props) {
                         <Button color="primary" key="AddButton1" id="addClientBtn" onClick={() => setModal(true)}>
                             <Add /> Agregar Cliente
                         </Button>
-                        <Button color="rose" key="AddButton2" id="uploadClientBtn" onClick={() => setModalUpload(true)}>
+                        {/* <Button color="rose" key="AddButton2" id="uploadClientBtn" onClick={() => setModalUpload(true)}>
                             <CloudUpload /> Subir Clientes
-                        </Button>
+                        </Button> */}
                     </div>
                 </GridItem>
             </GridContainer>

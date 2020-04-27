@@ -2,6 +2,7 @@ import React from "react";
 import GridContainer from "components/Grid/GridContainer.js";
 // import GridItem from "components/Grid/GridItem.js";
 import AdminLayout from "../../layouts/Admin"
+import tuentiGif from "assets/img/tuentudm.gif";
 
 export default function ErrorPage() {
     // const user = window.sessionStorage.getItem("user")
@@ -17,6 +18,9 @@ export default function ErrorPage() {
                         <h2>{userDecode.userName}</h2>
                     </GridItem> */}
                 </GridContainer>
+                {/* <div>
+                    <img src={tuentiGif} />
+                </div> */}
             </div>
         </AdminLayout>
     );

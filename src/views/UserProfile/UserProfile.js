@@ -282,14 +282,14 @@ export default function UserProfile(props) {
                                 />
                                 <br />
                                 <br />
-                                <Selector
+                                {/* <Selector
                                     placeholder="Roles"
                                     options={roles}
                                     onChange={(value) => handleUserChange("rol", value)}
                                     value={user.rol}
-                                />
-                                <br />
-                                <br />
+                                /> */}
+                                {/* <br />
+                                <br /> */}
                                 <Button
                                     color="rose"
                                     disabled={

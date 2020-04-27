@@ -364,9 +364,9 @@ export default function Sellers(props) {
                         <Button color="primary" key="AddButton1" onClick={() => setModal(true)}>
                             <Add /> Agregar Vendedor
                         </Button>
-                        <Button color="rose" key="AddButton2" onClick={() => setModalUpload(true)}>
+                        {/* <Button color="rose" key="AddButton2" onClick={() => setModalUpload(true)}>
                             <CloudUpload /> Subir Vendedores
-                        </Button>
+                        </Button> */}
                     </div>
                 </GridItem>
             </GridContainer>
