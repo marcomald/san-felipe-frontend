@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 //  Icons
 import CloudUpload from "@material-ui/icons/CloudUpload";
 import ShoppingCart from "@material-ui/icons/ShoppingCart";
+import Close from "@material-ui/icons/Close";
 import InfoIcon from "@material-ui/icons/Info";
 // Components
 import { makeStyles } from "@material-ui/core/styles";
@@ -21,8 +22,8 @@ import Axios from 'axios';
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import Tooltip from "@material-ui/core/Tooltip";
 import InputLabel from "@material-ui/core/InputLabel";
-
 // Modal
 import Slide from "@material-ui/core/Slide";
 import Dialog from "@material-ui/core/Dialog";
@@ -31,12 +32,14 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import FormStyles from "assets/jss/material-dashboard-pro-react/views/extendedFormsStyle.js";
-
+import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import tableStyles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import AdminLayout from "layouts/Admin";
 import { getUserId, purchaseOrigin } from "helpers/utils";
 
 const customStyles = {
     ...styles,
+    ...tableStyles,
     customCardContentClass: {
         paddingLeft: "0",
         paddingRight: "0"
@@ -50,6 +53,7 @@ const customStyles = {
 
 const useStyles = makeStyles(customStyles);
 const useStylesForm = makeStyles(FormStyles);
+const useStylesModal = makeStyles(Modalstyles);
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
@@ -67,9 +71,42 @@ export default function Purchase(props) {
     const [origen, setOrigen] = React.useState("")
     const [offset, setOffset] = React.useState(0)
     const [limit, setLimit] = React.useState(3)
+    const [deleteModal, setDeleteModal] = React.useState(false);
+    const [fileUploadCode, setFileUploadCode] = React.useState("");
 
     const classes = useStyles();
     const FormClasses = useStylesForm();
+    const modalClasses = useStylesModal();
+
+    const fillButtons = (log) => {
+        const user = window.sessionStorage.getItem("user")
+        const userDecode = JSON.parse(window.atob(user));
+        const hasPermission = userDecode.permissions.filter(perm => perm === "eliminarregistros").length
+        return [
+            { color: "danger", icon: Close }
+        ].map((prop, key) => {
+            return (
+                hasPermission > 0 && log.log_carga_estado !== 'Eliminado' && <Tooltip
+                    id="tooltip-top"
+                    title="Eliminar registros"
+                    placement="top"
+                    classes={{ tooltip: classes.tooltip }}
+                    key={key}
+                >
+                    <Button
+                        color={prop.color}
+                        className={classes.actionButton}
+                        onClick={() => {
+                            setFileUploadCode(log.log_carga_file_upload_code)
+                            setDeleteModal(true)
+                        }}
+                    >
+                        <prop.icon className={classes.icon} />
+                    </Button>
+                </Tooltip>
+            );
+        })
+    };
 
     useEffect(() => {
         const limite = limit ? "&limit=" + limit : ""
@@ -135,6 +172,46 @@ export default function Purchase(props) {
         })
     }
 
+    const deleteUploadFile = () => {
+        Axios.delete("/compras/" + fileUploadCode, {
+            data: {
+                fileUploadCode,
+                userId: getUserId(),
+            }
+        }).then(response => {
+            setDeleteModal(false)
+            setReloadData(!reloadData);
+            setNotification({
+                color: 'info',
+                text: 'Exito! Registros eliminados.',
+                open: true
+            })
+            setTimeout(function () {
+                setNotification({
+                    ...notification,
+                    open: false
+                })
+            }, 6000);
+        }).catch(err => {
+            console.error("Error al eliminar compras de carga: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
+            setNotification({
+                color: 'danger',
+                text: 'Se produjo un error al eliminar los registros',
+                open: true
+            })
+            setTimeout(function () {
+                setNotification({
+                    ...notification,
+                    open: false
+                })
+            }, 10000);
+        })
+    }
+
     return (
         <AdminLayout>
             <h1>Subida de archivos de <b>Compras</b>.</h1>
@@ -160,10 +237,12 @@ export default function Purchase(props) {
                                         new Date(log.log_carga_fecha_desde).toLocaleDateString(),
                                         new Date(log.log_carga_fecha_hasta).toLocaleDateString(),
                                         log.log_carga_rows,
+                                        log.log_carga_estado,
+                                        fillButtons(log),
                                     ]
                                 })}
                                 limite={3}
-                                headers={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
+                                headers={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados", "Estado"]}
                                 onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
                                 total={logCarga.total}
                                 changeLimit={(limite) => { setLimit(limite) }}
@@ -320,6 +399,49 @@ export default function Purchase(props) {
                     <Button onClick={() => setModal(false)}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog
+                classes={{
+                    root: modalClasses.center,
+                    paper: modalClasses.modal,
+                }}
+                open={deleteModal}
+                transition={Transition}
+                keepMounted
+                onClose={() => setDeleteModal(false)}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+                maxWidth="md"
+                fullWidth={true}
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={modalClasses.modalHeader}
+                >
+                    <h3 className={modalClasses.modalTitle}>Eliminar compras</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={modalClasses.modalBody}
+                >
+                    <h4>Esta seguro que desea <b>eliminar</b> las compras relacionados a esta carga?</h4>
+                </DialogContent>
+                <DialogActions
+                    className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
+                >
+                    <Button
+                        color="danger"
+                        onClick={deleteUploadFile}
+                    >
+                        Eliminar
+                    </Button>
+                    <Button onClick={() => {
+                        setDeleteModal(false)
+                    }}>Cancelar</Button>
+                </DialogActions>
+            </Dialog>
+
             {loading && <Loader show={loading} />}
             <Snackbar
                 place="br"

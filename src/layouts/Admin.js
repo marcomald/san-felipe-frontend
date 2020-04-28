@@ -67,7 +67,7 @@ export default function Dashboard(props) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
-        logoText={"Distri Market"}
+        logoText={"Distrimarket"}
         logo={logo}
         image={image}
         handleDrawerToggle={handleDrawerToggle}
