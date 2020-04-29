@@ -67,7 +67,7 @@ export default function Footer(props) {
           </a>
           {rtlActive
             ? ", مصنوعة مع الحب لشبكة الإنترنت أفضل"
-            : ", innovando, constuyendo y mejorando."}
+            : ", innovando, construyendo y mejorando."}
         </p>
       </div>
     </footer>

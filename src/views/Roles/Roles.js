@@ -86,6 +86,8 @@ export default function Roles(props) {
         { name: "Acceso a Usuarios", key: "usuarios" },
         { name: "Acceso a Vendedores", key: "vendedores" },
         { name: "Acceso a Ventas", key: "ventas" },
+        { name: "Eliminar registros", key: "eliminarregistros" },
+        { name: "Acceso a Perfil", key: "userprofile" },
     ]
 
     useEffect(() => {

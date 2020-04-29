@@ -4,7 +4,7 @@ import Group from "@material-ui/icons/Group";
 import Edit from "@material-ui/icons/Edit";
 import Close from "@material-ui/icons/Close";
 import Add from "@material-ui/icons/Add";
-import CloudUpload from "@material-ui/icons/CloudUpload";
+// import CloudUpload from "@material-ui/icons/CloudUpload";
 // Components
 import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
@@ -454,9 +454,9 @@ export default function Clients(props) {
                         <Button color="primary" key="AddButton1" id="addClientBtn" onClick={() => setModal(true)}>
                             <Add /> Agregar Cliente
                         </Button>
-                        <Button color="rose" key="AddButton2" id="uploadClientBtn" onClick={() => setModalUpload(true)}>
+                        {/* <Button color="rose" key="AddButton2" id="uploadClientBtn" onClick={() => setModalUpload(true)}>
                             <CloudUpload /> Subir Clientes
-                        </Button>
+                        </Button> */}
                     </div>
                 </GridItem>
             </GridContainer>

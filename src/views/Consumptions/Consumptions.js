@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import CloudUpload from "@material-ui/icons/CloudUpload";
 import InfoIcon from "@material-ui/icons/Info";
 import SpeakerPhone from "@material-ui/icons/SpeakerPhone";
+import Close from "@material-ui/icons/Close";
 // Components
 import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
@@ -17,6 +18,7 @@ import Button from "components/CustomButtons/Button.js";
 import FileUpload from 'components/CustomUpload/FileUpload1.js';
 import Snackbar from "components/Snackbar/Snackbar.js";
 import Axios from 'axios'
+import Tooltip from "@material-ui/core/Tooltip";
 import Loader from 'components/Loader/Loader.js'
 // Modal
 import Slide from "@material-ui/core/Slide";
@@ -25,11 +27,14 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import tableStyles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import AdminLayout from "layouts/Admin";
 import { getUserId } from "helpers/utils";
+import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 
 const customStyles = {
     ...styles,
+    ...tableStyles,
     customCardContentClass: {
         paddingLeft: "0",
         paddingRight: "0"
@@ -38,17 +43,24 @@ const customStyles = {
         ...cardTitle,
         marginTop: "15px",
         marginBottom: "0px"
+    },
+    buttonContainer: {
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        height: "100%",
     }
 };
 
 const useStyles = makeStyles(customStyles);
+const useStylesModal = makeStyles(Modalstyles);
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
 export default function Consumptions(props) {
-    const classes = useStyles();
+
     const [file, setFile] = React.useState([])
     const [errors, setErrors] = React.useState([])
     const [modal, setModal] = React.useState(false)
@@ -58,6 +70,41 @@ export default function Consumptions(props) {
     const [logCarga, setLogCarga] = React.useState({ logs: [], total: 0, })
     const [offset, setOffset] = React.useState(0)
     const [limit, setLimit] = React.useState(3)
+    const [deleteModal, setDeleteModal] = React.useState(false);
+    const [fileUploadCode, setFileUploadCode] = React.useState("");
+
+    const modalClasses = useStylesModal();
+    const classes = useStyles();
+
+    const fillButtons = (log) => {
+        const user = window.sessionStorage.getItem("user")
+        const userDecode = JSON.parse(window.atob(user));
+        const hasPermission = userDecode.permissions.filter(perm => perm === "eliminarregistros").length
+        return [
+            { color: "danger", icon: Close }
+        ].map((prop, key) => {
+            return (
+                hasPermission > 0 && log.log_carga_estado !== 'Eliminado' && <Tooltip
+                    id="tooltip-top"
+                    title="Eliminar registros"
+                    placement="top"
+                    classes={{ tooltip: classes.tooltip }}
+                    key={key}
+                >
+                    <Button
+                        color={prop.color}
+                        className={classes.actionButton}
+                        onClick={() => {
+                            setFileUploadCode(log.log_carga_file_upload_code)
+                            setDeleteModal(true)
+                        }}
+                    >
+                        <prop.icon className={classes.icon} />
+                    </Button>
+                </Tooltip>
+            );
+        })
+    };
 
     useEffect(() => {
         const limite = limit ? "&limit=" + limit : ""
@@ -122,6 +169,46 @@ export default function Consumptions(props) {
         })
     }
 
+    const deleteUploadFile = () => {
+        Axios.delete("/consumos/" + fileUploadCode, {
+            data: {
+                fileUploadCode,
+                userId: getUserId(),
+            }
+        }).then(response => {
+            setDeleteModal(false)
+            setReloadData(!reloadData);
+            setNotification({
+                color: 'info',
+                text: 'Exito! Registros eliminados.',
+                open: true
+            })
+            setTimeout(function () {
+                setNotification({
+                    ...notification,
+                    open: false
+                })
+            }, 6000);
+        }).catch(err => {
+            console.error("Error al eliminar registros de carga: ", err)
+            if (err.request.status === 403) {
+                props.history.push('/login');
+                return
+            }
+            setNotification({
+                color: 'danger',
+                text: 'Se produjo un error al eliminar los registros',
+                open: true
+            })
+            setTimeout(function () {
+                setNotification({
+                    ...notification,
+                    open: false
+                })
+            }, 10000);
+        })
+    }
+
     return (
         <AdminLayout>
             <h1>Subida de archivos de <b>Consumos</b>.</h1>
@@ -147,10 +234,12 @@ export default function Consumptions(props) {
                                         new Date(log.log_carga_fecha_desde).toLocaleDateString(),
                                         new Date(log.log_carga_fecha_hasta).toLocaleDateString(),
                                         log.log_carga_rows,
+                                        log.log_carga_estado,
+                                        fillButtons(log)
                                     ]
                                 })}
                                 limite={3}
-                                headers={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados"]}
+                                headers={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados", "Estado"]}
                                 onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
                                 total={logCarga.total}
                                 changeLimit={(limite) => { setLimit(limite) }}
@@ -260,6 +349,49 @@ export default function Consumptions(props) {
                     <Button onClick={() => setModal(false)}>Cerrar</Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog
+                classes={{
+                    root: modalClasses.center,
+                    paper: modalClasses.modal,
+                }}
+                open={deleteModal}
+                transition={Transition}
+                keepMounted
+                onClose={() => setDeleteModal(false)}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+                maxWidth="md"
+                fullWidth={true}
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={modalClasses.modalHeader}
+                >
+                    <h3 className={modalClasses.modalTitle}>Eliminar consumos</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={modalClasses.modalBody}
+                >
+                    <h4>Esta seguro que desea <b>eliminar</b> los consumos relacionados a esta carga?</h4>
+                </DialogContent>
+                <DialogActions
+                    className={modalClasses.modalFooter + " " + modalClasses.modalFooterCenter}
+                >
+                    <Button
+                        color="danger"
+                        onClick={deleteUploadFile}
+                    >
+                        Eliminar
+                    </Button>
+                    <Button onClick={() => {
+                        setDeleteModal(false)
+                    }}>Cancelar</Button>
+                </DialogActions>
+            </Dialog>
+
             {loading && <Loader show={loading} />}
             <Snackbar
                 place="br"

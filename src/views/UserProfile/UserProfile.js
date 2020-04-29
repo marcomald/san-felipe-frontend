@@ -13,7 +13,7 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
 import CustomInput from "components/CustomInput/CustomInput";
-import Selector from "components/CustomDropdown/CustomSelector";
+// import Selector from "components/CustomDropdown/CustomSelector";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import Loader from 'components/Loader/Loader.js'
 import { getUserId } from "helpers/utils";
@@ -44,7 +44,7 @@ const useStyles = makeStyles(customStyles);
 export default function UserProfile(props) {
 
     const [user, setUser] = React.useState({});
-    const [roles, setRoles] = React.useState([]);
+    // const [roles, setRoles] = React.useState([]);
     const [reloadData, setReloadData] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [notification, setNotification] = React.useState({
@@ -58,22 +58,22 @@ export default function UserProfile(props) {
     const classes = useStyles();
 
     useEffect(() => {
-        Axios.get("/roles")
-            .then(async response => {
-                const rolesAux = await response.data.roles.map(r => {
-                    return {
-                        value: r.id,
-                        label: r.nombre
-                    }
-                })
-                setRoles(rolesAux)
-            }).catch(e => {
-                console.error(e)
-                if (e.request.status === 403) {
-                    props.history.push('/login');
-                    return
-                }
-            })
+        // Axios.get("/roles")
+        //     .then(async response => {
+        //         const rolesAux = await response.data.roles.map(r => {
+        //             return {
+        //                 value: r.id,
+        //                 label: r.nombre
+        //             }
+        //         })
+        //         setRoles(rolesAux)
+        //     }).catch(e => {
+        //         console.error(e)
+        //         if (e.request.status === 403) {
+        //             props.history.push('/login');
+        //             return
+        //         }
+        //     })
         Axios.get("/users/" + getUserId())
             .then(async response => {
                 const userResponse = await response.data;
@@ -282,14 +282,14 @@ export default function UserProfile(props) {
                                 />
                                 <br />
                                 <br />
-                                <Selector
+                                {/* <Selector
                                     placeholder="Roles"
                                     options={roles}
                                     onChange={(value) => handleUserChange("rol", value)}
                                     value={user.rol}
-                                />
-                                <br />
-                                <br />
+                                /> */}
+                                {/* <br />
+                                <br /> */}
                                 <Button
                                     color="rose"
                                     disabled={
