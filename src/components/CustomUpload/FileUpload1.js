@@ -27,7 +27,7 @@ export default function FileUpload(props) {
                     return initial;
                 }, {});
                 setFile(file);
-                props.handleFile(jsonData)
+                props.handleFile({file:jsonData, name: file.name})
                 setLoading(false)
             }
             reader.readAsBinaryString(file);

@@ -62,6 +62,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function Consumptions(props) {
 
     const [file, setFile] = React.useState([])
+    const [fileName, setFileName] = React.useState("")
     const [errors, setErrors] = React.useState([])
     const [modal, setModal] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
@@ -138,8 +139,9 @@ export default function Consumptions(props) {
 
     const handleFileChange = async (purchasesFile) => {
         setErrors([])
-        if (purchasesFile.data) {
-            setFile(purchasesFile.data)
+        if (purchasesFile && purchasesFile.file && purchasesFile.file.data) {
+            setFile(purchasesFile.file.data)
+            setFileName(purchasesFile.name)
             return
         }
         setFile(purchasesFile)
@@ -150,6 +152,7 @@ export default function Consumptions(props) {
         await Axios.post(`/consumos`, {
             consumos: file,
             userId: getUserId(),
+            fileName,
         }).then(async data => {
             const response = await data.data;
             setLoading(false);
@@ -234,12 +237,13 @@ export default function Consumptions(props) {
                                         new Date(log.log_carga_fecha_desde).toLocaleDateString(),
                                         new Date(log.log_carga_fecha_hasta).toLocaleDateString(),
                                         log.log_carga_rows,
+                                        log.log_carga_file_name,
                                         log.log_carga_estado,
                                         fillButtons(log)
                                     ]
                                 })}
                                 limite={3}
-                                headers={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados", "Estado"]}
+                                headers={["N#", "Fecha de carga", "Usuario Responsable", "Desde", "Hasta", "Registros Procesados", "Nombre de Archivo", "Estado"]}
                                 onOffsetChange={(valueOffset) => { setOffset(valueOffset) }}
                                 total={logCarga.total}
                                 changeLimit={(limite) => { setLimit(limite) }}
