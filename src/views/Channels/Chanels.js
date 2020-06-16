@@ -182,7 +182,7 @@ export default function Channels(props) {
     };
 
     const validateCreateChannel = () => {
-        const aux = channels.filter(ch => ch.zonificacion === channel.zone &&
+        const aux = channels.channels.filter(ch => ch.zonificacion === channel.zone &&
             ch.nombre === channel.nombre &&
             ch.ciudad === (channel.ciudad && channel.ciudad.value)).length
         if (aux === 0) {
@@ -316,9 +316,9 @@ export default function Channels(props) {
             ciudad: channel.ciudad.value,
             userId: getUserId(),
         }).then(response => {
-            const channelsList = channels
-            channelsList.push(response.data)
-            setChannels(channelsList)
+            // const channelsList = channels.channels
+            // channelsList.push(response.data)
+            // setChannels(channelsList)
             setModal(false)
             setReloadData(!reloadData);
             setChannel({})
