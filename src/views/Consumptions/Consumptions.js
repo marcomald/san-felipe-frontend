@@ -31,6 +31,7 @@ import tableStyles from "assets/jss/material-dashboard-pro-react/views/extendedT
 import AdminLayout from "layouts/Admin";
 import { getUserId } from "helpers/utils";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import moment from 'moment';
 
 const customStyles = {
     ...styles,
@@ -230,16 +231,14 @@ export default function Consumptions(props) {
                                 data={logCarga.logs.map((log, index) => {
                                     return [
                                         (index + 1),
-                                        new Date(log.log_carga_fecha_carga).toLocaleDateString() +
-                                        ' ' +
-                                        new Date(log.log_carga_fecha_carga).toLocaleTimeString(),
+                                        moment(log.log_carga_fecha_carga).format("DD/MM/YYYY HH:mm:ss"),
                                         log.usuario_nombre_completo,
-                                        new Date(log.log_carga_fecha_desde).toLocaleDateString(),
-                                        new Date(log.log_carga_fecha_hasta).toLocaleDateString(),
+                                        moment.utc(log.log_carga_fecha_desde).format("DD/MM/YYYY"),
+                                        moment.utc(log.log_carga_fecha_hasta).format("DD/MM/YYYY"),
                                         log.log_carga_rows,
                                         log.log_carga_file_name,
                                         log.log_carga_estado,
-                                        fillButtons(log)
+                                        fillButtons(log),
                                     ]
                                 })}
                                 limite={3}
