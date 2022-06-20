@@ -16,8 +16,8 @@ import CardFooter from "components/Card/CardFooter.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
 import Axios from "axios";
 import styles from "assets/jss/material-dashboard-pro-react/views/loginPageStyle.js";
-import AuthContext from '../../authContext'
-import AuthLayout from '../../layouts/Auth'
+import AuthContext from "../../authContext";
+import AuthLayout from "../../layouts/Auth";
 
 const useStyles = makeStyles(styles);
 
@@ -29,10 +29,10 @@ export default function LoginPage(props) {
   const [notification, setNotification] = React.useState({
     color: "info",
     text: "",
-    open: false,
+    open: false
   });
 
-  setTimeout(function () {
+  setTimeout(function() {
     setCardAnimation("");
   }, 700);
 
@@ -41,7 +41,7 @@ export default function LoginPage(props) {
   useEffect(() => {
     window.sessionStorage.removeItem("user");
     window.sessionStorage.removeItem("accessToken");
-  }, [reloadLogin])
+  }, [reloadLogin]);
 
   return (
     <AuthLayout>
@@ -54,7 +54,7 @@ export default function LoginPage(props) {
                   <Card login className={classes[cardAnimaton]}>
                     <CardHeader
                       className={`${classes.cardHeader} ${classes.textCenter}`}
-                      color="primary"
+                      color="info"
                     >
                       <h4 className={classes.cardTitle}>Inicio de Sesion</h4>
                     </CardHeader>
@@ -70,10 +70,10 @@ export default function LoginPage(props) {
                             <InputAdornment position="end">
                               <Email className={classes.inputAdornmentIcon} />
                             </InputAdornment>
-                          ),
+                          )
                         }}
-                        onChange={(e) => {
-                          setEmail(e.target.value)
+                        onChange={e => {
+                          setEmail(e.target.value);
                         }}
                         value={email}
                       />
@@ -88,54 +88,63 @@ export default function LoginPage(props) {
                             <InputAdornment position="end">
                               <Icon className={classes.inputAdornmentIcon}>
                                 lock_outline
-                            </Icon>
+                              </Icon>
                             </InputAdornment>
                           ),
                           type: "password",
                           autoComplete: "off"
                         }}
                         value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value)
+                        onChange={e => {
+                          setPassword(e.target.value);
                         }}
                       />
                     </CardBody>
                     <CardFooter className={classes.justifyContentCenter}>
                       <Button
-                        color="primary"
-                        simple size="lg"
+                        color="info"
+                        simple
+                        size="lg"
                         onClick={() => {
+                          // eslint-disable-next-line react/prop-types
                           Axios.post("/auth/login", {
                             username: email,
-                            password,
-                          }).then(async data => {
-                            const response = await data.data;
-                            const user = JSON.stringify(response.user);
-                            const userEncode = window.btoa(user);
-                            window.sessionStorage.setItem("user", userEncode);
-                            window.sessionStorage.setItem("accessToken", response.access_token);
-                            context.onSetLogin({
-                              token: response.access_token,
-                              user: response.user,
-                            });
-                            props.history.push('/inicio');
-                          }).catch(err => {
-                            setNotification({
-                              color: 'danger',
-                              text: 'Email o contrasena incorrecta, por favor intentelo de nuevo.',
-                              open: true
-                            })
-                            setTimeout(function () {
-                              setNotification({
-                                ...notification,
-                                open: false
-                              })
-                            }, 10000);
+                            password
                           })
+                            .then(async data => {
+                              const response = await data.data;
+                              const user = JSON.stringify(response.user);
+                              const userEncode = window.btoa(user);
+                              window.sessionStorage.setItem("user", userEncode);
+                              window.sessionStorage.setItem(
+                                "accessToken",
+                                response.access_token
+                              );
+                              context.onSetLogin({
+                                token: response.access_token,
+                                user: response.user
+                              });
+                              // eslint-disable-next-line react/prop-types
+                              props.history.push("/inicio");
+                            })
+                            .catch(() => {
+                              setNotification({
+                                color: "danger",
+                                text:
+                                  "Email o contrasena incorrecta, por favor intentelo de nuevo.",
+                                open: true
+                              });
+                              setTimeout(function() {
+                                setNotification({
+                                  ...notification,
+                                  open: false
+                                });
+                              }, 10000);
+                            });
                         }}
                       >
                         Ingresar
-                    </Button>
+                      </Button>
                     </CardFooter>
                   </Card>
                 </form>
@@ -147,15 +156,14 @@ export default function LoginPage(props) {
               message={notification.text}
               open={notification.open}
               closeNotification={() => {
-                const noti = { ...notification, open: false }
-                setNotification(noti)
+                const noti = { ...notification, open: false };
+                setNotification(noti);
               }}
               close
             />
-          </div >
+          </div>
         )}
       </AuthContext.Consumer>
     </AuthLayout>
-
   );
 }

@@ -1,7 +1,7 @@
-import { createContext } from 'react'
+import { createContext } from "react";
 
 const ThemeContext = createContext({
-    login: { token: '', user: {} },
+  login: { token: "", user: {} }
 });
 
 export default ThemeContext;

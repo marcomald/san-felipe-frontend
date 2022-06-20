@@ -2,7 +2,7 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Footer from "components/Footer/Footer.js";
 import styles from "assets/jss/material-dashboard-pro-react/layouts/authStyle.js";
-import tuentiBg from "assets/img/tuentiFondo.jpeg";
+import sanFelipeBg from "assets/img/cotopaxi.jpeg";
 
 const useStyles = makeStyles(styles);
 
@@ -12,7 +12,7 @@ export default function Pages({ children }) {
 
   React.useEffect(() => {
     document.body.style.overflow = "unset";
-    return function cleanup() { };
+    return function cleanup() {};
   });
 
   return (
@@ -20,7 +20,7 @@ export default function Pages({ children }) {
       <div className={classes.wrapper} ref={wrapper}>
         <div
           className={classes.fullPage}
-          style={{ backgroundImage: "url(" + tuentiBg + ")" }}
+          style={{ backgroundImage: "url(" + sanFelipeBg + ")" }}
         >
           {children}
           <Footer white />

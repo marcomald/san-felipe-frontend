@@ -17,10 +17,10 @@ export default function Dashboard(props) {
   const { children } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [miniActive] = React.useState(false);
-  const [image] = React.useState(require("assets/img/tuentiFondo.jpeg"));
+  const [image] = React.useState(require("assets/img/cotopaxi.jpeg"));
   const [color] = React.useState("blue");
   const [bgColor] = React.useState("black");
-  const [logo] = React.useState(require("assets/img/logo-white.svg"));
+  const [logo] = React.useState(require("assets/img/san-felipe-blanco.png"));
 
   const classes = useStyles();
   const mainPanelClasses =
@@ -67,7 +67,7 @@ export default function Dashboard(props) {
     <div className={classes.wrapper}>
       <Sidebar
         routes={routes}
-        logoText={"Distrimarket"}
+        logoText={"San Felipe"}
         logo={logo}
         image={image}
         handleDrawerToggle={handleDrawerToggle}
@@ -79,9 +79,7 @@ export default function Dashboard(props) {
       />
       <div className={mainPanelClasses} ref={mainPanel}>
         <div style={{ minHeight: "99vh" }}>
-          <div style={{ display: "block", padding: "0 2rem" }}>
-            {children}
-          </div>
+          <div style={{ display: "block", padding: "0 2rem" }}>{children}</div>
           <Footer fluid />
         </div>
       </div>

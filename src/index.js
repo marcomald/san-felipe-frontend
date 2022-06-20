@@ -17,9 +17,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
-import App from './App';
+import App from "./App";
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById("root"));
