@@ -107,7 +107,7 @@ const sidebarStyle = theme => ({
   logo: {
     padding: "15px 0px",
     margin: "0",
-    display: "block",
+    display: "flex",
     position: "relative",
     zIndex: "4",
     "&:after": {
@@ -127,10 +127,8 @@ const sidebarStyle = theme => ({
     textAlign: "center",
     width: "30px",
     display: "inline-block",
-    maxHeight: "30px",
-    marginLeft: "22px",
-    marginRight: "18px",
-    marginTop: "7px",
+    maxHeight: "50px",
+    margin: "auto",
     color: "inherit"
   },
   logoMiniRTL: {
@@ -166,7 +164,7 @@ const sidebarStyle = theme => ({
     transform: "translate3d(25px, 0, 0)"
   },
   img: {
-    width: "35px",
+    width: "50px",
     verticalAlign: "middle",
     border: "0"
   },

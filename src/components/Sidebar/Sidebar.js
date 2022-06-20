@@ -582,12 +582,6 @@ class Sidebar extends React.Component {
         >
           <img src={logo} alt="logo" className={classes.img} />
         </a>
-        <a
-          href="/inicio"
-          className={logoNormal}
-        >
-          {logoText}
-        </a>
       </div>
     );
     const drawerPaper =
