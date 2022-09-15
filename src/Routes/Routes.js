@@ -1,40 +1,26 @@
 import React from "react";
 import { Switch, Route, Redirect } from "react-router";
 import { BrowserRouter as Router } from "react-router-dom";
-import Altas from "../views/Discharged/Discharged";
-import Canales from "../views/Channels/Chanels";
 import Clientes from "../views/Clients/Clients";
-import Compras from "../views/Purchases/Purchase";
-import Consumos from "../views/Consumptions/Consumptions";
-import FastTracks from "../views/FastTrack/FastTrack";
 import Roles from "../views/Roles/Roles";
 import Usuarios from "../views/Users/Users";
-import Vendedores from "../views/Sellers/Sellers";
-import Ventas from "../views/Sales/Sales";
 import Login from "../views/Pages/LoginPage";
 import ErrorPage from "../views/Pages/ErrorPage";
 import Home from "../views/Pages/HomePage";
 import UserProfile from "views/UserProfile/UserProfile";
+import Pedidos from "views/Orders/OrdersList";
+import OrdersForm from "views/Orders/OrdersForm";
+import DeliveryRoutesList from "views/DeliveryRoutes/DeliveryRoutesList";
+import DeliveryRoutesForm from "views/DeliveryRoutes/DeliveryRoutesForm";
+import ClientForm from "../views/Clients/ClientForm";
+import ClientFormEdit from "../views/Clients/ClientFormEdit";
+import DeliveryRoutesFormEdit from "../views/DeliveryRoutes/DeliveryRoutesFormEdit";
+import DeliveryRoutesClients from "../views/DeliveryRoutes/DeliveryRoutesClients";
 
 const PrivateRoutes = permissions => {
   const allowedRoutes = [];
   permissions.forEach(permission => {
     switch (permission) {
-      case "altas":
-        allowedRoutes.push(
-          <Route path="/procesos/altas" exact component={Altas} key="altas" />
-        );
-        break;
-      case "canales":
-        allowedRoutes.push(
-          <Route
-            path="/mantenimiento/canales"
-            exact
-            component={Canales}
-            key="canales"
-          />
-        );
-        break;
       case "clientes":
         allowedRoutes.push(
           <Route
@@ -44,34 +30,20 @@ const PrivateRoutes = permissions => {
             key="clientes"
           />
         );
-        break;
-      case "compras":
         allowedRoutes.push(
           <Route
-            path="/procesos/compras"
+            path="/mantenimiento/clientes/crear"
             exact
-            component={Compras}
-            key="compras"
+            component={ClientForm}
+            key="clientes"
           />
         );
-        break;
-      case "consumos":
         allowedRoutes.push(
           <Route
-            path="/procesos/consumos"
+            path="/mantenimiento/clientes/editar/:id"
             exact
-            component={Consumos}
-            key="consumos"
-          />
-        );
-        break;
-      case "fasttrack":
-        allowedRoutes.push(
-          <Route
-            path="/procesos/fast-tracks"
-            exact
-            component={FastTracks}
-            key="fast-tracks"
+            component={ClientFormEdit}
+            key="clientes"
           />
         );
         break;
@@ -95,23 +67,63 @@ const PrivateRoutes = permissions => {
           />
         );
         break;
-      case "vendedores":
+      case "pedidos":
         allowedRoutes.push(
           <Route
-            path="/mantenimiento/vendedores"
+            path="/mantenimiento/pedidos"
             exact
-            component={Vendedores}
-            key="vendedores"
+            component={Pedidos}
+            key="mantenimientos"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/pedidos/crear"
+            exact
+            component={OrdersForm}
+            key="mantenimientos-crear"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/pedidos/editar/:id"
+            exact
+            component={OrdersForm}
+            key="mantenimientos-editar"
           />
         );
         break;
-      case "ventas":
+      case "rutas":
         allowedRoutes.push(
           <Route
-            path="/procesos/despachos-ventas"
+            path="/mantenimiento/rutas-de-entrega"
             exact
-            component={Ventas}
-            key="ventas"
+            component={DeliveryRoutesList}
+            key="rutas-de-entrega"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/rutas-de-entrega/crear/"
+            exact
+            component={DeliveryRoutesForm}
+            key="rutas-de-entrega"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/rutas-de-entrega/editar/:id"
+            exact
+            component={DeliveryRoutesFormEdit}
+            key="rutas-de-entrega"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/rutas-de-entrega/ver/:id"
+            exact
+            component={DeliveryRoutesClients}
+            key="rutas-de-entrega"
           />
         );
         break;
@@ -138,7 +150,6 @@ const PublicRoutes = () => (
   <Router>
     <Switch>
       <Route path="/login" exact component={Login} />
-      <Route path="/inicio" exact component={Home} />
       <Redirect to="/login" />
     </Switch>
   </Router>

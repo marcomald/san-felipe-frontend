@@ -17,33 +17,22 @@ import Icon from "@material-ui/core/Icon";
 import IconPerson from "@material-ui/icons/Person";
 // import ExitToApp from "@material-ui/icons/ExitToApp";
 //  Views 
-import Purchase from "views/Purchases/Purchase.js";
-import Sales from "views/Sales/Sales";
-import FastTrack from "views/FastTrack/FastTrack";
-import Discharged from "views/Discharged/Discharged";
-import Consumptions from "views/Consumptions/Consumptions";
 import LoginPage from "views/Pages/LoginPage";
-import Channels from "views/Channels/Chanels";
-import Map from "@material-ui/icons/Map";
 import Clients from "views/Clients/Clients";
-import Sellers from "views/Sellers/Sellers";
 import Users from "views/Users/Users"
 import Roles from "views/Roles/Roles"
 // @material-ui/icons
-import AttachMoney from "@material-ui/icons/AttachMoney";
-import SimCard from "@material-ui/icons/SimCard";
-import SpeakerPhone from "@material-ui/icons/SpeakerPhone";
-import AssignmentTurnedIn from "@material-ui/icons/AssignmentTurnedIn";
-import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import Group from "@material-ui/icons/Group";
 import ExitToApp from "@material-ui/icons/ExitToApp";
 import Settings from "@material-ui/icons/Settings"
 import AssignmentInd from "@material-ui/icons/AssignmentInd"
-import Work from "@material-ui/icons/Work"
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import MapIcon from '@material-ui/icons/Map';
 // core components
 import AdminNavbarLinks from "components/Navbars/AdminNavbarLinks.js";
 import sidebarStyle from "assets/jss/material-dashboard-pro-react/components/sidebarStyle.js";
-import avatar from "assets/img/faces/avatar.jpg";
+import Pedidos from "views/Orders/OrdersList";
+import DeliveryRoutesList from "views/DeliveryRoutes/DeliveryRoutesList";
 var ps;
 // We've created this component so we can have a ref to the wrapper of the links that appears in our sidebar.
 // This was necessary so that we could initialize PerfectScrollbar on the links.
@@ -138,26 +127,6 @@ class Sidebar extends React.Component {
     const allowedRoutes = [];
     userDecode.permissions.forEach(permission => {
       switch (permission) {
-        case "altas":
-          allowedRoutes.push({
-            path: "/altas",
-            name: "Altas",
-            rtlName: "Altas",
-            icon: SimCard,
-            component: Discharged,
-            layout: "/procesos"
-          })
-          break;
-        case "canales":
-          allowedRoutes.push({
-            path: "/canales",
-            name: "Canales",
-            rtlName: "Canales",
-            icon: Map,
-            component: Channels,
-            layout: "/mantenimiento"
-          })
-          break;
         case "clientes":
           allowedRoutes.push({
             path: "/clientes",
@@ -166,36 +135,6 @@ class Sidebar extends React.Component {
             icon: AssignmentInd,
             component: Clients,
             layout: "/mantenimiento"
-          })
-          break;
-        case "compras":
-          allowedRoutes.push({
-            path: "/compras",
-            name: "Compras",
-            rtlName: "Compras",
-            icon: ShoppingCart,
-            component: Purchase,
-            layout: "/procesos"
-          })
-          break;
-        case "consumos":
-          allowedRoutes.push({
-            path: "/consumos",
-            name: "Consumos",
-            rtlName: "Consumos",
-            icon: SpeakerPhone,
-            component: Consumptions,
-            layout: "/procesos"
-          })
-          break;
-        case "fasttrack":
-          allowedRoutes.push({
-            path: "/fast-tracks",
-            name: "Fast Track",
-            rtlName: "Fast Track",
-            icon: AssignmentTurnedIn,
-            component: FastTrack,
-            layout: "/procesos"
           })
           break;
         case "roles":
@@ -218,24 +157,24 @@ class Sidebar extends React.Component {
             layout: "/mantenimiento"
           })
           break;
-        case "vendedores":
+        case "pedidos":
           allowedRoutes.push({
-            path: "/vendedores",
-            name: "Vendedores",
-            rtlName: "Vendedores",
-            icon: Work,
-            component: Sellers,
+            path: "/pedidos",
+            name: "Pedidos",
+            rtlName: "Pedidos",
+            icon: ShoppingCartIcon,
+            component: Pedidos,
             layout: "/mantenimiento"
           })
           break;
-        case "ventas":
+        case "rutas":
           allowedRoutes.push({
-            path: "/despachos-ventas",
-            name: "Ventas",
-            rtlName: "Ventas",
-            icon: AttachMoney,
-            component: Sales,
-            layout: "/procesos"
+            path: "/rutas-de-entrega",
+            name: "Rutas de entrega",
+            rtlName: "Rutas de entrega",
+            icon: MapIcon,
+            component: DeliveryRoutesList,
+            layout: "/mantenimiento"
           })
           break;
         default:
@@ -245,8 +184,8 @@ class Sidebar extends React.Component {
 
     allowedRoutes.push({
       path: "/login",
-      name: "Cerrar sesion",
-      rtlName: "Cerrar sesion",
+      name: "Cerrar sesión",
+      rtlName: "Cerrar sesión",
       icon: ExitToApp,
       component: LoginPage,
       layout: ""

@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import AssignmentTurnedIn from "@material-ui/icons/AssignmentTurnedIn";
 import Edit from "@material-ui/icons/Edit";
 import Add from "@material-ui/icons/Add";
 // Components
@@ -29,6 +28,7 @@ import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import TableStyles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import AdminLayout from "layouts/Admin";
+import { Settings } from "@material-ui/icons";
 
 const customStyles = {
   ...styles,
@@ -291,7 +291,7 @@ export default function Roles(props) {
       <GridContainer>
         <GridItem xs={12} sm={6}>
           <h1>
-            Administracion de <b>Roles.</b>
+            Administración de <b>Roles.</b>
           </h1>
         </GridItem>
         <GridItem xs={12} sm={6}>
@@ -311,7 +311,7 @@ export default function Roles(props) {
           <Card>
             <CardHeader color="rose" icon>
               <CardIcon color="rose">
-                <AssignmentTurnedIn />
+                <Settings />
               </CardIcon>
               <h4 className={classes.cardIconTitle}>Roles registrados</h4>
             </CardHeader>

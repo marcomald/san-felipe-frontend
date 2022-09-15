@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import AssignmentTurnedIn from "@material-ui/icons/AssignmentTurnedIn";
 import Edit from "@material-ui/icons/Edit";
 import Close from "@material-ui/icons/Close";
 import Add from "@material-ui/icons/Add";
@@ -33,6 +32,7 @@ import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import TableStyles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import AdminLayout from "../../layouts/Admin";
 import { getUserId } from "helpers/utils";
+import { Group } from "@material-ui/icons";
 
 const customStyles = {
   ...styles,
@@ -56,6 +56,7 @@ const customStyles = {
 const useStyles = makeStyles(customStyles);
 const useStylesModal = makeStyles(Modalstyles);
 const useTableStyles = makeStyles(TableStyles);
+// eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
@@ -97,6 +98,7 @@ export default function Usuarios(props) {
       .catch(e => {
         console.error(e);
         if (e.request.status === 403) {
+          // eslint-disable-next-line react/prop-types
           props.history.push("/login");
           return;
         }
@@ -130,6 +132,7 @@ export default function Usuarios(props) {
           return;
         }
       });
+    // eslint-disable-next-line react/prop-types
   }, [reloadData, props.history, offset, limit]);
 
   const handleUserChange = (property, value) => {
@@ -249,7 +252,8 @@ export default function Usuarios(props) {
       email: user.email,
       password: user.password,
       rolId: user.rol.value,
-      userId: getUserId()
+      userId: getUserId(),
+      vendedor: user.rol.label.toUpperCase() === "VENDEDOR"
     })
       .then(async data => {
         const response = await data.data;
@@ -468,7 +472,7 @@ export default function Usuarios(props) {
         <GridContainer>
           <GridItem xs={12} sm={6}>
             <h1>
-              Administracion de <b>Usuarios.</b>
+              Administración de <b>Usuarios.</b>
             </h1>
           </GridItem>
           <GridItem xs={12} sm={6}>
@@ -488,7 +492,7 @@ export default function Usuarios(props) {
             <Card>
               <CardHeader color="rose" icon>
                 <CardIcon color="rose">
-                  <AssignmentTurnedIn />
+                  <Group />
                 </CardIcon>
                 <h4 className={classes.cardIconTitle}>Usuarios registrados</h4>
               </CardHeader>

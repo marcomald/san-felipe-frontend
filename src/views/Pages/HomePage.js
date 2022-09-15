@@ -16,6 +16,7 @@ export default function HomePage() {
               maxHeight: "90vh"
             }}
             src={sanFelipeImgBg}
+            alt="San Felipe Fondo"
           />
         </div>
       </div>

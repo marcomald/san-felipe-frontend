@@ -1,17 +1,19 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import Select from "react-select";
 
 const customStyles = {
-  option: (provided, { data, isDisabled, isFocused, isSelected }) => ({
+  option: (provided, { isSelected }) => ({
     ...provided,
     color: isSelected ? "white" : "black",
     "&:hover": {
       background: "#4054B2",
       color: "white"
     },
-    background: isSelected ? "#4054B2" : "white"
+    background: isSelected ? "#4054B2" : "white",
+    zIndex: 100
   }),
-  singleValue: (provided, state) => ({
+  singleValue: provided => ({
     ...provided,
     color: "#3C4858",
     fontWeight: 400,
@@ -20,22 +22,29 @@ const customStyles = {
       color: "white"
     }
   }),
-  control: (provided, state) => ({
+  control: provided => ({
     ...provided,
     border: "none",
     borderRadius: "0",
     borderBottom: "1px solid #D2D2D2",
     boxShadow: "none",
-    fontSize: ".8rem"
+    fontSize: ".8rem",
+    marginTop: "2rem",
+    zIndex: 100
   }),
-  placeholder: (provided, state) => ({
+  placeholder: provided => ({
     ...provided,
     color: "#3C4858",
     fontWeight: 400
   }),
-  valueContainer: (provided, state) => ({
+  valueContainer: provided => ({
     ...provided,
-    padding: 0
+    padding: 0,
+    zIndex: 10000
+  }),
+  menu: provided => ({
+    ...provided,
+    zIndex: 10000
   })
 };
 

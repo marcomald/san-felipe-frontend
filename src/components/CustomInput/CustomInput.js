@@ -28,7 +28,8 @@ export default function CustomInput(props) {
     success,
     helperText,
     onChange,
-    value
+    value,
+    disabled
   } = props;
 
   const labelClasses = classNames({
@@ -81,8 +82,9 @@ export default function CustomInput(props) {
         }}
         id={id}
         {...inputProps}
-        value={value || ''}
+        value={value || ""}
         onChange={onChange}
+        disabled={disabled}
       />
       {helperText !== undefined ? (
         <FormHelperText id={id + "-text"} className={helpTextClasses}>
@@ -105,4 +107,6 @@ CustomInput.propTypes = {
   white: PropTypes.bool,
   helperText: PropTypes.node,
   value: PropTypes.string,
+  disabled: PropTypes.bool,
+  onChange: PropTypes.func
 };
