@@ -12,7 +12,8 @@ import {
   Add,
   Close,
   FormatListBulleted,
-  ShoppingCart
+  ShoppingCart,
+  Edit
 } from "@material-ui/icons";
 import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
@@ -35,8 +36,12 @@ import Snackbar from "components/Snackbar/Snackbar";
 import { getProductPrice, getProducts } from "../../services/Products";
 import { formatToSelectOption } from "../../helpers/utils";
 import { getTerritory } from "../../services/Territory";
-import { getClients } from "../../services/Clients";
-import { createOrder, getOrderById } from "../../services/Orders";
+import { getClientByID, getClients } from "../../services/Clients";
+import {
+  editOrder,
+  getOrdeDetailById,
+  getOrderById
+} from "../../services/Orders";
 import moment from "moment";
 
 // eslint-disable-next-line react/display-name
@@ -73,7 +78,7 @@ const OriginList = [
   { value: "Llamada telefonica", label: "Llamada telefonica" }
 ];
 
-export default function OrdersForm(props) {
+export default function OrdersFormEdit(props) {
   const orderID = props.match.params.id;
   const [order, setOrder] = useState({});
   const [clients, setClients] = useState([]);
@@ -94,9 +99,6 @@ export default function OrdersForm(props) {
 
   useEffect(() => {
     fetchProducts();
-    if (orderID) {
-      fetchOrder();
-    }
   }, []);
 
   useEffect(() => {
@@ -118,6 +120,12 @@ export default function OrdersForm(props) {
       fetchProductPrice();
     }
   }, [productSelected.product]);
+
+  useEffect(() => {
+    if (orderID) {
+      fetchOrder();
+    }
+  }, [orderID]);
 
   const handleForm = (key, value) => {
     const updatedOrder = { ...order };
@@ -189,12 +197,25 @@ export default function OrdersForm(props) {
 
   const fetchOrder = async () => {
     const retrievedOrder = await getOrderById(orderID);
+    const client = await getClientByID(retrievedOrder.cliente_id);
+    const orderDetail = await getOrdeDetailById(orderID);
     setOrder({
       order_id: retrievedOrder.pedido_id,
       origin: {
         value: retrievedOrder.origen,
         label: retrievedOrder.origen
-      }
+      },
+      client: {
+        ...client,
+        label: client.nombre,
+        value: retrievedOrder.cliente_id
+      },
+      products: orderDetail.map(detail => ({
+        boxes: detail.cant_cajas,
+        bottles: detail.cant_botellas,
+        price: { precio: detail.precio, precio_id: detail.precio_id },
+        product: { ...detail }
+      }))
     });
   };
 
@@ -236,8 +257,8 @@ export default function OrdersForm(props) {
     );
   };
 
-  const createNewOrder = async () => {
-    await createOrder([
+  const editCreatedOrder = async () => {
+    await editOrder(
       {
         empresa_id: order.client.empresa_id,
         sucursal_id: order.client.sucursal_id,
@@ -259,12 +280,12 @@ export default function OrdersForm(props) {
           producto_id: product.product.producto_id
         })),
         userId: getUserId()
-      }
-    ]);
-    setOrder({});
+      },
+      orderID
+    );
     setNotification({
       color: "info",
-      text: "Exito, pedido creado.",
+      text: "Exito, pedido editado.",
       open: true
     });
     setTimeout(() => {
@@ -281,7 +302,7 @@ export default function OrdersForm(props) {
         <GridContainer>
           <GridItem xs={12} sm={6}>
             <h1>
-              Agregar nuevo <b>Pedido</b>
+              Editar <b>Pedido</b>
             </h1>
           </GridItem>
           <GridItem xs={12} sm={6}>
@@ -296,9 +317,9 @@ export default function OrdersForm(props) {
               <Button
                 color="rose"
                 disabled={!validateOrder()}
-                onClick={createNewOrder}
+                onClick={editCreatedOrder}
               >
-                <Add /> Crear Pedido
+                <Edit /> Editar Pedido
               </Button>
             </div>
           </GridItem>
@@ -387,7 +408,9 @@ export default function OrdersForm(props) {
                             product?.bottles ?? 0,
                             `$${product?.price?.precio ?? 0}`,
                             0,
-                            `$${calculateTotalPerProduct(product)}`,
+                            "$" +
+                              (product.product.total ??
+                                `${calculateTotalPerProduct(product)}`),
                             fillButtons(product)
                           ];
                         })

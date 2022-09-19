@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import ShoppingCart from "@material-ui/icons/ShoppingCart";
 import Close from "@material-ui/icons/Close";
 import Add from "@material-ui/icons/Add";
-import Eye from "@material-ui/icons/Visibility";
 // Components
 import { makeStyles } from "@material-ui/core/styles";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
@@ -31,6 +30,9 @@ import {
 } from "@material-ui/core";
 import CustomInput from "components/CustomInput/CustomInput";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import { Edit } from "@material-ui/icons";
+import { deleteOrder } from "services/Orders";
+import { getOrders } from "services/Orders";
 
 const customStyles = {
   ...styles,
@@ -68,6 +70,8 @@ export default function Pedidos(props) {
   const [orders, setOrders] = useState({ orders: [], total: 0 });
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(10);
+  const [order, setOrder] = useState({});
+  const [showDelete, setShowDelete] = useState(false);
   const [showClient, setShowClient] = useState(false);
   const [client, setClient] = useState({});
   const [notification, setNotification] = useState({
@@ -77,73 +81,54 @@ export default function Pedidos(props) {
   });
 
   useEffect(() => {
-    setLoading(true);
-    const limitQuery = limit ? "&limit=" + limit : "";
-    Axios.get("/orders?" + limitQuery)
-      .then(async response => {
-        setOrders({ orders: response.data });
-      })
-      .catch(e => {
-        console.error(e);
-        if (e?.request?.status === 403) {
-          // eslint-disable-next-line react/prop-types
-          props.history.push("/login");
-          return;
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    fetchOrders("", limit, "");
   }, [props, limit]);
 
   useEffect(() => {
-    const limite = limit ? "&limit=" + limit : "";
-    const offsetV = offset ? "&offset=" + offset : "";
-    Axios.get("/orders?" + limite + offsetV)
-      .then(response => {
-        setOrders({ orders: response.data });
-      })
-      .catch(e => {
-        console.error(e);
-        if (e?.request?.status === 403) {
-          props.history.push("/login");
-          return;
-        }
-      });
+    fetchOrders(offset, limit);
     // eslint-disable-next-line react/prop-types
   }, [props.history, offset, limit]);
 
+  const fetchOrders = async (offsetFetch, limitFetch) => {
+    const ordersRetrieved = await getOrders(limitFetch, offsetFetch, "");
+    setOrders({ orders: ordersRetrieved });
+  };
+
   const fillButtons = order => {
-    return [{ color: "rose", icon: Eye }, { color: "danger", icon: Close }].map(
-      (prop, key) => {
-        return (
-          <Tooltip
-            id="tooltip-top"
-            title={prop.color === "danger" ? "Eliminar pedido" : "Ver detalle"}
-            placement="top"
-            classes={{ tooltip: classes.tooltip }}
+    return [
+      { color: "rose", icon: Edit },
+      { color: "danger", icon: Close }
+    ].map((prop, key) => {
+      return (
+        <Tooltip
+          id="tooltip-top"
+          title={
+            prop.color === "danger" ? "Eliminar pedido" : "Ver / Editar pedido"
+          }
+          placement="top"
+          classes={{ tooltip: classes.tooltip }}
+          key={key}
+        >
+          <Button
+            color={prop.color}
+            className={classesTable.actionButton}
             key={key}
+            onClick={() => {
+              if (prop.color === "danger") {
+                setOrder(order);
+                setShowDelete(true);
+              } else {
+                props.history.push(
+                  "/mantenimiento/pedidos/editar/" + order.pedido_id
+                );
+              }
+            }}
           >
-            <Button
-              color={prop.color}
-              className={classesTable.actionButton}
-              key={key}
-              onClick={() => {
-                if (prop.color === "danger") {
-                  console.log("eliminar");
-                } else {
-                  props.history.push(
-                    "/mantenimiento/pedidos/editar/" + order.pedido_id
-                  );
-                }
-              }}
-            >
-              <prop.icon className={classesTable.icon} />
-            </Button>
-          </Tooltip>
-        );
-      }
-    );
+            <prop.icon className={classesTable.icon} />
+          </Button>
+        </Tooltip>
+      );
+    });
   };
 
   const clientInfo = order => (
@@ -179,6 +164,23 @@ export default function Pedidos(props) {
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  const deleteCurrentOrder = async () => {
+    await deleteOrder(order.pedido_id);
+    await fetchOrders(offset, limit);
+    setNotification({
+      color: "info",
+      text: "Exito! Pedido eliminado.",
+      open: true
+    });
+    setTimeout(function() {
+      setNotification({
+        ...notification,
+        open: false
+      });
+    }, 6000);
+    setShowDelete(false);
   };
 
   return (
@@ -219,7 +221,7 @@ export default function Pedidos(props) {
                   data={orders?.orders?.map(order => {
                     return [
                       order?.num_pedido,
-                      17,
+                      order.semana,
                       new Date(order?.fecha_pedido).toLocaleDateString(),
                       clientInfo(order),
                       order?.origen,
@@ -370,6 +372,55 @@ export default function Pedidos(props) {
               }}
             >
               Cerrar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          classes={{
+            root: modalClasses.center,
+            paper: modalClasses.modal
+          }}
+          open={showDelete}
+          transition={Transition}
+          keepMounted
+          onClose={() => setShowDelete(false)}
+          aria-labelledby="modal-slide-title"
+          aria-describedby="modal-slide-description"
+          maxWidth="md"
+          fullWidth={true}
+        >
+          <DialogTitle
+            id="classic-modal-slide-title"
+            disableTypography
+            className={modalClasses.modalHeader}
+          >
+            <h3 className={modalClasses.modalTitle}>
+              Eliminar pedido <b>#{order.num_pedido}</b>
+            </h3>
+          </DialogTitle>
+          <DialogContent
+            id="modal-slide-description"
+            className={modalClasses.modalBody}
+          >
+            <h4>
+              Esta seguro que desea <b>eliminar</b> el pedido?
+            </h4>
+          </DialogContent>
+          <DialogActions
+            className={
+              modalClasses.modalFooter + " " + modalClasses.modalFooterCenter
+            }
+          >
+            <Button color="danger" onClick={deleteCurrentOrder}>
+              Eliminar
+            </Button>
+            <Button
+              onClick={() => {
+                setShowDelete(false);
+              }}
+            >
+              Cancelar
             </Button>
           </DialogActions>
         </Dialog>

@@ -18,6 +18,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import MapIcon from "@material-ui/icons/Map";
 import { getDeliveryRouteById } from "../../services/DeliveryRoutesServices";
+import Selector from "components/CustomDropdown/CustomSelector";
 
 // eslint-disable-next-line react/display-name
 
@@ -63,18 +64,28 @@ L.drawLocal.edit.toolbar.actions = {
   }
 };
 
+const visitFrequencyList = [
+  { label: "Lunes", value: "L" },
+  { label: "Martes", value: "M" },
+  { label: "Miércoles", value: "X" },
+  { label: "Jueves", value: "J" },
+  { label: "Viernes", value: "V" },
+  { label: "Sábado", value: "S" },
+  { label: "Domingo", value: "D" },
+  { label: "Todos", value: "" }
+];
+
 export default function DeliveryRoutesClients(props) {
   const routeId = props.match.params.id;
   const [route, setRoute] = useState({});
+  const [visitFrequency, setVisitFrequency] = useState(visitFrequencyList[0]);
   const classes = useStyles();
+  const [map, setMap] = useState();
 
-  const fetchGeoroute = async () => {
-    const retrievedGeoroute = await getDeliveryRouteById(routeId);
+  const fetchGeoroute = async frecuency => {
+    const retrievedGeoroute = await getDeliveryRouteById(routeId, frecuency);
     setRoute(retrievedGeoroute);
-    initMap(
-      retrievedGeoroute.polygon.coordinates[0],
-      retrievedGeoroute.clients
-    );
+    return retrievedGeoroute;
   };
 
   const initMap = (polygon, clients) => {
@@ -82,7 +93,6 @@ export default function DeliveryRoutesClients(props) {
     let longitud = -78.570624;
     const mapLayout = L.map("RouteMap").setView([latitud, longitud], 16);
 
-    //Map configurations
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 21,
       attribution: "© OpenStreetMap"
@@ -103,13 +113,34 @@ export default function DeliveryRoutesClients(props) {
       );
       marker.addTo(mapLayout);
     });
-
+    setMap(mapLayout);
     return mapLayout;
   };
 
   useEffect(() => {
-    fetchGeoroute();
+    const getData = async () => {
+      const retrievedGeoroute = await fetchGeoroute(
+        visitFrequencyList[0].value
+      );
+      initMap(
+        retrievedGeoroute.polygon.coordinates[0],
+        retrievedGeoroute.clients
+      );
+    };
+    getData();
   }, []);
+
+  const onChangeFrequency = async frecuency => {
+    setVisitFrequency(frecuency);
+    const retrievedGeoroute = await fetchGeoroute(frecuency.value);
+    if (map) {
+      map.remove();
+      initMap(
+        retrievedGeoroute.polygon.coordinates[0],
+        retrievedGeoroute.clients
+      );
+    }
+  };
 
   return (
     <AdminLayout>
@@ -169,11 +200,26 @@ export default function DeliveryRoutesClients(props) {
                         inputProps={{
                           type: "text"
                         }}
-                        value={route?.clients?.length}
+                        value={
+                          route.clients && route.clients.length
+                            ? route.clients.length
+                            : "0"
+                        }
                         formControlProps={{
                           fullWidth: true
                         }}
                         disabled
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <label className="custom-label">
+                        Frecuencia de visita
+                      </label>
+                      <Selector
+                        placeholder="Frecuencia de visita"
+                        options={visitFrequencyList}
+                        onChange={onChangeFrequency}
+                        value={visitFrequency}
                       />
                     </GridItem>
                     <GridItem md={12}>

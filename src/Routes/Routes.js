@@ -16,6 +16,7 @@ import ClientForm from "../views/Clients/ClientForm";
 import ClientFormEdit from "../views/Clients/ClientFormEdit";
 import DeliveryRoutesFormEdit from "../views/DeliveryRoutes/DeliveryRoutesFormEdit";
 import DeliveryRoutesClients from "../views/DeliveryRoutes/DeliveryRoutesClients";
+import OrdersFormEdit from "views/Orders/OrdersFormEdit";
 
 const PrivateRoutes = permissions => {
   const allowedRoutes = [];
@@ -88,7 +89,7 @@ const PrivateRoutes = permissions => {
           <Route
             path="/mantenimiento/pedidos/editar/:id"
             exact
-            component={OrdersForm}
+            component={OrdersFormEdit}
             key="mantenimientos-editar"
           />
         );

@@ -11,9 +11,14 @@ export const getDeliveryRoutes = async (limit, offset, search) => {
   }
 };
 
-export const getDeliveryRouteById = async georuta_id => {
+export const getDeliveryRouteById = async (
+  georuta_id,
+  visitFrequency = "L"
+) => {
   try {
-    const response = await Axios.get("/georuta/" + georuta_id);
+    const response = await Axios.get(
+      `/georuta/${georuta_id}?visitFrequency=${visitFrequency}`
+    );
     return response.data;
   } catch (error) {
     console.error("error get georutas by id ->", error);
