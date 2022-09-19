@@ -33,6 +33,7 @@ import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import { Edit } from "@material-ui/icons";
 import { deleteOrder } from "services/Orders";
 import { getOrders } from "services/Orders";
+import moment from "moment";
 
 const customStyles = {
   ...styles,
@@ -222,7 +223,7 @@ export default function Pedidos(props) {
                     return [
                       order?.num_pedido,
                       order.semana,
-                      new Date(order?.fecha_pedido).toLocaleDateString(),
+                      moment(order?.fecha_pedid).format("YYYY-MM-DD"),
                       clientInfo(order),
                       order?.origen,
                       fillButtons(order)

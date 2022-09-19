@@ -23,5 +23,11 @@ export const getProductPrice = async (
     return response.data;
   } catch (error) {
     console.error("error get product price ->", error);
+    if (error.request.status === 404) {
+      return {
+        error: true,
+        message: "No se encontro un precio vinculado al producto"
+      };
+    }
   }
 };

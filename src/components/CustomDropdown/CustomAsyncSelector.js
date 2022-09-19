@@ -1,0 +1,67 @@
+/* eslint-disable react/prop-types */
+import React from "react";
+import Select from "react-select/async";
+
+const customStyles = {
+  option: (provided, { isSelected }) => ({
+    ...provided,
+    color: isSelected ? "white" : "black",
+    "&:hover": {
+      background: "#4054B2",
+      color: "white"
+    },
+    background: isSelected ? "#4054B2" : "white",
+    zIndex: 100
+  }),
+  singleValue: provided => ({
+    ...provided,
+    color: "#3C4858",
+    fontWeight: 400,
+    "&:hover": {
+      background: "#4054B2",
+      color: "white"
+    }
+  }),
+  control: provided => ({
+    ...provided,
+    border: "none",
+    borderRadius: "0",
+    borderBottom: "1px solid #D2D2D2",
+    boxShadow: "none",
+    fontSize: ".8rem",
+    marginTop: "2rem",
+    zIndex: 100
+  }),
+  placeholder: provided => ({
+    ...provided,
+    color: "#3C4858",
+    fontWeight: 400
+  }),
+  valueContainer: provided => ({
+    ...provided,
+    padding: 0,
+    zIndex: 10000
+  }),
+  menu: provided => ({
+    ...provided,
+    zIndex: 10000
+  })
+};
+
+export default function Selector(props) {
+  return (
+    <React.Fragment>
+      {props.label && <label style={{ fontSize: "12px" }}>{props.label}</label>}
+      <Select
+        onChange={props.onChange}
+        styles={customStyles}
+        loadOptions={props.loadOptions}
+        defaultOptions={props.options}
+        placeholder={props.placeholder}
+        isMulti={props.isMulti ? true : false}
+        value={props.value ? props.value : ""}
+        cacheOptions
+      />
+    </React.Fragment>
+  );
+}

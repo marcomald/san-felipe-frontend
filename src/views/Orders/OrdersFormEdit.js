@@ -27,6 +27,7 @@ import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
 import CustomInput from "components/CustomInput/CustomInput";
 import Selector from "components/CustomDropdown/CustomSelector";
+import AsyncSelector from "components/CustomDropdown/CustomAsyncSelector";
 import Button from "components/CustomButtons/Button.js";
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import CustomTable from "components/Table/CustomTable.js";
@@ -85,8 +86,6 @@ export default function OrdersFormEdit(props) {
   const [products, setProducts] = useState([]);
   const [territory, setTerritory] = useState({});
   const [productSelected, setProductSelected] = useState({});
-  const [searchClients, setSearchClients] = useState("");
-  const [searchProducts, setSearchProducts] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
@@ -99,15 +98,8 @@ export default function OrdersFormEdit(props) {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
-
-  useEffect(() => {
     fetchClients();
-  }, [searchClients]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [searchProducts]);
+  }, []);
 
   useEffect(() => {
     if (order.client) {
@@ -160,8 +152,8 @@ export default function OrdersFormEdit(props) {
     const price = product?.price?.precio;
     const boxes = product?.boxes ? +product.boxes : 0;
     const bottles = product?.bottles ? +product.bottles : 0;
-    const bottlesPrice = bottles * price;
-    const boxesPrice = boxes * price * (product?.product?.unidades ?? 0);
+    const bottlesPrice = (price / product?.product?.unidades) * bottles;
+    const boxesPrice = boxes * price;
     return (bottlesPrice + boxesPrice).toFixed(2);
   };
 
@@ -211,16 +203,26 @@ export default function OrdersFormEdit(props) {
         value: retrievedOrder.cliente_id
       },
       products: orderDetail.map(detail => ({
-        boxes: detail.cant_cajas,
-        bottles: detail.cant_botellas,
-        price: { precio: detail.precio, precio_id: detail.precio_id },
-        product: { ...detail }
+        boxes: detail.d_cant_cajas,
+        bottles: detail.d_cant_botellas,
+        price: {
+          precio: detail.price_precio,
+          precio_id: detail.price_precio_id
+        },
+        product: {
+          codigo: detail.product_codigo,
+          descripcion: detail.product_descripcion,
+          unidades: detail.product_unidades,
+          total: detail.d_total,
+          tipo_venta: detail.d_tipo_venta,
+          producto_id: detail.product_producto_id
+        }
       }))
     });
   };
 
   const fetchClients = async () => {
-    const retrievedClients = await getClients("30", "", searchClients);
+    const retrievedClients = await getClients("50", "", "");
     setClients(
       formatToSelectOption(retrievedClients.clients, "cliente_id", "nombre")
     );
@@ -240,18 +242,35 @@ export default function OrdersFormEdit(props) {
         order.client.sucursal_id,
         order.client.listapre_id ?? "02"
       );
+      if (productPrice.error) {
+        setNotification({
+          color: "warning",
+          text: productPrice.message,
+          open: true
+        });
+        setTimeout(() => {
+          setNotification({
+            ...notification,
+            open: false
+          });
+        }, 5000);
+      }
       handleOrderProductsForm("price", productPrice);
     }
   };
 
   const validateBottles = (max = 50, value = 0) => {
-    if (+max >= +value && +value >= 0) {
+    let maxAllowed = max;
+    if (max > 1) {
+      maxAllowed = max - 1;
+    }
+    if (+maxAllowed >= +value && +value >= 0) {
       handleOrderProductsForm("bottles", value);
     }
   };
 
   const fetchProducts = async () => {
-    const retrievedProducts = await getProducts("10", "", searchProducts);
+    const retrievedProducts = await getProducts("50", "", "");
     setProducts(
       formatToSelectOption(retrievedProducts, "producto_id", "descripcion")
     );
@@ -294,6 +313,26 @@ export default function OrdersFormEdit(props) {
         open: false
       });
     }, 10000);
+  };
+
+  const onSearchProducts = async searchText => {
+    const retrievedProducts = await getProducts("50", "", searchText);
+    const formatedProducts = formatToSelectOption(
+      retrievedProducts,
+      "producto_id",
+      "descripcion"
+    );
+    return formatedProducts;
+  };
+
+  const onSearchClients = async searchText => {
+    const retrievedClients = await getClients("50", "", searchText);
+    const formatedClients = formatToSelectOption(
+      retrievedClients.clients,
+      "cliente_id",
+      "nombre"
+    );
+    return formatedClients;
   };
 
   return (
@@ -339,12 +378,12 @@ export default function OrdersFormEdit(props) {
                 <form>
                   <GridContainer>
                     <GridItem md={6}>
-                      <Selector
+                      <AsyncSelector
                         placeholder="Cliente"
                         options={clients}
                         onChange={value => handleForm("client", value)}
                         value={order.client}
-                        onInputChange={text => setSearchClients(text)}
+                        loadOptions={onSearchClients}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -403,14 +442,11 @@ export default function OrdersFormEdit(props) {
                           return [
                             product?.product?.codigo,
                             product?.product?.descripcion,
-                            "01",
-                            product?.boxes ?? 0,
-                            product?.bottles ?? 0,
+                            product.boxes ? product.boxes : 0,
+                            product.bottles ? product.bottles : 0,
                             `$${product?.price?.precio ?? 0}`,
                             0,
-                            "$" +
-                              (product.product.total ??
-                                `${calculateTotalPerProduct(product)}`),
+                            `$${calculateTotalPerProduct(product)}`,
                             fillButtons(product)
                           ];
                         })
@@ -420,10 +456,9 @@ export default function OrdersFormEdit(props) {
                   headers={[
                     "Código",
                     "Nombre",
-                    "Tipo venta",
                     "Cajas",
                     "Botellas",
-                    "Precio",
+                    "Precio Caja",
                     "Descuento",
                     "Total",
                     "Acción"
@@ -461,15 +496,15 @@ export default function OrdersFormEdit(props) {
             className={modalClasses.modalBody}
           >
             <form>
-              <Selector
+              <AsyncSelector
                 placeholder="Producto"
                 options={products}
                 onChange={value => handleOrderProductsForm("product", value)}
                 value={productSelected?.product}
-                onInputChange={setSearchProducts}
+                loadOptions={onSearchProducts}
               />
               <CustomInput
-                labelText="Precio"
+                labelText="Precio Caja"
                 id="boxes"
                 inputProps={{
                   type: "number"
@@ -491,10 +526,7 @@ export default function OrdersFormEdit(props) {
                 formControlProps={{
                   fullWidth: true
                 }}
-                disabled={
-                  productSelected?.bottles > 0 ||
-                  productSelected?.product?.unidades === 1
-                }
+                disabled={productSelected?.product?.unidades === 1}
               />
               <CustomInput
                 labelText="Botellas"
@@ -505,15 +537,24 @@ export default function OrdersFormEdit(props) {
                 value={productSelected?.bottles ?? 0}
                 onChange={e =>
                   validateBottles(
-                    productSelected?.product?.unidades,
+                    productSelected ? productSelected?.product?.unidades : 0,
                     e.target.value
                   )
                 }
                 formControlProps={{
                   fullWidth: true
                 }}
-                disabled={productSelected?.boxes > 0}
               />
+              {productSelected &&
+                productSelected.product &&
+                productSelected.product.unidades && (
+                  <small>
+                    Máximo de botellas por pedido:{" "}
+                    {productSelected.product.unidades > 1
+                      ? productSelected.product.unidades - 1
+                      : productSelected.product.unidades}
+                  </small>
+                )}
             </form>
           </DialogContent>
           <DialogActions
