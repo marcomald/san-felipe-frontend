@@ -33,6 +33,7 @@ import TableStyles from "assets/jss/material-dashboard-pro-react/views/extendedT
 import AdminLayout from "../../layouts/Admin";
 import { getUserId } from "helpers/utils";
 import { Group } from "@material-ui/icons";
+import moment from "moment";
 
 const customStyles = {
   ...styles,
@@ -179,12 +180,11 @@ export default function Usuarios(props) {
                 email: userSelected.email,
                 estado: {
                   value: userSelected.estado,
-                  label:
-                    userSelected.estado === "activo" ? "Activo" : "Inactivo"
+                  label: getStatusName(userSelected.estado)
                 },
                 rol: {
-                  value: userSelected.rol_id,
-                  label: userSelected.rol_nombre
+                  value: userSelected.rol.id,
+                  label: userSelected.rol.nombre
                 }
               });
               setUserEditAux({
@@ -466,6 +466,17 @@ export default function Usuarios(props) {
       });
   };
 
+  const getStatusName = status => {
+    if (
+      status.toUpperCase() === "A" ||
+      status.toUpperCase() === "ACTIVE" ||
+      status.toUpperCase() === "ACTIVo"
+    ) {
+      return "Activo";
+    }
+    return status;
+  };
+
   return (
     <AdminLayout>
       <React.Fragment>
@@ -504,9 +515,9 @@ export default function Usuarios(props) {
                       return [
                         us.nombre_completo,
                         us.email,
-                        new Date(us.fecha_creacion).toLocaleDateString(),
-                        us.rol_nombre,
-                        us.estado.toUpperCase(),
+                        moment(us.fecha_creacion).format("DD-MM-YYYY"),
+                        us.rol.nombre,
+                        getStatusName(us.estado),
                         fillButtons(us)
                       ];
                     })

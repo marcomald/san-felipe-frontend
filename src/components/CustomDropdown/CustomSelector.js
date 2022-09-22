@@ -34,7 +34,7 @@ const customStyles = {
   }),
   placeholder: provided => ({
     ...provided,
-    color: "#3C4858",
+    color: "#AAAAAA",
     fontWeight: 400
   }),
   valueContainer: provided => ({
@@ -51,7 +51,9 @@ const customStyles = {
 export default function Selector(props) {
   return (
     <React.Fragment>
-      {props.label && <label style={{ fontSize: "12px" }}>{props.label}</label>}
+      {props.value && (
+        <label className="custom-label-2">{props.placeholder}</label>
+      )}
       <Select
         onChange={props.onChange}
         onInputChange={props.onInputChange}
@@ -60,6 +62,7 @@ export default function Selector(props) {
         placeholder={props.placeholder}
         isMulti={props.isMulti ? true : false}
         value={props.value ? props.value : ""}
+        isDisabled={props.disabled ? true : false}
       />
     </React.Fragment>
   );

@@ -65,14 +65,14 @@ L.drawLocal.edit.toolbar.actions = {
 };
 
 const visitFrequencyList = [
+  { label: "Todos", value: "" },
   { label: "Lunes", value: "L" },
   { label: "Martes", value: "M" },
   { label: "Miércoles", value: "X" },
   { label: "Jueves", value: "J" },
   { label: "Viernes", value: "V" },
   { label: "Sábado", value: "S" },
-  { label: "Domingo", value: "D" },
-  { label: "Todos", value: "" }
+  { label: "Domingo", value: "D" }
 ];
 
 export default function DeliveryRoutesClients(props) {

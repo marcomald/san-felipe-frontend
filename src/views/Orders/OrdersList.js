@@ -71,7 +71,9 @@ export default function Pedidos(props) {
   const [orders, setOrders] = useState({ orders: [], total: 0 });
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
   const [order, setOrder] = useState({});
+  const [search, setSearch] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [showClient, setShowClient] = useState(false);
   const [client, setClient] = useState({});
@@ -82,17 +84,18 @@ export default function Pedidos(props) {
   });
 
   useEffect(() => {
-    fetchOrders("", limit, "");
-  }, [props, limit]);
-
-  useEffect(() => {
-    fetchOrders(offset, limit);
+    fetchOrders(offset, limit, search);
     // eslint-disable-next-line react/prop-types
-  }, [props.history, offset, limit]);
+  }, [props.history, offset, limit, search]);
 
-  const fetchOrders = async (offsetFetch, limitFetch) => {
-    const ordersRetrieved = await getOrders(limitFetch, offsetFetch, "");
-    setOrders({ orders: ordersRetrieved });
+  const fetchOrders = async (offsetFetch, limitFetch, searchFetch) => {
+    const ordersRetrieved = await getOrders(
+      limitFetch,
+      offsetFetch,
+      searchFetch
+    );
+    setOrders({ orders: ordersRetrieved.orders });
+    setTotal(ordersRetrieved.total);
   };
 
   const fillButtons = order => {
@@ -169,7 +172,7 @@ export default function Pedidos(props) {
 
   const deleteCurrentOrder = async () => {
     await deleteOrder(order.pedido_id);
-    await fetchOrders(offset, limit);
+    await fetchOrders(offset, limit, search);
     setNotification({
       color: "info",
       text: "Exito! Pedido eliminado.",
@@ -238,14 +241,22 @@ export default function Pedidos(props) {
                     "Origen",
                     "Acciones"
                   ]}
+                  limit={limit}
                   onOffsetChange={valueOffset => {
                     setOffset(valueOffset);
                   }}
-                  total={orders?.total}
+                  total={total}
                   changeLimit={limite => {
                     setLimit(limite);
                   }}
                   offset={offset}
+                  onSearchChange={searchValue => {
+                    setSearch(searchValue);
+                  }}
+                  searchValue={search}
+                  showSearch={true}
+                  placeholderSearch={"Ejemplo: EDUARDO LOPEZ O 172405872"}
+                  labelSearch={"Nombre de cliente o RUC/CI a buscar"}
                 />
               </CardBody>
             </Card>

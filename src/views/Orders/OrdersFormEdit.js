@@ -44,6 +44,7 @@ import {
   getOrderById
 } from "../../services/Orders";
 import moment from "moment";
+import { ORIGIN_ORDER_LIST } from "helpers/constants";
 
 // eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -72,13 +73,6 @@ const useStyles = makeStyles(customStyles);
 const useStylesModal = makeStyles(Modalstyles);
 const useTableStyles = makeStyles(TableStyles);
 
-const OriginList = [
-  { value: "WhatsApp", label: "WhatsApp" },
-  { value: "Facebook", label: "Facebook" },
-  { value: "Twitter", label: "Twitter" },
-  { value: "Llamada telefonica", label: "Llamada telefonica" }
-];
-
 export default function OrdersFormEdit(props) {
   const orderID = props.match.params.id;
   const [order, setOrder] = useState({});
@@ -87,6 +81,9 @@ export default function OrdersFormEdit(props) {
   const [territory, setTerritory] = useState({});
   const [productSelected, setProductSelected] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [totalOrder, setTotalOrder] = useState(0);
+  const [editProduct, setEditProduct] = useState({});
+  const [showEditModal, setShowEditModal] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -119,6 +116,12 @@ export default function OrdersFormEdit(props) {
     }
   }, [orderID]);
 
+  useEffect(() => {
+    if (order.products && order.products) {
+      calculateTotalOrder(order.products);
+    }
+  }, [order.products]);
+
   const handleForm = (key, value) => {
     const updatedOrder = { ...order };
     updatedOrder[key] = value;
@@ -148,13 +151,30 @@ export default function OrdersFormEdit(props) {
     setProductSelected({});
   };
 
+  const onEditProduct = () => {
+    const products = order.products.map(product => {
+      if (product.product.producto_id === editProduct.product.producto_id) {
+        return { ...product, cantidad: editProduct.cantidad };
+      }
+      return product;
+    });
+    handleForm("products", products);
+    setShowEditModal(false);
+    setEditProduct({});
+  };
+
+  const calculateTotalOrder = products => {
+    let total = 0;
+    products.forEach(product => {
+      total += +calculateTotalPerProduct(product);
+    });
+    setTotalOrder(total.toFixed(2));
+  };
+
   const calculateTotalPerProduct = product => {
     const price = product?.price?.precio;
-    const boxes = product?.boxes ? +product.boxes : 0;
-    const bottles = product?.bottles ? +product.bottles : 0;
-    const bottlesPrice = (price / product?.product?.unidades) * bottles;
-    const boxesPrice = boxes * price;
-    return (bottlesPrice + boxesPrice).toFixed(2);
+    const total = product?.cantidad * price;
+    return total.toFixed(2);
   };
 
   const validateOrder = () => {
@@ -165,11 +185,16 @@ export default function OrdersFormEdit(props) {
   };
 
   const fillButtons = product => {
-    return [{ color: "danger", icon: Close }].map((prop, key) => {
+    return [
+      { color: "rose", icon: Edit },
+      { color: "danger", icon: Close }
+    ].map((prop, key) => {
       return (
         <Tooltip
           id="tooltip-top"
-          title="Eliminar producto"
+          title={
+            prop.color === "danger" ? "Eliminar producto" : "Editar producto"
+          }
           placement="top"
           classes={{ tooltip: classes.tooltip }}
           key={key}
@@ -178,7 +203,14 @@ export default function OrdersFormEdit(props) {
             color={prop.color}
             className={classesTable.actionButton}
             key={key}
-            onClick={() => removeProduct(product)}
+            onClick={() => {
+              if (prop.color === "danger") {
+                removeProduct(product);
+                return;
+              }
+              setShowEditModal(true);
+              setEditProduct(product);
+            }}
           >
             <prop.icon className={classesTable.icon} />
           </Button>
@@ -203,8 +235,7 @@ export default function OrdersFormEdit(props) {
         value: retrievedOrder.cliente_id
       },
       products: orderDetail.map(detail => ({
-        boxes: detail.d_cant_cajas,
-        bottles: detail.d_cant_botellas,
+        cantidad: detail.d_cantidad,
         price: {
           precio: detail.price_precio,
           precio_id: detail.price_precio_id
@@ -215,7 +246,9 @@ export default function OrdersFormEdit(props) {
           unidades: detail.product_unidades,
           total: detail.d_total,
           tipo_venta: detail.d_tipo_venta,
-          producto_id: detail.product_producto_id
+          producto_id: detail.product_producto_id,
+          value: detail.product_producto_id,
+          label: detail.product_descripcion
         }
       }))
     });
@@ -259,13 +292,44 @@ export default function OrdersFormEdit(props) {
     }
   };
 
-  const validateBottles = (max = 50, value = 0) => {
-    let maxAllowed = max;
+  const onSelectProduct = product => {
+    if (order.products) {
+      const productAlredyAdded = order.products.some(
+        item => item.product.producto_id === product.producto_id
+      );
+      if (productAlredyAdded) {
+        setNotification({
+          color: "warning",
+          text:
+            "El producto ya ha sido agregado en el pedido, seleccione otro por favor.",
+          open: true
+        });
+        setTimeout(() => {
+          setNotification({
+            ...notification,
+            open: false
+          });
+        }, 7000);
+        return;
+      }
+    }
+    handleOrderProductsForm("product", product);
+  };
+
+  const validateBottles = (max = 50, value = 0, edit = false) => {
+    let maxAllowed = max - 1;
     if (max > 1) {
-      maxAllowed = max - 1;
+      maxAllowed = max;
+    }
+    if (max === 1) {
+      maxAllowed = 50;
+    }
+    if (edit) {
+      setEditProduct({ ...editProduct, cantidad: +value });
+      return;
     }
     if (+maxAllowed >= +value && +value >= 0) {
-      handleOrderProductsForm("bottles", value);
+      handleOrderProductsForm("cantidad", +value);
     }
   };
 
@@ -287,12 +351,12 @@ export default function OrdersFormEdit(props) {
         origen: order.origin.value,
         fecha_entrega: "2022-06-19 00:00:00",
         tipo_pago: "transferencia",
+        creado_desde: order.creado_desde,
         estado: "A",
         comentario: "",
         detail: order.products.map(product => ({
           price_id: product.price.precio_id,
-          cant_cajas: product.boxes ?? 0,
-          cant_botellas: product.bottles ?? 0,
+          cantidad: product.cantidad ?? 0,
           tipo_venta: "01",
           descuento: 0,
           total: calculateTotalPerProduct(product),
@@ -389,7 +453,7 @@ export default function OrdersFormEdit(props) {
                     <GridItem md={6}>
                       <Selector
                         placeholder="Origen"
-                        options={OriginList}
+                        options={ORIGIN_ORDER_LIST}
                         onChange={value => handleForm("origin", value)}
                         value={order.origin}
                       />
@@ -432,7 +496,18 @@ export default function OrdersFormEdit(props) {
                 <CardIcon color="rose">
                   <FormatListBulleted />
                 </CardIcon>
-                <h4 className={classes.cardIconTitle}>Productos agregados</h4>
+                <GridContainer>
+                  <GridItem xs={8}>
+                    <h4 className={classes.cardIconTitle}>
+                      Productos agregados
+                    </h4>
+                  </GridItem>
+                  <GridItem xs={4}>
+                    <h4 className={classes.cardIconTitle + " align-right"}>
+                      <b>TOTAL: </b>${totalOrder}
+                    </h4>
+                  </GridItem>
+                </GridContainer>
               </CardHeader>
               <CardBody>
                 <CustomTable
@@ -442,8 +517,7 @@ export default function OrdersFormEdit(props) {
                           return [
                             product?.product?.codigo,
                             product?.product?.descripcion,
-                            product.boxes ? product.boxes : 0,
-                            product.bottles ? product.bottles : 0,
+                            product.cantidad ? product.cantidad : 0,
                             `$${product?.price?.precio ?? 0}`,
                             0,
                             `$${calculateTotalPerProduct(product)}`,
@@ -452,13 +526,12 @@ export default function OrdersFormEdit(props) {
                         })
                       : []
                   }
-                  limite={10}
+                  limite={20}
                   headers={[
                     "Código",
                     "Nombre",
-                    "Cajas",
-                    "Botellas",
-                    "Precio Caja",
+                    "Cantidad",
+                    "Precio",
                     "Descuento",
                     "Total",
                     "Acción"
@@ -468,6 +541,7 @@ export default function OrdersFormEdit(props) {
             </Card>
           </GridItem>
         </GridContainer>
+
         <Dialog
           classes={{
             root: modalClasses.center,
@@ -499,12 +573,12 @@ export default function OrdersFormEdit(props) {
               <AsyncSelector
                 placeholder="Producto"
                 options={products}
-                onChange={value => handleOrderProductsForm("product", value)}
+                onChange={onSelectProduct}
                 value={productSelected?.product}
                 loadOptions={onSearchProducts}
               />
               <CustomInput
-                labelText="Precio Caja"
+                labelText="Precio"
                 id="boxes"
                 inputProps={{
                   type: "number"
@@ -516,45 +590,17 @@ export default function OrdersFormEdit(props) {
                 disabled
               />
               <CustomInput
-                labelText="Cajas"
-                id="boxes"
+                labelText="Cantidad"
+                id="amount"
                 inputProps={{
                   type: "number"
                 }}
-                value={productSelected?.boxes}
-                onChange={e => handleOrderProductsForm("boxes", e.target.value)}
-                formControlProps={{
-                  fullWidth: true
-                }}
-                disabled={productSelected?.product?.unidades === 1}
-              />
-              <CustomInput
-                labelText="Botellas"
-                id="bottles"
-                inputProps={{
-                  type: "number"
-                }}
-                value={productSelected?.bottles ?? 0}
-                onChange={e =>
-                  validateBottles(
-                    productSelected ? productSelected?.product?.unidades : 0,
-                    e.target.value
-                  )
-                }
+                value={productSelected?.cantidad ?? 0}
+                onChange={e => validateBottles(50, e.target.value)}
                 formControlProps={{
                   fullWidth: true
                 }}
               />
-              {productSelected &&
-                productSelected.product &&
-                productSelected.product.unidades && (
-                  <small>
-                    Máximo de botellas por pedido:{" "}
-                    {productSelected.product.unidades > 1
-                      ? productSelected.product.unidades - 1
-                      : productSelected.product.unidades}
-                  </small>
-                )}
             </form>
           </DialogContent>
           <DialogActions
@@ -567,9 +613,7 @@ export default function OrdersFormEdit(props) {
               onClick={addProduct}
               disabled={
                 !productSelected.product ||
-                (productSelected?.boxes ? +productSelected?.boxes : 0) +
-                  (productSelected?.bottles ? +productSelected?.bottles : 0) <=
-                  0
+                (productSelected?.cantidad ? productSelected?.cantidad : 0) <= 0
               }
             >
               Agregar Producto
@@ -584,6 +628,95 @@ export default function OrdersFormEdit(props) {
             </Button>
           </DialogActions>
         </Dialog>
+
+        <Dialog
+          classes={{
+            root: modalClasses.center,
+            paper: modalClasses.modal
+          }}
+          open={showEditModal}
+          transition={Transition}
+          keepMounted
+          onClose={() => setShowEditModal(false)}
+          aria-labelledby="modal-slide-title"
+          aria-describedby="modal-slide-description"
+          maxWidth="md"
+          fullWidth={true}
+        >
+          <DialogTitle
+            id="classic-modal-slide-title"
+            disableTypography
+            className={modalClasses.modalHeader}
+          >
+            <h3 className={modalClasses.modalTitle}>
+              Editar producto de tu pedido
+            </h3>
+          </DialogTitle>
+          <DialogContent
+            id="modal-slide-description"
+            className={modalClasses.modalBody}
+          >
+            <form>
+              <AsyncSelector
+                placeholder="Producto"
+                options={products}
+                onChange={value => handleOrderProductsForm("product", value)}
+                value={editProduct?.product}
+                loadOptions={onSearchProducts}
+                disabled
+              />
+              <CustomInput
+                labelText="Precio"
+                id="boxes"
+                inputProps={{
+                  type: "number"
+                }}
+                value={editProduct?.price?.precio ?? 0}
+                formControlProps={{
+                  fullWidth: true
+                }}
+                disabled
+              />
+              <CustomInput
+                labelText="Cantidad"
+                id="amount"
+                inputProps={{
+                  type: "number"
+                }}
+                value={editProduct?.cantidad ?? 0}
+                onChange={e => validateBottles(50, e.target.value, true)}
+                formControlProps={{
+                  fullWidth: true
+                }}
+              />
+            </form>
+          </DialogContent>
+          <DialogActions
+            className={
+              modalClasses.modalFooter + " " + modalClasses.modalFooterCenter
+            }
+          >
+            <Button
+              color="info"
+              onClick={onEditProduct}
+              disabled={
+                !editProduct.product ||
+                (editProduct?.cantidad ? editProduct?.cantidad : 0) <= 0
+              }
+            >
+              Editar Producto
+            </Button>
+            <Button
+              onClick={() => {
+                setShowEditModal(false);
+                setEditProduct({});
+              }}
+            >
+              Cerrar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <Snackbar
           place="br"
           color={notification.color}
