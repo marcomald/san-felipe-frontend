@@ -45,6 +45,8 @@ import {
 } from "../../services/Orders";
 import moment from "moment";
 import { ORIGIN_ORDER_LIST } from "helpers/constants";
+import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
+import { PAYMENT_LIST } from "helpers/constants";
 
 // eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -225,6 +227,10 @@ export default function OrdersFormEdit(props) {
     const orderDetail = await getOrdeDetailById(orderID);
     setOrder({
       order_id: retrievedOrder.pedido_id,
+      fecha_entrega: new Date(retrievedOrder.fecha_entrega),
+      formapago_id: PAYMENT_LIST.find(
+        payment => payment.value === retrievedOrder.formapago_id
+      ),
       origin: {
         value: retrievedOrder.origen,
         label: retrievedOrder.origen
@@ -349,7 +355,9 @@ export default function OrdersFormEdit(props) {
         fecha_pedido: moment().format("YYYY-MM-DD HH:mm:ss"),
         cliente_id: order.client.cliente_id,
         origen: order.origin.value,
-        fecha_entrega: "2022-06-19 00:00:00",
+        total: totalOrder,
+        estado_pedido: "Creado",
+        formapago_id: order.formapago_id.value,
         tipo_pago: "transferencia",
         creado_desde: order.creado_desde,
         estado: "A",
@@ -399,6 +407,13 @@ export default function OrdersFormEdit(props) {
     return formatedClients;
   };
 
+  const onSelectClient = client => {
+    const selectedPayment = PAYMENT_LIST.find(
+      payment => payment.value === client.formapago_id
+    );
+    setOrder({ ...order, client, formapago_id: selectedPayment });
+  };
+
   return (
     <AdminLayout>
       <React.Fragment>
@@ -445,7 +460,7 @@ export default function OrdersFormEdit(props) {
                       <AsyncSelector
                         placeholder="Cliente"
                         options={clients}
-                        onChange={value => handleForm("client", value)}
+                        onChange={onSelectClient}
                         value={order.client}
                         loadOptions={onSearchClients}
                       />
@@ -457,6 +472,25 @@ export default function OrdersFormEdit(props) {
                         onChange={value => handleForm("origin", value)}
                         value={order.origin}
                       />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <Selector
+                        placeholder="Forma de pago"
+                        options={PAYMENT_LIST}
+                        onChange={value => handleForm("formapago_id", value)}
+                        value={order?.formapago_id}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <CustomDatePicker
+                        placeholder="Fecha de entrega"
+                        value={order?.fecha_entrega ?? new Date()}
+                        onChange={date => handleForm("fecha_entrega", date)}
+                        minDate={new Date()}
+                      />
+                    </GridItem>
+                    <GridItem md={12}>
+                      <br />
                     </GridItem>
                     <GridItem md={6}>
                       <CustomInput
@@ -474,6 +508,7 @@ export default function OrdersFormEdit(props) {
                       />
                     </GridItem>
                   </GridContainer>
+                  <br />
                   <Button
                     color="primary"
                     key="AddButton1"

@@ -7,3 +7,14 @@ export const ORIGIN_ORDER_LIST = [
   { value: "Activaciones", label: "Activaciones" },
   { value: "Puerta a puerta", label: "Puerta a puerta" }
 ];
+
+export const PAYMENT_LIST = [
+  { value: "01", label: "Contado" },
+  { value: "02", label: "Crédito" },
+  { value: "03", label: "Descuento en rol" },
+  { value: "04", label: "Anticipo" },
+  { value: "05", label: "Contra entrega" },
+  { value: "06", label: "Cheque" },
+  { value: "07", label: "Depósito" },
+  { value: "08", label: "Transferencia" }
+];

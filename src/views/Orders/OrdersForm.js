@@ -41,6 +41,8 @@ import { getClients } from "../../services/Clients";
 import { createOrder, getOrderById } from "../../services/Orders";
 import moment from "moment";
 import { ORIGIN_ORDER_LIST } from "helpers/constants";
+import { PAYMENT_LIST } from "helpers/constants";
+import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 
 // eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -174,6 +176,8 @@ export default function OrdersForm(props) {
     if (!order?.client) return false;
     if (!order?.products || order?.products?.length === 0) return false;
     if (!order?.origin) return false;
+    if (!order?.formapago_id) return false;
+    if (!order?.fecha_entrega) return false;
     return true;
   };
 
@@ -338,7 +342,10 @@ export default function OrdersForm(props) {
         fecha_pedido: moment().format("YYYY-MM-DD HH:mm:ss"),
         cliente_id: order.client.cliente_id,
         origen: order.origin.value,
-        fecha_entrega: "2022-06-19 00:00:00",
+        fecha_entrega: order.fecha_entrega,
+        total: totalOrder,
+        estado_pedido: "Creado",
+        formapago_id: order.formapago_id.value,
         tipo_pago: "transferencia",
         creado_desde: "web",
         estado: "A",
@@ -366,6 +373,13 @@ export default function OrdersForm(props) {
         open: false
       });
     }, 10000);
+  };
+
+  const onSelectClient = client => {
+    const selectedPayment = PAYMENT_LIST.find(
+      payment => payment.value === client.formapago_id
+    );
+    setOrder({ ...order, client, formapago_id: selectedPayment });
   };
 
   return (
@@ -414,7 +428,7 @@ export default function OrdersForm(props) {
                       <AsyncSelector
                         placeholder="Cliente"
                         options={clients}
-                        onChange={value => handleForm("client", value)}
+                        onChange={onSelectClient}
                         value={order.client}
                         loadOptions={onSearchClients}
                       />
@@ -426,6 +440,25 @@ export default function OrdersForm(props) {
                         onChange={value => handleForm("origin", value)}
                         value={order.origin}
                       />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <Selector
+                        placeholder="Forma de pago"
+                        options={PAYMENT_LIST}
+                        onChange={value => handleForm("formapago_id", value)}
+                        value={order?.formapago_id}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <CustomDatePicker
+                        placeholder="Fecha de entrega"
+                        value={order?.fecha_entrega ?? new Date()}
+                        onChange={date => handleForm("fecha_entrega", date)}
+                        minDate={new Date()}
+                      />
+                    </GridItem>
+                    <GridItem md={12}>
+                      <br />
                     </GridItem>
                     <GridItem md={6}>
                       <CustomInput
@@ -443,6 +476,7 @@ export default function OrdersForm(props) {
                       />
                     </GridItem>
                   </GridContainer>
+                  <br />
                   <Button
                     color="primary"
                     key="AddButton1"

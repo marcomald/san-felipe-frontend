@@ -23,3 +23,66 @@
 .align-right {
     text-align: right;
 }
+
+.datePicker {
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-color: hsl(0,0%,100%);
+    border-color: hsl(0,0%,80%);
+    border-radius: 0;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: none;
+    cursor: default;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    min-height: 38px;
+    outline: 0 !important;
+    position: relative;
+    -webkit-transition: all 100ms;
+    transition: all 100ms;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 1px solid #D2D2D2;
+    font-size: .8rem;
+    margin-top: 2rem;
+    z-index: 100;
+    width: 100%;
+    &:focus {
+        border-bottom: 2px solid #303f9f;
+    }
+}
+
+.calendar-date{
+    z-index: 10001 !important;
+}
+
+.react-datepicker-popper {
+    z-index: 10001 !important;
+}
+
+.relative {
+    position: relative;
+}
+
+.container-calendar-icon {
+    position: absolute;
+    bottom: 5%;
+    z-index: 1000;
+    right: 2%;
+    svg {
+        fill: #D2D2D2;
+        height: 1.2rem;
+    }
+}

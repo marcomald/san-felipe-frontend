@@ -46,3 +46,14 @@ export const getClientByID = async clientId => {
     console.error("error get client by id ->", error);
   }
 };
+
+export const validateExistClientByDocument = async clientDocument => {
+  try {
+    const response = await Axios.get(
+      "/clients/exist/document/" + clientDocument
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error get client by document ->", error);
+  }
+};

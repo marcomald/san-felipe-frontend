@@ -226,9 +226,11 @@ export default function Pedidos(props) {
                     return [
                       order?.num_pedido,
                       order.semana,
-                      moment(order?.fecha_pedid).format("YYYY-MM-DD"),
+                      moment.utc(order?.fecha_pedido).format("DD-MM-YYYY"),
+                      moment.utc(order?.fecha_entrega).format("DD-MM-YYYY"),
                       clientInfo(order),
                       order?.origen,
+                      "$" + order?.total,
                       fillButtons(order)
                     ];
                   })}
@@ -237,8 +239,10 @@ export default function Pedidos(props) {
                     "N°",
                     "Semana",
                     "Fecha de pedido",
+                    "Fecha de entrega",
                     "Cliente",
                     "Origen",
+                    "Total",
                     "Acciones"
                   ]}
                   limit={limit}

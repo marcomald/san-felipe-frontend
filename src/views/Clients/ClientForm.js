@@ -25,9 +25,13 @@ import { getPriceList } from "../../services/PriceList";
 import Button from "components/CustomButtons/Button.js";
 import Search from "@material-ui/icons/Search";
 import "leaflet/dist/images/marker-shadow.png";
-import { createClient } from "../../services/Clients";
+import {
+  createClient,
+  validateExistClientByDocument
+} from "../../services/Clients";
 import Add from "@material-ui/icons/Add";
 import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
+import { PAYMENT_LIST } from "helpers/constants";
 
 // eslint-disable-next-line react/display-name
 
@@ -156,7 +160,7 @@ export default function ClientForm(props) {
     }
   };
 
-  const validateFields = () => {
+  const validateFields = async () => {
     let hasError = false;
     if (!client.nombre) {
       hasError = true;
@@ -204,6 +208,24 @@ export default function ClientForm(props) {
       hasError = true;
     }
 
+    const existClient = await validateExistClientByDocument(client.ruc_cedula);
+    console.log("existClient", existClient);
+    if (existClient) {
+      hasError = true;
+      setNotification({
+        color: "danger",
+        text: "Error! Ya existe un cliente con la cedula/ruc ingresada",
+        open: true
+      });
+      setTimeout(function() {
+        setNotification({
+          ...notification,
+          open: false
+        });
+      }, 10000);
+      return hasError;
+    }
+
     if (hasError) {
       setNotification({
         color: "danger",
@@ -221,7 +243,7 @@ export default function ClientForm(props) {
   };
 
   const createNewClient = async () => {
-    const formErrors = validateFields();
+    const formErrors = await validateFields();
     if (!formErrors) {
       let frecvisita_id = "";
       visitFrequency.forEach(day => {
@@ -241,7 +263,8 @@ export default function ClientForm(props) {
         estado: "A",
         latitud: coords.latitud,
         longitud: coords.longitud,
-        frecvisita_id
+        frecvisita_id,
+        formapago_id: client.formapago_id.value
       });
       if (created) {
         setNotification({
@@ -429,24 +452,6 @@ export default function ClientForm(props) {
                       />
                     </GridItem>
                     <GridItem md={6}>
-                      <CustomInput
-                        labelText="Nombre de contacto"
-                        id="contacto"
-                        inputProps={{
-                          type: "text"
-                        }}
-                        value={client.contacto}
-                        onChange={e => handleRoute("contacto", e.target.value)}
-                        formControlProps={{
-                          fullWidth: true
-                        }}
-                      />
-                    </GridItem>
-                    <GridItem md={6}></GridItem>
-                    <hr />
-                    <br />
-                    <br />
-                    <GridItem md={6}>
                       <Selector
                         placeholder="Negocio"
                         options={business}
@@ -469,6 +474,28 @@ export default function ClientForm(props) {
                         options={priceList}
                         onChange={value => handleRoute("listapre_id", value)}
                         value={client.listapre_id}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <Selector
+                        placeholder="Forma de pago"
+                        options={PAYMENT_LIST}
+                        onChange={value => handleRoute("formapago_id", value)}
+                        value={client.formapago_id}
+                      />
+                    </GridItem>
+                    <GridItem md={12}>
+                      <CustomInput
+                        labelText="Comentario"
+                        id="contacto"
+                        inputProps={{
+                          type: "text"
+                        }}
+                        value={client.contacto}
+                        onChange={e => handleRoute("contacto", e.target.value)}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
                       />
                     </GridItem>
                     <GridItem md={12}>

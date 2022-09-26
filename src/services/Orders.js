@@ -55,3 +55,14 @@ export const getOrders = async (limit, offset, search) => {
     console.error("error get order detail by order id ->", error);
   }
 };
+
+export const getShippify = async (georouteId, date) => {
+  try {
+    const response = await Axios.get(
+      `/orders/shippify/georoute/${georouteId}/date/:${date}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error get order detail by order id ->", error);
+  }
+};

@@ -212,9 +212,6 @@ export default function DeliveryRoutesClients(props) {
                       />
                     </GridItem>
                     <GridItem md={6}>
-                      <label className="custom-label">
-                        Frecuencia de visita
-                      </label>
                       <Selector
                         placeholder="Frecuencia de visita"
                         options={visitFrequencyList}

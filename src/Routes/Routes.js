@@ -17,6 +17,7 @@ import ClientFormEdit from "../views/Clients/ClientFormEdit";
 import DeliveryRoutesFormEdit from "../views/DeliveryRoutes/DeliveryRoutesFormEdit";
 import DeliveryRoutesClients from "../views/DeliveryRoutes/DeliveryRoutesClients";
 import OrdersFormEdit from "views/Orders/OrdersFormEdit";
+import Shippify from "views/Shippify/Shippify";
 
 const PrivateRoutes = permissions => {
   const allowedRoutes = [];
@@ -125,6 +126,16 @@ const PrivateRoutes = permissions => {
             exact
             component={DeliveryRoutesClients}
             key="rutas-de-entrega"
+          />
+        );
+        break;
+      case "shippify":
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/reporte-shippify"
+            exact
+            component={Shippify}
+            key="reporte-shippify"
           />
         );
         break;

@@ -28,6 +28,7 @@ import "leaflet/dist/images/marker-shadow.png";
 import { getClientByID, updateClient } from "../../services/Clients";
 import Add from "@material-ui/icons/Add";
 import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
+import { PAYMENT_LIST } from "helpers/constants";
 
 // eslint-disable-next-line react/display-name
 
@@ -104,6 +105,9 @@ export default function ClientFormEdit(props) {
 
     setClient({
       ...firstClient,
+      formapago_id: PAYMENT_LIST.find(
+        payment => payment.value === firstClient.formapago_id
+      ),
       listapre_id: {
         ...selectedPriceList,
         value: selectedPriceList?.listapre_id,
@@ -298,7 +302,8 @@ export default function ClientFormEdit(props) {
           estado: "A",
           latitud: coords.latitud,
           longitud: coords.longitud,
-          frecvisita_id
+          frecvisita_id,
+          formapago_id: client.formapago_id.value
         },
         clientID
       );
@@ -413,6 +418,7 @@ export default function ClientFormEdit(props) {
                         formControlProps={{
                           fullWidth: true
                         }}
+                        disabled
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -488,24 +494,6 @@ export default function ClientFormEdit(props) {
                       />
                     </GridItem>
                     <GridItem md={6}>
-                      <CustomInput
-                        labelText="Nombre de contacto"
-                        id="contacto"
-                        inputProps={{
-                          type: "text"
-                        }}
-                        value={client.contacto}
-                        onChange={e => handleRoute("contacto", e.target.value)}
-                        formControlProps={{
-                          fullWidth: true
-                        }}
-                      />
-                    </GridItem>
-                    <GridItem md={6}></GridItem>
-                    <hr />
-                    <br />
-                    <br />
-                    <GridItem md={6}>
                       <Selector
                         placeholder="Negocio"
                         options={business}
@@ -528,6 +516,28 @@ export default function ClientFormEdit(props) {
                         options={priceList}
                         onChange={value => handleRoute("listapre_id", value)}
                         value={client.listapre_id}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <Selector
+                        placeholder="Forma de pago"
+                        options={PAYMENT_LIST}
+                        onChange={value => handleRoute("formapago_id", value)}
+                        value={client.formapago_id}
+                      />
+                    </GridItem>
+                    <GridItem md={12}>
+                      <CustomInput
+                        labelText="Comentario"
+                        id="contacto"
+                        inputProps={{
+                          type: "text"
+                        }}
+                        value={client.contacto}
+                        onChange={e => handleRoute("contacto", e.target.value)}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
                       />
                     </GridItem>
                     <GridItem md={12}>

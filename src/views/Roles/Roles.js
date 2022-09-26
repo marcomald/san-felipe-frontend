@@ -80,7 +80,8 @@ export default function Roles(props) {
     { name: "Acceso a Pedidos", key: "pedidos" },
     { name: "Acceso a Roles", key: "roles" },
     { name: "Acceso a Usuarios", key: "usuarios" },
-    { name: "Acceso a Perfil", key: "userprofile" }
+    { name: "Acceso a Perfil", key: "userprofile" },
+    { name: "Acceso a Shippify", key: "shippify" }
   ];
 
   useEffect(() => {
@@ -88,6 +89,7 @@ export default function Roles(props) {
     Axios.get("/roles?" + limite)
       .then(response => {
         setRoles(response.data);
+        console.log("ROLES", response.data);
       })
       .catch(e => {
         console.error(e);
@@ -132,20 +134,32 @@ export default function Roles(props) {
               setRolEdit({
                 ...rl,
                 permisos: rl.permisos.map(per => {
-                  const aux = permisos.filter(pe => pe.key === per)[0];
+                  const aux = permisos.find(pe => pe.key === per);
+                  if (aux) {
+                    return {
+                      value: aux.key,
+                      label: aux.name
+                    };
+                  }
                   return {
-                    value: aux.key,
-                    label: aux.name
+                    value: per,
+                    label: per
                   };
                 })
               });
               setRolEditAux({
                 ...rl,
                 permisos: rl.permisos.map(per => {
-                  const aux = permisos.filter(pe => pe.key === per)[0];
+                  const aux = permisos.find(pe => pe.key === per);
+                  if (aux) {
+                    return {
+                      value: aux.key,
+                      label: aux.name
+                    };
+                  }
                   return {
-                    value: aux.key,
-                    label: aux.name
+                    value: per,
+                    label: per
                   };
                 })
               });
