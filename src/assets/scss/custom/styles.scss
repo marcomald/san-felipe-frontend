@@ -86,3 +86,26 @@
         height: 1.2rem;
     }
 }
+
+.info {
+    background-color: white;
+    padding: 1rem;
+    p{ margin: 0}
+    h4{ margin: 0}
+    hr {
+        margin-top: 5px;
+    }
+}
+.legend {
+    line-height: 18px;
+    color: #555;
+    p{ margin: 0}
+    h4{ margin: 0}
+}
+.legend i {
+    width: 18px;
+    border-radius: 50%;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+}

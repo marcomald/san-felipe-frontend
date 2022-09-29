@@ -66,3 +66,14 @@ export const getShippify = async (georouteId, date) => {
     console.error("error get order detail by order id ->", error);
   }
 };
+
+export const getOrdersByGoeroute = async (georouteId, date) => {
+  try {
+    const response = await Axios.get(
+      `/orders/by-georoute/${georouteId}/date/${date}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("error get order detail by order id ->", error);
+  }
+};

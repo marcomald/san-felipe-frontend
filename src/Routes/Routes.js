@@ -18,6 +18,7 @@ import DeliveryRoutesFormEdit from "../views/DeliveryRoutes/DeliveryRoutesFormEd
 import DeliveryRoutesClients from "../views/DeliveryRoutes/DeliveryRoutesClients";
 import OrdersFormEdit from "views/Orders/OrdersFormEdit";
 import Shippify from "views/Shippify/Shippify";
+import TrackingList from "views/Tracking/TrackingList";
 
 const PrivateRoutes = permissions => {
   const allowedRoutes = [];
@@ -136,6 +137,16 @@ const PrivateRoutes = permissions => {
             exact
             component={Shippify}
             key="reporte-shippify"
+          />
+        );
+        break;
+      case "track":
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/tracking-pedidos"
+            exact
+            component={TrackingList}
+            key="tracking-pedidos"
           />
         );
         break;

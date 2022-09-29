@@ -28,13 +28,14 @@ import Settings from "@material-ui/icons/Settings"
 import AssignmentInd from "@material-ui/icons/AssignmentInd"
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import MapIcon from '@material-ui/icons/Map';
-import {CloudDownload} from '@material-ui/icons';
+import {CloudDownload, DirectionsCar} from '@material-ui/icons';
 // core components
 import AdminNavbarLinks from "components/Navbars/AdminNavbarLinks.js";
 import sidebarStyle from "assets/jss/material-dashboard-pro-react/components/sidebarStyle.js";
 import Pedidos from "views/Orders/OrdersList";
 import DeliveryRoutesList from "views/DeliveryRoutes/DeliveryRoutesList";
 import Shippify from "views/Shippify/Shippify";
+import TrackingList from "views/Tracking/TrackingList";
 var ps;
 // We've created this component so we can have a ref to the wrapper of the links that appears in our sidebar.
 // This was necessary so that we could initialize PerfectScrollbar on the links.
@@ -189,6 +190,16 @@ class Sidebar extends React.Component {
             layout: "/mantenimiento"
           })
           break;
+          case "track":
+            allowedRoutes.push({
+              path: "/tracking-pedidos",
+              name: "Rastreo de Pedidos ",
+              rtlName: "Rastreo de Pedidos",
+              icon: DirectionsCar,
+              component: TrackingList,
+              layout: "/mantenimiento"
+            })
+            break;
         default:
           break;
       }
