@@ -154,7 +154,13 @@ export default function TrackingList() {
           total += +order.total;
         });
         total -= ordersCanceled.length;
-        const percentege = (ordersDelivered.length / orders.length) * 100;
+
+        let percentege = 0;
+        if (orders.length > 0) {
+          percentege =
+            ((ordersDelivered.length - ordersCanceled.length) / orders.length) *
+            100;
+        }
         div.innerHTML += `<p><b>Total de pedidos: </b>${orders.length}</p>`;
         div.innerHTML += `<p><b>Pedidos por entregar: </b>${ordersToDelivery.length}</p>`;
         div.innerHTML += `<p><b>Pedidos entregados: </b>${ordersDelivered.length}</p>`;
@@ -301,7 +307,6 @@ export default function TrackingList() {
                       placeholder="Fecha de entrega"
                       value={route?.fecha ?? new Date()}
                       onChange={date => handleRoute("fecha", date)}
-                      minDate={new Date()}
                     />
                   </GridItem>
                   <GridItem xs={2}>

@@ -36,7 +36,6 @@ import { getUserId } from "helpers/utils";
 import Snackbar from "components/Snackbar/Snackbar";
 import { getProductPrice, getProducts } from "../../services/Products";
 import { formatToSelectOption } from "../../helpers/utils";
-import { getTerritory } from "../../services/Territory";
 import { getClientByID, getClients } from "../../services/Clients";
 import {
   editOrder,
@@ -47,6 +46,7 @@ import moment from "moment";
 import { ORIGIN_ORDER_LIST } from "helpers/constants";
 import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 import { PAYMENT_LIST } from "helpers/constants";
+import { getDeliveryRoutes } from "services/DeliveryRoutesServices";
 
 // eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -80,7 +80,7 @@ export default function OrdersFormEdit(props) {
   const [order, setOrder] = useState({});
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
-  const [territory, setTerritory] = useState({});
+  const [geoRoutes, setGeoroutes] = useState([]);
   const [productSelected, setProductSelected] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [totalOrder, setTotalOrder] = useState(0);
@@ -99,12 +99,6 @@ export default function OrdersFormEdit(props) {
     fetchProducts();
     fetchClients();
   }, []);
-
-  useEffect(() => {
-    if (order.client) {
-      fetchTerritory();
-    }
-  }, [order.client]);
 
   useEffect(() => {
     if (productSelected.product) {
@@ -183,6 +177,7 @@ export default function OrdersFormEdit(props) {
     if (!order?.client) return false;
     if (!order?.products || order?.products?.length === 0) return false;
     if (!order?.origin) return false;
+    if (!order?.georuta_id) return false;
     return true;
   };
 
@@ -225,12 +220,21 @@ export default function OrdersFormEdit(props) {
     const retrievedOrder = await getOrderById(orderID);
     const client = await getClientByID(retrievedOrder.cliente_id);
     const orderDetail = await getOrdeDetailById(orderID);
+    const routes = await fetchGeoroutes();
+    const georutaOrder = routes.find(
+      georoute => georoute.georuta_id === retrievedOrder.georuta_id
+    );
+    const date = moment.utc(retrievedOrder.fecha_entrega);
+    const year = date.format("YYYY");
+    const month = date.format("MM");
+    const day = date.format("DD");
     setOrder({
       order_id: retrievedOrder.pedido_id,
-      fecha_entrega: new Date(retrievedOrder.fecha_entrega),
+      fecha_entrega: new Date([year, month, day]),
       formapago_id: PAYMENT_LIST.find(
         payment => payment.value === retrievedOrder.formapago_id
       ),
+      georuta_id: georutaOrder,
       origin: {
         value: retrievedOrder.origen,
         label: retrievedOrder.origen
@@ -267,11 +271,16 @@ export default function OrdersFormEdit(props) {
     );
   };
 
-  const fetchTerritory = async () => {
-    if (order.client) {
-      const territoryRetrieved = await getTerritory(order.client.territorio_id);
-      setTerritory(territoryRetrieved);
-    }
+  const fetchGeoroutes = async () => {
+    const retrievedGeoroutes = await getDeliveryRoutes("100", "", "");
+    setGeoroutes(
+      formatToSelectOption(retrievedGeoroutes.georutas, "georuta_id", "nombre")
+    );
+    return formatToSelectOption(
+      retrievedGeoroutes.georutas,
+      "georuta_id",
+      "nombre"
+    );
   };
 
   const fetchProductPrice = async () => {
@@ -352,16 +361,16 @@ export default function OrdersFormEdit(props) {
         empresa_id: order.client.empresa_id,
         sucursal_id: order.client.sucursal_id,
         semana: moment().week(),
-        fecha_pedido: moment().format("YYYY-MM-DD HH:mm:ss"),
+        fecha_entrega: order.fecha_entrega,
         cliente_id: order.client.cliente_id,
         origen: order.origin.value,
         total: totalOrder,
         estado_pedido: "Creado",
         formapago_id: order.formapago_id.value,
-        tipo_pago: "transferencia",
         creado_desde: order.creado_desde,
         estado: "A",
         comentario: "",
+        georuta_id: order.georuta_id.value,
         detail: order.products.map(product => ({
           price_id: product.price.precio_id,
           cantidad: product.cantidad ?? 0,
@@ -411,7 +420,14 @@ export default function OrdersFormEdit(props) {
     const selectedPayment = PAYMENT_LIST.find(
       payment => payment.value === client.formapago_id
     );
-    setOrder({ ...order, client, formapago_id: selectedPayment });
+    const orderData = { ...order, client, formapago_id: selectedPayment };
+    const georuta = geoRoutes.find(
+      georoute => georoute.georuta_id === client.georuta_id
+    );
+    if (georuta) {
+      orderData.georuta_id = georuta;
+    }
+    setOrder(orderData);
   };
 
   return (
@@ -489,22 +505,12 @@ export default function OrdersFormEdit(props) {
                         minDate={new Date()}
                       />
                     </GridItem>
-                    <GridItem md={12}>
-                      <br />
-                    </GridItem>
                     <GridItem md={6}>
-                      <CustomInput
-                        labelText="Ruta"
-                        id="rute"
-                        inputProps={{
-                          type: "text"
-                        }}
-                        value={territory?.descripcion}
-                        onChange={e => handleForm("origin", e.target.value)}
-                        formControlProps={{
-                          fullWidth: true
-                        }}
-                        disabled
+                      <Selector
+                        placeholder="Ruta de entrega"
+                        options={geoRoutes}
+                        onChange={value => handleForm("georuta_id", value)}
+                        value={order?.georuta_id}
                       />
                     </GridItem>
                   </GridContainer>
