@@ -30,7 +30,13 @@ export const getUserId = () => {
   return userDecode.userId;
 };
 
-export const generateGetParams = (limit, offset, search) => {
+export const generateGetParams = (
+  limit,
+  offset,
+  search,
+  deliveryDate,
+  georutaId
+) => {
   let queryParams = "";
   if (search) {
     queryParams = `?s=${search}`;
@@ -47,6 +53,20 @@ export const generateGetParams = (limit, offset, search) => {
       queryParams = `${queryParams}&offset=${offset}`;
     } else {
       queryParams = `?offset=${offset}`;
+    }
+  }
+  if (deliveryDate) {
+    if (queryParams) {
+      queryParams = `${queryParams}&deliveryDate=${deliveryDate}`;
+    } else {
+      queryParams = `?deliveryDate=${deliveryDate}`;
+    }
+  }
+  if (georutaId) {
+    if (queryParams) {
+      queryParams = `${queryParams}&georutaId=${georutaId}`;
+    } else {
+      queryParams = `?georutaId=${georutaId}`;
     }
   }
   return queryParams;

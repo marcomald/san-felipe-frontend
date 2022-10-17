@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import moment from "moment";
 import Close from "@material-ui/icons/Close";
 import Add from "@material-ui/icons/Add";
 // Components
@@ -32,7 +32,7 @@ import {
   deleteDeliveryRoute,
   getDeliveryRoutes
 } from "../../services/DeliveryRoutesServices";
-import { Edit, RemoveRedEyeOutlined } from "@material-ui/icons";
+import { Edit } from "@material-ui/icons";
 
 const customStyles = {
   ...styles,
@@ -90,8 +90,7 @@ export default function DeliveryRoutesList(props) {
   const fillButtons = route => {
     return [
       { color: "rose", icon: Edit },
-      { color: "danger", icon: Close },
-      { color: "primary", icon: RemoveRedEyeOutlined }
+      { color: "danger", icon: Close }
     ].map((prop, key) => {
       return (
         <Tooltip
@@ -99,9 +98,7 @@ export default function DeliveryRoutesList(props) {
           title={
             prop.color === "danger"
               ? "Eliminar ruta de entrega"
-              : prop.color === "rose"
-              ? "Editar ruta de entrega"
-              : "Ver clientes de la ruta"
+              : "Editar ruta de entrega"
           }
           placement="top"
           classes={{ tooltip: classes.tooltip }}
@@ -115,15 +112,9 @@ export default function DeliveryRoutesList(props) {
               setGeoRoute(route);
               if (prop.color === "danger") {
                 setShowDelete(true);
-              }
-              if (prop.color === "rose") {
+              } else {
                 props.history.push(
                   "/mantenimiento/rutas-de-entrega/editar/" + route.georuta_id
-                );
-              }
-              if (prop.color === "primary") {
-                props.history.push(
-                  "/mantenimiento/rutas-de-entrega/ver/" + route.georuta_id
                 );
               }
             }}
@@ -187,16 +178,18 @@ export default function DeliveryRoutesList(props) {
               </CardHeader>
               <CardBody>
                 <CustomTable
-                  data={geoRoutes.georutas.map(item => {
-                    return [
-                      item.nombre,
-                      item.descripcion,
-                      item.estado === "A" ? "Activo" : "Inactivo",
-                      fillButtons(item)
-                    ];
-                  })}
+                  data={
+                    geoRoutes?.georutas?.map(item => {
+                      return [
+                        item?.nombre,
+                        moment(item?.fecha).format("DD/MM/YYYY"),
+                        item?.estado === "A" ? "Activo" : "Inactivo",
+                        fillButtons(item)
+                      ];
+                    }) ?? []
+                  }
                   limite={10}
-                  headers={["Nombre", "Descripción", "Estado", "Acciones"]}
+                  headers={["Nombre", "Fecha", "Estado", "Acciones"]}
                   onOffsetChange={valueOffset => {
                     setOffset(valueOffset);
                   }}

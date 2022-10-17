@@ -23,7 +23,6 @@ import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 import { getDeliveryRoutes } from "services/DeliveryRoutesServices";
 import { getTrackByVendedor } from "services/Track";
 import { getOrdersByGoeroute } from "services/Orders";
-import { getDeliveryRouteById } from "services/DeliveryRoutesServices";
 
 const customStyles = {
   ...styles,
@@ -98,20 +97,14 @@ export default function TrackingList() {
       route.ruta.georuta_id,
       route.fecha
     );
-    const routeClients = await getDeliveryRouteById(route.ruta.georuta_id, "");
     if (map) {
       map.remove();
-      initMap(
-        route.ruta.polygon.coordinates,
-        trackData ?? [],
-        orders ?? [],
-        routeClients.clients ?? []
-      );
+      initMap(route.ruta.polygon.coordinates, trackData ?? [], orders ?? []);
       myRef.current.scrollIntoView();
     }
   };
 
-  const initMap = (polygon, points, orders, clients) => {
+  const initMap = (polygon, points, orders) => {
     let latitud = -0.1865938;
     let longitud = -78.570624;
     const mapLayout = L.map("RouteMap").setView([latitud, longitud], 16);
@@ -136,9 +129,7 @@ export default function TrackingList() {
       if (seller) {
         div.innerHTML += `<p><b>Vendedor: </b>${seller.nombre_usuario}</p>`;
       }
-      if (clients) {
-        div.innerHTML += `<p><b>Clientes por ruta: </b>${clients.length}</p>`;
-      }
+
       if (orders) {
         const ordersToDelivery = orders.filter(
           order => order.estado_pedido === "Creado"
@@ -179,8 +170,6 @@ export default function TrackingList() {
 
     legend.onAdd = function() {
       const div = L.DomUtil.create("div", "info legend");
-      div.innerHTML +=
-        '<p style="margin-bottom:2px;"><i style="background: #00FF00"></i> Clientes </p>';
       div.innerHTML +=
         '<p style="margin-bottom:2px;"><i style="background: #3388ff"></i> Pedido por entregar </p>';
       div.innerHTML +=
@@ -224,20 +213,6 @@ export default function TrackingList() {
           );
           marker.addTo(mapLayout);
         }
-      });
-    }
-
-    if (clients) {
-      clients.forEach(client => {
-        const geometry = JSON.parse(client.geometry);
-        const marker = new L.circleMarker(geometry.coordinates, {
-          color: "#00FF00"
-        });
-        marker.bindPopup(
-          `<p style="margin:0;"> <b>Nombre: </b> ${client.nombre}</p>
-             <p style="margin:0;"><b>Ci/Ruc: </b> ${client.ruc_cedula}</p>`
-        );
-        marker.addTo(mapLayout);
       });
     }
 

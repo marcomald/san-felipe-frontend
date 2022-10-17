@@ -36,8 +36,7 @@ import { getUserId } from "helpers/utils";
 import Snackbar from "components/Snackbar/Snackbar";
 import { getProductPrice, getProducts } from "../../services/Products";
 import { formatToSelectOption } from "../../helpers/utils";
-import { getDeliveryRoutes } from "../../services/DeliveryRoutesServices";
-import { getClients } from "../../services/Clients";
+import { getClients, updateClientComment } from "../../services/Clients";
 import { createOrder, getOrderById } from "../../services/Orders";
 import moment from "moment";
 import { PAYMENT_LIST, ORIGIN_ORDER_LIST } from "helpers/constants";
@@ -75,7 +74,6 @@ export default function OrdersForm(props) {
   const [order, setOrder] = useState({ fecha_entrega: new Date() });
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
-  const [geoRoutes, setGeoroutes] = useState([]);
   const [productSelected, setProductSelected] = useState({});
   const [editProduct, setEditProduct] = useState({});
   const [totalOrder, setTotalOrder] = useState(0);
@@ -93,7 +91,7 @@ export default function OrdersForm(props) {
   useEffect(() => {
     fetchProducts();
     fetchClients();
-    fetchGeoroutes();
+    // fetchGeoroutes();
     if (orderID) {
       fetchOrder();
     }
@@ -172,7 +170,6 @@ export default function OrdersForm(props) {
     if (!order?.origin) return false;
     if (!order?.formapago_id) return false;
     if (!order?.fecha_entrega) return false;
-    if (!order?.georuta_id) return false;
     return true;
   };
 
@@ -229,13 +226,6 @@ export default function OrdersForm(props) {
     );
   };
 
-  const fetchGeoroutes = async () => {
-    const retrievedGeoroutes = await getDeliveryRoutes("100", "", "");
-    setGeoroutes(
-      formatToSelectOption(retrievedGeoroutes.georutas, "georuta_id", "nombre")
-    );
-  };
-
   const fetchProductPrice = async () => {
     if (order.client && productSelected.product) {
       const productPrice = await getProductPrice(
@@ -284,13 +274,13 @@ export default function OrdersForm(props) {
     handleOrderProductsForm("product", product);
   };
 
-  const validateBottles = (max = 50, value = 0, edit = false) => {
+  const validateBottles = (max = 500, value = 0, edit = false) => {
     let maxAllowed = max - 1;
     if (max > 1) {
       maxAllowed = max;
     }
     if (max === 1) {
-      maxAllowed = 50;
+      maxAllowed = 500;
     }
     if (edit) {
       setEditProduct({ ...editProduct, cantidad: +value });
@@ -328,8 +318,24 @@ export default function OrdersForm(props) {
     return formatedClients;
   };
 
+  const updateClientContact = async () => {
+    const selectedPayment = PAYMENT_LIST.find(
+      payment => payment.value === order.client.formapago_id
+    );
+    if (
+      order.client.contacto !== order.comentario ||
+      selectedPayment !== order.client.formapago_id
+    ) {
+      await updateClientComment(
+        order.client.cliente_id,
+        order.comentario,
+        order.client.formapago_id
+      );
+    }
+  };
+
   const createNewOrder = async () => {
-    await createOrder([
+    const created = await createOrder([
       {
         empresa_id: order.client.empresa_id,
         sucursal_id: order.client.sucursal_id,
@@ -344,7 +350,7 @@ export default function OrdersForm(props) {
         creado_desde: "web",
         estado: "A",
         comentario: "",
-        georuta_id: order?.georuta_id?.value,
+        georuta_id: "",
         detail: order.products.map(product => ({
           price_id: product.price.precio_id,
           cantidad: product.cantidad ?? 0,
@@ -356,7 +362,24 @@ export default function OrdersForm(props) {
         userId: getUserId()
       }
     ]);
+    if (created.error) {
+      setNotification({
+        color: "warning",
+        text:
+          "Ya existe un pedido para el cliente y fecha seleccionada, intente con diferentes valores.",
+        open: true
+      });
+      setTimeout(() => {
+        setNotification({
+          ...notification,
+          open: false
+        });
+      }, 7000);
+      return;
+    }
+    await updateClientContact();
     setOrder({});
+    setTotalOrder(0);
     setNotification({
       color: "info",
       text: "Exito, pedido creado.",
@@ -374,13 +397,12 @@ export default function OrdersForm(props) {
     const selectedPayment = PAYMENT_LIST.find(
       payment => payment.value === client.formapago_id
     );
-    const orderData = { ...order, client, formapago_id: selectedPayment };
-    const georuta = geoRoutes.find(
-      georoute => georoute.georuta_id === client.georuta_id
-    );
-    if (georuta) {
-      orderData.georuta_id = georuta;
-    }
+    const orderData = {
+      ...order,
+      client,
+      comentario: client.contacto,
+      formapago_id: selectedPayment
+    };
     setOrder(orderData);
   };
 
@@ -457,15 +479,26 @@ export default function OrdersForm(props) {
                         value={order?.fecha_entrega ?? new Date()}
                         onChange={date => handleForm("fecha_entrega", date)}
                         minDate={new Date()}
+                        showTimeSelect
                       />
                     </GridItem>
-                    <GridItem md={6}>
-                      <Selector
-                        placeholder="Ruta de entrega"
-                        options={geoRoutes}
-                        onChange={value => handleForm("georuta_id", value)}
-                        value={order?.georuta_id}
-                      />
+                    <GridItem md={12}>
+                      <div className="margin-top">
+                        <CustomInput
+                          labelText="Comentario"
+                          id="comment"
+                          inputProps={{
+                            type: "text"
+                          }}
+                          value={order?.comentario}
+                          onChange={e =>
+                            handleForm("comentario", e.target.value)
+                          }
+                          formControlProps={{
+                            fullWidth: true
+                          }}
+                        />
+                      </div>
                     </GridItem>
                   </GridContainer>
                   <br />
@@ -591,7 +624,7 @@ export default function OrdersForm(props) {
                   type: "number"
                 }}
                 value={productSelected?.cantidad ?? 0}
-                onChange={e => validateBottles(50, e.target.value)}
+                onChange={e => validateBottles(500, e.target.value)}
                 formControlProps={{
                   fullWidth: true
                 }}

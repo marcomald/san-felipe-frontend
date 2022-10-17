@@ -23,9 +23,10 @@ import MapIcon from "@material-ui/icons/Map";
 import { getSellers } from "../../services/Users";
 import { formatToSelectOption } from "../../helpers/utils";
 import { createDeliveryRoutes } from "../../services/DeliveryRoutesServices";
+import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
+import { getOrders } from "services/Orders";
 
 // eslint-disable-next-line react/display-name
-
 const customStyles = {
   ...styles,
   customCardContentClass: {
@@ -69,15 +70,21 @@ L.drawLocal.edit.toolbar.actions = {
 };
 
 export default function DeliveryRoutesForm(props) {
-  const [route, setRoute] = useState({});
+  const [route, setRoute] = useState();
   const [polygon, setPolygon] = useState([]);
   const [sellers, setSellers] = useState([]);
+  const [map, setMap] = useState();
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
     open: false
   });
   const classes = useStyles();
+
+  useEffect(() => {
+    fetchSellers();
+    initMap();
+  }, []);
 
   const handleRoute = (key, value) => {
     const updatedRoute = { ...route };
@@ -87,32 +94,54 @@ export default function DeliveryRoutesForm(props) {
 
   const fetchSellers = async () => {
     const retrievedSellers = await getSellers();
-    setSellers(
-      formatToSelectOption(retrievedSellers.users, "id", "nombre_completo")
-    );
+    if (retrievedSellers?.users) {
+      setSellers(
+        formatToSelectOption(retrievedSellers.users, "id", "nombre_completo")
+      );
+    }
   };
 
-  useEffect(() => {
+  const fetchOrders = async (
+    offsetFetch,
+    limitFetch,
+    searchFetch,
+    deliveryDate
+  ) => {
+    const ordersRetrieved = await getOrders(
+      limitFetch,
+      offsetFetch,
+      searchFetch,
+      deliveryDate,
+      "null"
+    );
+    if (map) {
+      map.remove();
+      initMap(ordersRetrieved.orders);
+    }
+  };
+
+  const initMap = ordersClients => {
     let latitud = -0.1865938;
     let longitud = -78.570624;
     const mapLayout = L.map("RouteMap").setView([latitud, longitud], 16);
-
-    if (navigator.geolocation) {
-      const success = position => {
-        latitud = position.coords.latitude;
-        longitud = position.coords.longitude;
-        mapLayout.flyTo([latitud, longitud], 16);
-      };
-      navigator.geolocation.getCurrentPosition(success, function(msg) {
-        console.error(msg);
-      });
-    }
 
     //Map configurations
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 21,
       attribution: "© OpenStreetMap"
     }).addTo(mapLayout);
+
+    if (ordersClients && ordersClients.length > 0) {
+      const boundsArray = [];
+      ordersClients.forEach(order => {
+        const geometry = JSON.parse(order.point);
+        boundsArray.push(geometry.coordinates);
+        const marker = new L.CircleMarker(geometry.coordinates);
+        marker.addTo(mapLayout);
+      });
+      const bounds = new L.LatLngBounds(boundsArray);
+      mapLayout.fitBounds(bounds);
+    }
 
     const drawnItems = new L.FeatureGroup();
     mapLayout.addLayer(drawnItems);
@@ -144,7 +173,6 @@ export default function DeliveryRoutesForm(props) {
 
     mapLayout.on(L.Draw.Event.CREATED, e => {
       setPolygon(e.layer.editing.latlngs[0]);
-      console.log(e.layer.editing.latlngs[0]);
       drawnItems.addLayer(e.layer);
       drawControlFull.remove(mapLayout);
       drawControlEditOnly.addTo(mapLayout);
@@ -156,15 +184,15 @@ export default function DeliveryRoutesForm(props) {
       }
     });
 
-    fetchSellers();
-  }, []);
+    setMap(mapLayout);
+  };
 
   const validateFields = () => {
     let hasError = false;
     if (!route.nombre) {
       hasError = true;
     }
-    if (!route.descripcion) {
+    if (!route.fecha) {
       hasError = true;
     }
     if (!route.vendedor) {
@@ -193,11 +221,13 @@ export default function DeliveryRoutesForm(props) {
   const createNewGeoRoute = async () => {
     const formErrors = validateFields();
     if (!formErrors) {
+      const polygonPoints = polygon[0].map(point => [point.lat, point.lng]);
+      polygonPoints.push(polygonPoints[0]);
       await createDeliveryRoutes({
         nombre: route.nombre,
-        descripcion: route.descripcion,
+        fecha: route.fecha,
         vendedorId: route.vendedor.id,
-        puntos: polygon[0].map(point => [point.lat, point.lng])
+        puntos: polygonPoints
       });
       setNotification({
         color: "info",
@@ -211,6 +241,11 @@ export default function DeliveryRoutesForm(props) {
         });
       }, 10000);
     }
+  };
+
+  const onSelectDate = async date => {
+    await fetchOrders("", "", "", date);
+    handleRoute("fecha", date);
   };
 
   return (
@@ -258,33 +293,10 @@ export default function DeliveryRoutesForm(props) {
                 <form>
                   <GridContainer>
                     <GridItem md={6}>
-                      <CustomInput
-                        labelText="Nombre"
-                        id="rute"
-                        inputProps={{
-                          type: "text"
-                        }}
-                        value={route.nombre}
-                        onChange={e => handleRoute("nombre", e.target.value)}
-                        formControlProps={{
-                          fullWidth: true
-                        }}
-                      />
-                    </GridItem>
-                    <GridItem md={6}>
-                      <CustomInput
-                        labelText="Descripción"
-                        id="rute"
-                        inputProps={{
-                          type: "text"
-                        }}
-                        value={route.descripcion}
-                        onChange={e =>
-                          handleRoute("descripcion", e.target.value)
-                        }
-                        formControlProps={{
-                          fullWidth: true
-                        }}
+                      <CustomDatePicker
+                        placeholder="Fecha de entrega"
+                        value={route?.fecha}
+                        onChange={onSelectDate}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -292,7 +304,21 @@ export default function DeliveryRoutesForm(props) {
                         placeholder="Vendedor"
                         options={sellers}
                         onChange={value => handleRoute("vendedor", value)}
-                        value={route.vendedor}
+                        value={route?.vendedor}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <CustomInput
+                        labelText="Nombre"
+                        id="rute"
+                        inputProps={{
+                          type: "text"
+                        }}
+                        value={route?.nombre}
+                        onChange={e => handleRoute("nombre", e.target.value)}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
                       />
                     </GridItem>
                     <GridItem md={12}>

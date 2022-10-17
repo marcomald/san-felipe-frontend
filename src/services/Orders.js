@@ -46,9 +46,21 @@ export const getOrdeDetailById = async orderID => {
   }
 };
 
-export const getOrders = async (limit, offset, search) => {
+export const getOrders = async (
+  limit,
+  offset,
+  search,
+  deliveryDate,
+  georutaId
+) => {
   try {
-    const queryParams = generateGetParams(limit, offset, search);
+    const queryParams = generateGetParams(
+      limit,
+      offset,
+      search,
+      deliveryDate,
+      georutaId
+    );
     const response = await Axios.get("/orders" + queryParams);
     return response.data;
   } catch (error) {

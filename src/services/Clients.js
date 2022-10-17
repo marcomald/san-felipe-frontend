@@ -57,3 +57,15 @@ export const validateExistClientByDocument = async clientDocument => {
     console.error("error get client by document ->", error);
   }
 };
+
+export const updateClientComment = async (clientId, comment, formapago_id) => {
+  try {
+    const response = await Axios.put(`/clients/${clientId}/comment`, {
+      comment,
+      formapago_id
+    });
+    return response.data;
+  } catch (error) {
+    console.error("error updating client comment ->", error);
+  }
+};

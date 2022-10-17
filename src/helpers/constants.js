@@ -5,7 +5,8 @@ export const ORIGIN_ORDER_LIST = [
   { value: "Página web", label: "Página web" },
   { value: "Boca a boca", label: "Boca a boca" },
   { value: "Activaciones", label: "Activaciones" },
-  { value: "Puerta a puerta", label: "Puerta a puerta" }
+  { value: "Puerta a puerta", label: "Puerta a puerta" },
+  { value: "RECIAPP", label: "RECIAPP" }
 ];
 
 export const PAYMENT_LIST = [
@@ -16,5 +17,6 @@ export const PAYMENT_LIST = [
   { value: "05", label: "Contra entrega" },
   { value: "06", label: "Cheque" },
   { value: "07", label: "Depósito" },
-  { value: "08", label: "Transferencia" }
+  { value: "08", label: "Transferencia" },
+  { value: "09", label: "RECIVECI" }
 ];
