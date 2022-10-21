@@ -32,6 +32,7 @@ import {
 import Add from "@material-ui/icons/Add";
 import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
 import { PAYMENT_LIST } from "helpers/constants";
+import LoaderComponent from "components/Loader/Loader";
 
 // eslint-disable-next-line react/display-name
 
@@ -69,6 +70,7 @@ export default function ClientForm(props) {
   const [territories, setTerritories] = useState([]);
   const [visitFrequency, setVisitFrequency] = useState([]);
   const [priceList, setPriceList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [map, setMap] = useState();
   const [notification, setNotification] = useState({
     color: "info",
@@ -98,7 +100,6 @@ export default function ClientForm(props) {
       const success = position => {
         latitud = position.coords.latitude;
         longitud = position.coords.longitude;
-        console.log(latitud, longitud);
         mapLayout.flyTo([latitud, longitud], 16);
       };
       navigator.geolocation.getCurrentPosition(success, function(msg) {
@@ -209,7 +210,6 @@ export default function ClientForm(props) {
     }
 
     const existClient = await validateExistClientByDocument(client.ruc_cedula);
-    console.log("existClient", existClient);
     if (existClient) {
       hasError = true;
       setNotification({
@@ -245,6 +245,7 @@ export default function ClientForm(props) {
   const createNewClient = async () => {
     const formErrors = await validateFields();
     if (!formErrors) {
+      setLoading(true);
       let frecvisita_id = "";
       visitFrequency.forEach(day => {
         frecvisita_id = `${frecvisita_id}${day}`;
@@ -267,6 +268,7 @@ export default function ClientForm(props) {
         formapago_id: client.formapago_id.value
       });
       if (created) {
+        setClient({});
         setNotification({
           color: "info",
           text: "Exito, cliente creado.",
@@ -279,6 +281,7 @@ export default function ClientForm(props) {
           });
         }, 10000);
       }
+      setLoading(false);
     }
   };
 
@@ -614,6 +617,7 @@ export default function ClientForm(props) {
           </GridItem>
         </GridContainer>
         <br />
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

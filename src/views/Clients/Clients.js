@@ -30,6 +30,7 @@ import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import AdminLayout from "layouts/Admin";
 import { deleteClient, getClients } from "../../services/Clients";
 import AssignmentInd from "@material-ui/icons/AssignmentInd";
+import LoaderComponent from "components/Loader/Loader";
 
 // Helper
 const customStyles = {
@@ -71,14 +72,17 @@ export default function Clients(props) {
   const [clientSearch, setClientSearch] = React.useState("");
   const [offset, setOffset] = React.useState(0);
   const [limit, setLimit] = React.useState(10);
+  const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
     fetchClients();
   }, [offset, limit, clientSearch]);
 
   const fetchClients = async () => {
+    setLoading(true);
     const retrievedClients = await getClients(limit, offset, clientSearch);
     setClients(retrievedClients);
+    setLoading(false);
   };
 
   const classes = useStyles();
@@ -248,6 +252,7 @@ export default function Clients(props) {
           </Button>
         </DialogActions>
       </Dialog>
+      {loading && <LoaderComponent />}
 
       <Snackbar
         place="br"

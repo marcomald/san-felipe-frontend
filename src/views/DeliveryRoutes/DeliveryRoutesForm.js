@@ -25,6 +25,8 @@ import { formatToSelectOption } from "../../helpers/utils";
 import { createDeliveryRoutes } from "../../services/DeliveryRoutesServices";
 import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 import { getOrders } from "services/Orders";
+import moment from "moment";
+import LoaderComponent from "components/Loader/Loader";
 
 // eslint-disable-next-line react/display-name
 const customStyles = {
@@ -74,6 +76,7 @@ export default function DeliveryRoutesForm(props) {
   const [polygon, setPolygon] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [map, setMap] = useState();
+  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -107,6 +110,7 @@ export default function DeliveryRoutesForm(props) {
     searchFetch,
     deliveryDate
   ) => {
+    setLoading(true);
     const ordersRetrieved = await getOrders(
       limitFetch,
       offsetFetch,
@@ -118,6 +122,7 @@ export default function DeliveryRoutesForm(props) {
       map.remove();
       initMap(ordersRetrieved.orders);
     }
+    setLoading(false);
   };
 
   const initMap = ordersClients => {
@@ -137,6 +142,14 @@ export default function DeliveryRoutesForm(props) {
         const geometry = JSON.parse(order.point);
         boundsArray.push(geometry.coordinates);
         const marker = new L.CircleMarker(geometry.coordinates);
+        marker.bindPopup(
+          `
+          <div>
+          <p style="margin:0">Nombre: <b>${order.nombre}</b></p>
+          <p style="margin:0">Total pedido: <b>${order.total}</b></p>
+          </div>
+         `
+        );
         marker.addTo(mapLayout);
       });
       const bounds = new L.LatLngBounds(boundsArray);
@@ -221,6 +234,7 @@ export default function DeliveryRoutesForm(props) {
   const createNewGeoRoute = async () => {
     const formErrors = validateFields();
     if (!formErrors) {
+      setLoading(true);
       const polygonPoints = polygon[0].map(point => [point.lat, point.lng]);
       polygonPoints.push(polygonPoints[0]);
       await createDeliveryRoutes({
@@ -240,11 +254,12 @@ export default function DeliveryRoutesForm(props) {
           open: false
         });
       }, 10000);
+      setLoading(false);
     }
   };
 
   const onSelectDate = async date => {
-    await fetchOrders("", "", "", date);
+    await fetchOrders("", "", "", moment(date).format("YYYY-MM-DD"));
     handleRoute("fecha", date);
   };
 
@@ -339,6 +354,7 @@ export default function DeliveryRoutesForm(props) {
           </GridItem>
         </GridContainer>
         <br />
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

@@ -29,6 +29,7 @@ import { getClientByID, updateClient } from "../../services/Clients";
 import Add from "@material-ui/icons/Add";
 import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
 import { PAYMENT_LIST } from "helpers/constants";
+import LoaderComponent from "components/Loader/Loader";
 
 // eslint-disable-next-line react/display-name
 
@@ -69,6 +70,7 @@ export default function ClientFormEdit(props) {
   const [territories, setTerritories] = useState([]);
   const [priceList, setPriceList] = useState([]);
   const [map, setMap] = useState();
+  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -173,36 +175,41 @@ export default function ClientFormEdit(props) {
   };
 
   const fetchClient = async () => {
+    setLoading(true);
     const mapLayout = initMap();
     const retrievedClient = await getClientByID(clientID);
-    setFirstClient(retrievedClient);
-    const frequency = [];
-    if (
-      retrievedClient.frecvisita_id &&
-      retrievedClient.frecvisita_id.length > 0
-    ) {
-      for (
-        let index = 0;
-        index < retrievedClient.frecvisita_id.length;
-        index += 1
+    if (retrievedClient) {
+      setFirstClient(retrievedClient);
+      const frequency = [];
+      if (
+        retrievedClient &&
+        retrievedClient.frecvisita_id &&
+        retrievedClient.frecvisita_id.length > 0
       ) {
-        const day = retrievedClient.frecvisita_id[index];
-        frequency.push(day);
+        for (
+          let index = 0;
+          index < retrievedClient.frecvisita_id.length;
+          index += 1
+        ) {
+          const day = retrievedClient.frecvisita_id[index];
+          frequency.push(day);
+        }
+        setVisitFrequency(frequency);
       }
-      setVisitFrequency(frequency);
-    }
 
-    if (retrievedClient?.point?.coordinates.length > 0) {
-      const lat = retrievedClient.point.coordinates[0];
-      const lng = retrievedClient.point.coordinates[1];
-      setCoords({
-        latitud: lat,
-        longitud: lng
-      });
-      mapLayout.flyTo([lat, lng], 16);
-      const marker = new L.Marker([lat, lng]);
-      marker.addTo(mapLayout);
+      if (retrievedClient?.point?.coordinates.length > 0) {
+        const lat = retrievedClient.point.coordinates[0];
+        const lng = retrievedClient.point.coordinates[1];
+        setCoords({
+          latitud: lat,
+          longitud: lng
+        });
+        mapLayout.flyTo([lat, lng], 16);
+        const marker = new L.Marker([lat, lng]);
+        marker.addTo(mapLayout);
+      }
     }
+    setLoading(false);
   };
 
   const searchLocation = () => {
@@ -265,6 +272,9 @@ export default function ClientFormEdit(props) {
     if (visitFrequency.length <= 0) {
       hasError = true;
     }
+    if (!client.formapago_id) {
+      hasError = true;
+    }
     if (hasError) {
       setNotification({
         color: "danger",
@@ -284,6 +294,7 @@ export default function ClientFormEdit(props) {
   const updateCurrentClient = async () => {
     const formErrors = validateFields();
     if (!formErrors) {
+      setLoading(true);
       let frecvisita_id = "";
       visitFrequency.forEach(day => {
         frecvisita_id = `${frecvisita_id}${day}`;
@@ -320,6 +331,7 @@ export default function ClientFormEdit(props) {
           });
         }, 10000);
       }
+      setLoading(false);
     }
   };
 
@@ -374,6 +386,24 @@ export default function ClientFormEdit(props) {
               <CardBody>
                 <form>
                   <GridContainer>
+                    <GridItem md={6}>
+                      <CustomInput
+                        labelText="Código de cliente"
+                        id="code"
+                        inputProps={{
+                          type: "text"
+                        }}
+                        value={client.cliente_id}
+                        onChange={e =>
+                          handleRoute("cliente_id", e.target.value)
+                        }
+                        formControlProps={{
+                          fullWidth: true
+                        }}
+                        disabled
+                      />
+                    </GridItem>
+                    <GridItem md={6}></GridItem>
                     <GridItem md={6}>
                       <CustomInput
                         labelText="Nombre"
@@ -655,6 +685,7 @@ export default function ClientFormEdit(props) {
           </GridItem>
         </GridContainer>
         <br />
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

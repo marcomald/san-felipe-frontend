@@ -13,7 +13,6 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
-import Loader from "components/Loader/Loader.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
 import Axios from "axios";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -34,6 +33,8 @@ import { Edit } from "@material-ui/icons";
 import { deleteOrder } from "services/Orders";
 import { getOrders } from "services/Orders";
 import moment from "moment";
+import LoaderComponent from "components/Loader/Loader";
+import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 
 const customStyles = {
   ...styles,
@@ -77,6 +78,7 @@ export default function Pedidos(props) {
   const [showDelete, setShowDelete] = useState(false);
   const [showClient, setShowClient] = useState(false);
   const [client, setClient] = useState({});
+  const [filterDate, setFilterDate] = useState();
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -88,14 +90,28 @@ export default function Pedidos(props) {
     // eslint-disable-next-line react/prop-types
   }, [props.history, offset, limit, search]);
 
-  const fetchOrders = async (offsetFetch, limitFetch, searchFetch) => {
+  const onChangeFilter = async date => {
+    setFilterDate(date);
+    const formatedDate = moment(date).format("YYYY-MM-DD");
+    fetchOrders(offset, limit, search, formatedDate);
+  };
+
+  const fetchOrders = async (
+    offsetFetch,
+    limitFetch,
+    searchFetch,
+    deliveryDate
+  ) => {
+    setLoading(true);
     const ordersRetrieved = await getOrders(
       limitFetch,
       offsetFetch,
-      searchFetch
+      searchFetch,
+      deliveryDate
     );
     setOrders({ orders: ordersRetrieved.orders });
     setTotal(ordersRetrieved.total);
+    setLoading(false);
   };
 
   const fillButtons = order => {
@@ -152,7 +168,6 @@ export default function Pedidos(props) {
   };
 
   const getClient = cliente_id => {
-    setLoading(true);
     Axios.get(`/clients/${cliente_id}`)
       .then(response => {
         setClient(response.data);
@@ -164,9 +179,6 @@ export default function Pedidos(props) {
           props.history.push("/login");
           return;
         }
-      })
-      .finally(() => {
-        setLoading(false);
       });
   };
 
@@ -221,13 +233,28 @@ export default function Pedidos(props) {
                 <h4 className={classes.cardIconTitle}>Pedidos registrados</h4>
               </CardHeader>
               <CardBody>
+                <h4>
+                  <b>Filtrar Pedidos</b>
+                </h4>
+                <GridContainer>
+                  <GridItem md={3}>
+                    <CustomDatePicker
+                      placeholder="Fecha de entrega"
+                      value={filterDate}
+                      onChange={onChangeFilter}
+                    />
+                  </GridItem>
+                </GridContainer>
+                <hr />
                 <CustomTable
                   data={orders?.orders?.map(order => {
                     return [
                       order?.num_pedido,
                       order.semana,
                       moment.utc(order?.fecha_pedido).format("DD-MM-YYYY"),
-                      moment.utc(order?.fecha_entrega).format("DD-MM-YYYY"),
+                      moment
+                        .utc(order?.fecha_entrega)
+                        .format("DD-MM-YYYY HH:mm"),
                       clientInfo(order),
                       order?.origen,
                       "$" + order?.total,
@@ -266,7 +293,7 @@ export default function Pedidos(props) {
             </Card>
           </GridItem>
         </GridContainer>
-        {loading && <Loader show={loading} />}
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

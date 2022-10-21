@@ -14,7 +14,6 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
-import Loader from "components/Loader/Loader.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
 import CustomInput from "components/CustomInput/CustomInput";
 import Selector from "components/CustomDropdown/CustomSelector";
@@ -34,6 +33,7 @@ import AdminLayout from "../../layouts/Admin";
 import { getUserId } from "helpers/utils";
 import { Group } from "@material-ui/icons";
 import moment from "moment";
+import LoaderComponent from "components/Loader/Loader";
 
 const customStyles = {
   ...styles,
@@ -86,6 +86,7 @@ export default function Usuarios(props) {
   const modalClasses = useStylesModal();
 
   useEffect(() => {
+    setLoading(true);
     Axios.get("/roles")
       .then(async response => {
         const rolesAux = await response.data.roles.map(r => {
@@ -116,6 +117,9 @@ export default function Usuarios(props) {
           props.history.push("/login");
           return;
         }
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [reloadData, props, limit]);
 
@@ -902,8 +906,7 @@ export default function Usuarios(props) {
             </Button>
           </DialogActions>
         </Dialog>
-
-        {loading && <Loader show={loading} />}
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

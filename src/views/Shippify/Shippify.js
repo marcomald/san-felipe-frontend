@@ -17,6 +17,7 @@ import Selector from "components/CustomDropdown/CustomSelector";
 import { getDeliveryRoutes } from "services/DeliveryRoutesServices";
 import { formatToSelectOption } from "helpers/utils";
 import { getShippify } from "services/Orders";
+import LoaderComponent from "components/Loader/Loader";
 // eslint-disable-next-line react/display-name
 
 const customStyles = {
@@ -42,6 +43,7 @@ const useStyles = makeStyles(customStyles);
 export default function Shippify(props) {
   const [report, setReport] = useState({ fecha: new Date() });
   const [georoutes, setGeoroutes] = useState([]);
+  const [loading, setLoading] = useState(false);
   const classes = useStyles();
 
   useEffect(() => {
@@ -49,10 +51,12 @@ export default function Shippify(props) {
   }, []);
 
   const fetchGeoroutes = async () => {
+    setLoading(true);
     const retrievedGeoroutes = await getDeliveryRoutes("", "", "");
     setGeoroutes(
       formatToSelectOption(retrievedGeoroutes.georutas, "georuta_id", "nombre")
     );
+    setLoading(false);
   };
 
   const handleForm = (key, value) => {
@@ -62,10 +66,12 @@ export default function Shippify(props) {
   };
 
   const generateReport = async () => {
+    setLoading(true);
     const url = await getShippify(report?.georoute?.value, report?.fecha);
     if (url) {
       window.open(url, "_blank", "noopener,noreferrer");
     }
+    setLoading(false);
   };
 
   return (
@@ -133,6 +139,7 @@ export default function Shippify(props) {
           </GridItem>
         </GridContainer>
         <br />
+        {loading && <LoaderComponent />}
       </React.Fragment>
     </AdminLayout>
   );

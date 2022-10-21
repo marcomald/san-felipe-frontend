@@ -33,6 +33,7 @@ import {
   getDeliveryRoutes
 } from "../../services/DeliveryRoutesServices";
 import { Edit } from "@material-ui/icons";
+import LoaderComponent from "components/Loader/Loader";
 
 const customStyles = {
   ...styles,
@@ -72,6 +73,7 @@ export default function DeliveryRoutesList(props) {
   const [showDelete, setShowDelete] = useState(false);
   const [geoRoute, setGeoRoute] = useState({});
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -83,8 +85,10 @@ export default function DeliveryRoutesList(props) {
   }, [offset, limit, search]);
 
   const fetchGeoroutes = async () => {
+    setLoading(true);
     const retrievedGeoroutes = await getDeliveryRoutes(limit, offset, search);
     setGeoroutes(retrievedGeoroutes);
+    setLoading(false);
   };
 
   const fillButtons = route => {
@@ -206,6 +210,7 @@ export default function DeliveryRoutesList(props) {
             </Card>
           </GridItem>
         </GridContainer>
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

@@ -12,7 +12,6 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
-import Loader from "components/Loader/Loader.js";
 import Snackbar from "components/Snackbar/Snackbar.js";
 import CustomInput from "components/CustomInput/CustomInput";
 import Selector from "components/CustomDropdown/CustomSelector";
@@ -29,6 +28,7 @@ import TableStyles from "assets/jss/material-dashboard-pro-react/views/extendedT
 import Modalstyles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import AdminLayout from "layouts/Admin";
 import { Settings } from "@material-ui/icons";
+import LoaderComponent from "components/Loader/Loader";
 
 const customStyles = {
   ...styles,
@@ -52,6 +52,7 @@ const customStyles = {
 const useStyles = makeStyles(customStyles);
 const useStylesModal = makeStyles(Modalstyles);
 const useTableStyles = makeStyles(TableStyles);
+// eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
@@ -86,10 +87,10 @@ export default function Roles(props) {
 
   useEffect(() => {
     const limite = limit ? "&limit=" + limit : "";
+    setLoading(true);
     Axios.get("/roles?" + limite)
       .then(response => {
         setRoles(response.data);
-        console.log("ROLES", response.data);
       })
       .catch(e => {
         console.error(e);
@@ -97,6 +98,9 @@ export default function Roles(props) {
           props.history.push("/login");
           return;
         }
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [reloadData, props, limit]);
 
@@ -186,6 +190,7 @@ export default function Roles(props) {
   };
 
   const createRol = () => {
+    setLoading(true);
     Axios.post("/roles", {
       nombre: rol.nombre,
       descripcion: rol.descripcion,
@@ -193,7 +198,6 @@ export default function Roles(props) {
     })
       .then(async data => {
         const response = await data.data;
-        setLoading(false);
         if (response.errors) {
           setNotification({
             color: "danger",
@@ -239,6 +243,9 @@ export default function Roles(props) {
             open: false
           });
         }, 10000);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -540,7 +547,7 @@ export default function Roles(props) {
           <Button onClick={() => setEditModal(false)}>Cancelar</Button>
         </DialogActions>
       </Dialog>
-      {loading && <Loader show={loading} />}
+      {loading && <LoaderComponent />}
       <Snackbar
         place="br"
         color={notification.color}

@@ -50,6 +50,7 @@ import moment from "moment";
 import { ORIGIN_ORDER_LIST } from "helpers/constants";
 import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 import { PAYMENT_LIST } from "helpers/constants";
+import LoaderComponent from "components/Loader/Loader";
 
 // eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -88,6 +89,7 @@ export default function OrdersFormEdit(props) {
   const [totalOrder, setTotalOrder] = useState(0);
   const [editProduct, setEditProduct] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -218,6 +220,7 @@ export default function OrdersFormEdit(props) {
   };
 
   const fetchOrder = async () => {
+    setLoading(true);
     const retrievedOrder = await getOrderById(orderID);
     const client = await getClientByID(retrievedOrder.cliente_id);
     const orderDetail = await getOrdeDetailById(orderID);
@@ -225,9 +228,13 @@ export default function OrdersFormEdit(props) {
     const year = date.format("YYYY");
     const month = date.format("MM");
     const day = date.format("DD");
+    const minute = date.format("mm");
+    const hour = date.format("HH");
+    const deliveryDate = new Date([year, month, day]);
+    deliveryDate.setHours(hour, minute, 0, 0);
     setOrder({
       order_id: retrievedOrder.pedido_id,
-      fecha_entrega: new Date([year, month, day]),
+      fecha_entrega: deliveryDate,
       comentario: client.contacto,
       formapago_id: PAYMENT_LIST.find(
         payment => payment.value === retrievedOrder.formapago_id
@@ -260,6 +267,7 @@ export default function OrdersFormEdit(props) {
         }
       }))
     });
+    setLoading(false);
   };
 
   const fetchClients = async () => {
@@ -358,12 +366,15 @@ export default function OrdersFormEdit(props) {
   };
 
   const editCreatedOrder = async () => {
+    setLoading(true);
     await editOrder(
       {
         empresa_id: order.client.empresa_id,
         sucursal_id: order.client.sucursal_id,
         semana: moment().week(),
-        fecha_entrega: order.fecha_entrega,
+        fecha_entrega: moment(order.fecha_entrega).format(
+          "YYYY-MM-DD HH:mm:ss"
+        ),
         cliente_id: order.client.cliente_id,
         origen: order.origin.value,
         total: totalOrder,
@@ -397,6 +408,7 @@ export default function OrdersFormEdit(props) {
         open: false
       });
     }, 10000);
+    setLoading(false);
   };
 
   const onSearchProducts = async searchText => {
@@ -502,9 +514,10 @@ export default function OrdersFormEdit(props) {
                     <GridItem md={6}>
                       <CustomDatePicker
                         placeholder="Fecha de entrega"
-                        value={order?.fecha_entrega ?? new Date()}
+                        value={order?.fecha_entrega}
                         onChange={date => handleForm("fecha_entrega", date)}
                         minDate={new Date()}
+                        showTimeSelect
                       />
                     </GridItem>
                     <GridItem md={12}>
@@ -769,7 +782,7 @@ export default function OrdersFormEdit(props) {
             </Button>
           </DialogActions>
         </Dialog>
-
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

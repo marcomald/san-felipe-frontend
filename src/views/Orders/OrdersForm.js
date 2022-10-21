@@ -41,6 +41,7 @@ import { createOrder, getOrderById } from "../../services/Orders";
 import moment from "moment";
 import { PAYMENT_LIST, ORIGIN_ORDER_LIST } from "helpers/constants";
 import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
+import LoaderComponent from "components/Loader/Loader";
 
 // eslint-disable-next-line react/display-name
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -79,6 +80,7 @@ export default function OrdersForm(props) {
   const [totalOrder, setTotalOrder] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -335,15 +337,18 @@ export default function OrdersForm(props) {
   };
 
   const createNewOrder = async () => {
+    setLoading(true);
     const created = await createOrder([
       {
         empresa_id: order.client.empresa_id,
         sucursal_id: order.client.sucursal_id,
         semana: moment().week(),
-        fecha_pedido: moment().format("YYYY-MM-DD HH:mm:ss"),
+        fecha_pedido: moment().format("YYYY-MM-DD"),
         cliente_id: order.client.cliente_id,
         origen: order.origin.value,
-        fecha_entrega: order.fecha_entrega,
+        fecha_entrega: moment(order.fecha_entrega).format(
+          "YYYY-MM-DD HH:mm:ss"
+        ),
         total: totalOrder,
         estado_pedido: "Creado",
         formapago_id: order.formapago_id.value,
@@ -391,6 +396,7 @@ export default function OrdersForm(props) {
         open: false
       });
     }, 10000);
+    setLoading(false);
   };
 
   const onSelectClient = client => {
@@ -744,7 +750,7 @@ export default function OrdersForm(props) {
             </Button>
           </DialogActions>
         </Dialog>
-
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}

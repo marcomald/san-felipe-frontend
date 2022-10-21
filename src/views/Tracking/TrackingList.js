@@ -23,6 +23,7 @@ import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 import { getDeliveryRoutes } from "services/DeliveryRoutesServices";
 import { getTrackByVendedor } from "services/Track";
 import { getOrdersByGoeroute } from "services/Orders";
+import LoaderComponent from "components/Loader/Loader";
 
 const customStyles = {
   ...styles,
@@ -55,13 +56,19 @@ export default function TrackingList() {
   const [sellers, setSellers] = useState([]);
   const [route, setRoute] = useState({ fecha: new Date() });
   const [geoRoutes, setGeoroutes] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [map, setMap] = useState();
   const myRef = useRef(null);
 
   useEffect(() => {
-    fetchSellers();
-    fetchGeoroutes();
-    initMap();
+    const initData = async () => {
+      setLoading(true);
+      await fetchSellers();
+      await fetchGeoroutes();
+      setLoading(false);
+      initMap();
+    };
+    initData();
   }, []);
 
   const fetchSellers = async () => {
@@ -89,6 +96,7 @@ export default function TrackingList() {
   };
 
   const searchTrackAndOrders = async () => {
+    setLoading(true);
     const trackData = await getTrackByVendedor(
       route.ruta.vendedorId,
       route.fecha
@@ -102,6 +110,7 @@ export default function TrackingList() {
       initMap(route.ruta.polygon.coordinates, trackData ?? [], orders ?? []);
       myRef.current.scrollIntoView();
     }
+    setLoading(false);
   };
 
   const initMap = (polygon, points, orders) => {
@@ -316,6 +325,7 @@ export default function TrackingList() {
             </Card>
           </GridItem>
         </GridContainer>
+        {loading && <LoaderComponent />}
       </React.Fragment>
     </AdminLayout>
   );

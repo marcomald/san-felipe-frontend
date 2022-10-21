@@ -29,6 +29,7 @@ import {
 import { CustomDatePicker } from "components/CustomDatePicker/CustomDatePicker";
 import { getOrders } from "services/Orders";
 import moment from "moment";
+import LoaderComponent from "components/Loader/Loader";
 
 // eslint-disable-next-line react/display-name
 
@@ -80,6 +81,7 @@ export default function DeliveryRoutesFormEdit(props) {
   const [polygon, setPolygon] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [map, setMap] = useState();
+  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -218,6 +220,7 @@ export default function DeliveryRoutesFormEdit(props) {
   const updateGeoRoute = async () => {
     const formErrors = validateFields();
     if (!formErrors) {
+      setLoading(true);
       await updateDeliveryRoutes(routeId, {
         nombre: route.nombre,
         descripcion: route.descripcion,
@@ -235,6 +238,7 @@ export default function DeliveryRoutesFormEdit(props) {
           open: false
         });
       }, 10000);
+      setLoading(false);
     }
   };
 
@@ -256,6 +260,7 @@ export default function DeliveryRoutesFormEdit(props) {
   };
 
   const fetchGeoroute = async () => {
+    setLoading(true);
     const ordersRetrieved = await fetchOrders("", "", "", "", routeId);
     const retrievedGeoroute = await getDeliveryRouteById(routeId);
     const polygons = [
@@ -284,6 +289,7 @@ export default function DeliveryRoutesFormEdit(props) {
     }
     setPolygon(polygons);
     initMap(ordersRetrieved.orders, polygons);
+    setLoading(false);
   };
 
   const onSelectDate = async date => {
@@ -379,6 +385,7 @@ export default function DeliveryRoutesFormEdit(props) {
           </GridItem>
         </GridContainer>
         <br />
+        {loading && <LoaderComponent />}
         <Snackbar
           place="br"
           color={notification.color}
