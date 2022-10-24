@@ -186,7 +186,7 @@ export default function DeliveryRoutesList(props) {
                     geoRoutes?.georutas?.map(item => {
                       return [
                         item?.nombre,
-                        moment(item?.fecha).format("DD/MM/YYYY"),
+                        moment.utc(item?.fecha).format("DD-MM-YYYY"),
                         item?.estado === "A" ? "Activo" : "Inactivo",
                         fillButtons(item)
                       ];

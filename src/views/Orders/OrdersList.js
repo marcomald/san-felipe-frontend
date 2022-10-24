@@ -86,7 +86,11 @@ export default function Pedidos(props) {
   });
 
   useEffect(() => {
-    fetchOrders(offset, limit, search);
+    let date = filterDate;
+    if (filterDate) {
+      date = moment(filterDate).format("YYYY-MM-DD");
+    }
+    fetchOrders(offset, limit, search, date);
     // eslint-disable-next-line react/prop-types
   }, [props.history, offset, limit, search]);
 
