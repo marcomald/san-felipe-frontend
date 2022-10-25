@@ -355,7 +355,7 @@ export default function OrdersForm(props) {
         creado_desde: "web",
         estado: "A",
         comentario: "",
-        georuta_id: "",
+        georuta_id: null,
         detail: order.products.map(product => ({
           price_id: product.price.precio_id,
           cantidad: product.cantidad ?? 0,
