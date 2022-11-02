@@ -6,7 +6,7 @@ import CardHeader from "components/Card/CardHeader";
 import CardIcon from "components/Card/CardIcon";
 import GridContainer from "components/Grid/GridContainer";
 import GridItem from "components/Grid/GridItem";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AdminLayout from "../../layouts/Admin";
 import styles from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import { cardTitle } from "assets/jss/material-dashboard-pro-react.js";
@@ -18,6 +18,7 @@ import { getDeliveryRoutes } from "services/DeliveryRoutesServices";
 import { formatToSelectOption } from "helpers/utils";
 import { getShippify } from "services/Orders";
 import LoaderComponent from "components/Loader/Loader";
+import moment from "moment";
 // eslint-disable-next-line react/display-name
 
 const customStyles = {
@@ -41,28 +42,38 @@ const customStyles = {
 const useStyles = makeStyles(customStyles);
 
 export default function Shippify(props) {
-  const [report, setReport] = useState({ fecha: new Date() });
+  const [report, setReport] = useState();
   const [georoutes, setGeoroutes] = useState([]);
   const [loading, setLoading] = useState(false);
   const classes = useStyles();
 
-  useEffect(() => {
-    fetchGeoroutes();
-  }, []);
-
-  const fetchGeoroutes = async () => {
-    setLoading(true);
-    const retrievedGeoroutes = await getDeliveryRoutes("", "", "");
-    setGeoroutes(
-      formatToSelectOption(retrievedGeoroutes.georutas, "georuta_id", "nombre")
+  const fetchGeoroutes = async date => {
+    const formatedDate = moment(date).format("YYYY-MM-DD");
+    const retrievedGeoroutes = await getDeliveryRoutes(
+      "100",
+      "0",
+      "",
+      formatedDate
     );
-    setLoading(false);
+    const data = formatToSelectOption(
+      retrievedGeoroutes.georutas,
+      "georuta_id",
+      "nombre"
+    );
+    setGeoroutes(data);
+    setReport({ fecha: date, georoute: data[0] });
   };
 
   const handleForm = (key, value) => {
     const reportOptions = { ...report };
     reportOptions[key] = value;
     setReport(reportOptions);
+  };
+
+  const onChangeDate = async value => {
+    setLoading(true);
+    await fetchGeoroutes(value);
+    setLoading(false);
   };
 
   const generateReport = async () => {
@@ -110,6 +121,13 @@ export default function Shippify(props) {
                 <form>
                   <GridContainer>
                     <GridItem md={6}>
+                      <CustomDatePicker
+                        placeholder="Fecha"
+                        value={report?.fecha}
+                        onChange={onChangeDate}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
                       <Selector
                         placeholder="Ruta de entrega"
                         options={georoutes}
@@ -117,18 +135,11 @@ export default function Shippify(props) {
                         value={report?.georoute}
                       />
                     </GridItem>
-                    <GridItem md={6}>
-                      <CustomDatePicker
-                        placeholder="Fecha"
-                        value={report?.fecha ?? new Date()}
-                        onChange={date => handleForm("fecha", date)}
-                      />
-                    </GridItem>
                   </GridContainer>
                   <br />
                   <Button
                     color="primary"
-                    disabled={false}
+                    disabled={!report?.georoute || !report?.fecha}
                     onClick={generateReport}
                   >
                     Generar Reporte

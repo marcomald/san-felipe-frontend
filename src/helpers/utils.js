@@ -72,6 +72,35 @@ export const generateGetParams = (
   return queryParams;
 };
 
+export const generateGetParamsGeoruta = (limit, offset, search, date) => {
+  let queryParams = "";
+  if (search) {
+    queryParams = `?s=${search}`;
+  }
+  if (limit) {
+    if (queryParams) {
+      queryParams = `${queryParams}&limit=${limit}`;
+    } else {
+      queryParams = `?limit=${limit}`;
+    }
+  }
+  if (offset) {
+    if (queryParams) {
+      queryParams = `${queryParams}&offset=${offset}`;
+    } else {
+      queryParams = `?offset=${offset}`;
+    }
+  }
+  if (date) {
+    if (queryParams) {
+      queryParams = `${queryParams}&fecha=${date}`;
+    } else {
+      queryParams = `?fecha=${date}`;
+    }
+  }
+  return queryParams;
+};
+
 export const formatToSelectOption = (items, value, name) => {
   return items.map(item => {
     return {

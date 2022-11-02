@@ -54,7 +54,7 @@ const useStyles = makeStyles(customStyles);
 export default function TrackingList() {
   const classes = useStyles();
   const [sellers, setSellers] = useState([]);
-  const [route, setRoute] = useState({ fecha: new Date() });
+  const [route, setRoute] = useState({});
   const [geoRoutes, setGeoroutes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [map, setMap] = useState();
@@ -64,7 +64,6 @@ export default function TrackingList() {
     const initData = async () => {
       setLoading(true);
       await fetchSellers();
-      await fetchGeoroutes();
       setLoading(false);
       initMap();
     };
@@ -78,15 +77,27 @@ export default function TrackingList() {
     );
   };
 
-  const fetchGeoroutes = async () => {
-    const retrievedGeoroutes = await getDeliveryRoutes("100", "0", "");
+  const fetchGeoroutes = async date => {
+    const formatedDate = moment(date).format("YYYY-MM-DD");
+    const retrievedGeoroutes = await getDeliveryRoutes(
+      "100",
+      "0",
+      "",
+      formatedDate
+    );
     const data = formatToSelectOption(
       retrievedGeoroutes.georutas,
       "georuta_id",
       "nombre"
     );
     setGeoroutes(data);
-    handleRoute("ruta", data[0]);
+    setRoute({ fecha: date, ruta: data[0] });
+  };
+
+  const onChangeDate = async value => {
+    setLoading(true);
+    await fetchGeoroutes(value);
+    setLoading(false);
   };
 
   const handleRoute = (key, value) => {
@@ -141,13 +152,13 @@ export default function TrackingList() {
 
       if (orders) {
         const ordersToDelivery = orders.filter(
-          order => order.estado_pedido === "Creado"
+          order => order.estado_pedido === "creado"
         );
         const ordersDelivered = orders.filter(
-          order => order.estado_pedido === "Entregado"
+          order => order.estado_pedido === "facturado"
         );
         const ordersCanceled = orders.filter(
-          order => order.estado_pedido === "Cancelado"
+          order => order.estado_pedido === "cancelado"
         );
         let total = 0;
         ordersDelivered.forEach(order => {
@@ -158,12 +169,13 @@ export default function TrackingList() {
         let percentege = 0;
         if (orders.length > 0) {
           percentege =
-            ((ordersDelivered.length - ordersCanceled.length) / orders.length) *
+            (ordersDelivered.length / (orders.length - ordersCanceled.length)) *
             100;
         }
         div.innerHTML += `<p><b>Total de pedidos: </b>${orders.length}</p>`;
         div.innerHTML += `<p><b>Pedidos por entregar: </b>${ordersToDelivery.length}</p>`;
         div.innerHTML += `<p><b>Pedidos entregados: </b>${ordersDelivered.length}</p>`;
+        div.innerHTML += `<p><b>Pedidos cancelados: </b>${ordersCanceled.length}</p>`;
         div.innerHTML += `<p><b>Total Recaudado: </b> $${total}</p>`;
         div.innerHTML += `<p><b>Porcentaje de entrega: </b> %${percentege.toFixed(
           2
@@ -182,7 +194,7 @@ export default function TrackingList() {
       div.innerHTML +=
         '<p style="margin-bottom:2px;"><i style="background: #3388ff"></i> Pedido por entregar </p>';
       div.innerHTML +=
-        '<p style="margin-bottom:2px;"><i style="background: #000000"></i> Pedido entregado </p>';
+        '<p style="margin-bottom:2px;"><i style="background: #32CD32	"></i> Pedido entregado </p>';
       div.innerHTML +=
         '<p style="margin-bottom:2px;"><i style="background: #FF0000"></i> Pedido cancelado </p>';
       div.innerHTML +=
@@ -227,13 +239,13 @@ export default function TrackingList() {
 
     if (orders) {
       const getColor = status => {
-        if (status === "Creado") {
+        if (status === "creado") {
           return "#3388ff";
         }
-        if (status === "Entregado") {
-          return "#000000";
+        if (status === "facturado") {
+          return "#32CD32	";
         }
-        if (status === "Cancelado") {
+        if (status === "cancelado") {
           return "#FF0000";
         }
         return "#3388ff";
@@ -247,7 +259,12 @@ export default function TrackingList() {
         marker.bindPopup(
           `<p style="margin:0;"> <b>Nombre: </b> ${order.nombre}</p>
             <p style="margin:0;"> <b>CI/RUC: </b> ${order.ruc_cedula}</p>
-            <p style="margin:0;"> <b>Total pedido: </b> $${order.total}</p>`
+            <p style="margin:0;"> <b>Total pedido: </b> $${order.total}</p>
+            ${
+              order.estado_pedido === "cancelado"
+                ? ` <p style="margin:0;"> <b>Cancelado: </b> ${order.comentario}</p>`
+                : ""
+            }`
         );
         marker.addTo(mapLayout);
       });
@@ -279,18 +296,19 @@ export default function TrackingList() {
               <CardBody>
                 <GridContainer>
                   <GridItem md={5}>
+                    <CustomDatePicker
+                      placeholder="Fecha de entrega"
+                      value={route?.fecha}
+                      onChange={onChangeDate}
+                    />
+                  </GridItem>
+                  <GridItem md={5}>
                     <Selector
                       placeholder="Ruta"
                       options={geoRoutes}
                       onChange={value => handleRoute("ruta", value)}
                       value={route?.ruta}
-                    />
-                  </GridItem>
-                  <GridItem md={5}>
-                    <CustomDatePicker
-                      placeholder="Fecha de entrega"
-                      value={route?.fecha ?? new Date()}
-                      onChange={date => handleRoute("fecha", date)}
+                      disabled={!route?.fecha}
                     />
                   </GridItem>
                   <GridItem xs={2}>
@@ -299,6 +317,7 @@ export default function TrackingList() {
                         color="rose"
                         key="Search"
                         onClick={searchTrackAndOrders}
+                        disabled={!route?.fecha || !route?.ruta}
                       >
                         <Search /> Buscar
                       </Button>

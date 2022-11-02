@@ -1,9 +1,9 @@
 import Axios from "axios";
-import { generateGetParams } from "../helpers/utils";
+import { generateGetParamsGeoruta } from "../helpers/utils";
 
-export const getDeliveryRoutes = async (limit, offset, search) => {
+export const getDeliveryRoutes = async (limit, offset, search, date) => {
   try {
-    const queryParams = generateGetParams(limit, offset, search);
+    const queryParams = generateGetParamsGeoruta(limit, offset, search, date);
     const response = await Axios.get("/georuta" + queryParams);
     return response.data;
   } catch (error) {

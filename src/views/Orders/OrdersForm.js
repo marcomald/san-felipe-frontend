@@ -350,7 +350,7 @@ export default function OrdersForm(props) {
           "YYYY-MM-DD HH:mm:ss"
         ),
         total: totalOrder,
-        estado_pedido: "Creado",
+        estado_pedido: "creado",
         formapago_id: order.formapago_id.value,
         creado_desde: "web",
         estado: "A",
