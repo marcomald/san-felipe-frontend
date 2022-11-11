@@ -1,5 +1,5 @@
 import Axios from "axios";
-import { generateGetParams } from "../helpers/utils";
+import { checkUnauthorized, generateGetParams } from "../helpers/utils";
 
 export const getTerritories = async (limit, offset, clientSearch) => {
   try {
@@ -8,6 +8,7 @@ export const getTerritories = async (limit, offset, clientSearch) => {
     return response.data;
   } catch (error) {
     console.error("error get territories->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -17,5 +18,6 @@ export const getTerritory = async territoryId => {
     return response.data;
   } catch (error) {
     console.error("error get territory by id ->", error);
+    checkUnauthorized(error);
   }
 };

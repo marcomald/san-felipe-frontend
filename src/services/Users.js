@@ -1,4 +1,5 @@
 import Axios from "axios";
+import { checkUnauthorized } from "helpers/utils";
 
 export const getSellers = async () => {
   try {
@@ -6,5 +7,6 @@ export const getSellers = async () => {
     return response.data;
   } catch (error) {
     console.error("error ->", error);
+    checkUnauthorized(error);
   }
 };

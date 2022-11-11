@@ -19,6 +19,9 @@ import DeliveryRoutesClients from "../views/DeliveryRoutes/DeliveryRoutesClients
 import OrdersFormEdit from "views/Orders/OrdersFormEdit";
 import Shippify from "views/Shippify/Shippify";
 import TrackingList from "views/Tracking/TrackingList";
+import DespatchList from "views/Despatch/DespatchList";
+import DespatchForm from "views/Despatch/DespatchForm";
+import DespatchFormEdit from "views/Despatch/DespatchFormEdit";
 
 const PrivateRoutes = permissions => {
   const allowedRoutes = [];
@@ -147,6 +150,32 @@ const PrivateRoutes = permissions => {
             exact
             component={TrackingList}
             key="tracking-pedidos"
+          />
+        );
+        break;
+      case "despatch":
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/despacho"
+            exact
+            component={DespatchList}
+            key="despacho"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/despacho/crear"
+            exact
+            component={DespatchForm}
+            key="create-despacho"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/despacho/editar/:id"
+            exact
+            component={DespatchFormEdit}
+            key="create-despacho"
           />
         );
         break;

@@ -1,4 +1,5 @@
 import Axios from "axios";
+import { checkUnauthorized } from "helpers/utils";
 import { generateGetParams } from "helpers/utils";
 
 export const createOrder = async orders => {
@@ -7,6 +8,7 @@ export const createOrder = async orders => {
     return response.data;
   } catch (error) {
     console.error("error creating order by id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -16,6 +18,7 @@ export const deleteOrder = async ordedId => {
     return response.data;
   } catch (error) {
     console.error("error deleting order by id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -25,6 +28,7 @@ export const editOrder = async (order, orderId) => {
     return response.data;
   } catch (error) {
     console.error("error creating order by id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -34,6 +38,7 @@ export const getOrderById = async orderID => {
     return response.data;
   } catch (error) {
     console.error("error get order by id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -43,6 +48,7 @@ export const getOrdeDetailById = async orderID => {
     return response.data;
   } catch (error) {
     console.error("error get order detail by order id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -65,6 +71,7 @@ export const getOrders = async (
     return response.data;
   } catch (error) {
     console.error("error get order detail by order id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -76,6 +83,7 @@ export const getShippify = async (georouteId, date) => {
     return response.data;
   } catch (error) {
     console.error("error get order detail by order id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -87,5 +95,6 @@ export const getOrdersByGoeroute = async (georouteId, date) => {
     return response.data;
   } catch (error) {
     console.error("error get order detail by order id ->", error);
+    checkUnauthorized(error);
   }
 };

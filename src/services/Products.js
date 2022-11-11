@@ -1,5 +1,5 @@
 import Axios from "axios";
-import { generateGetParams } from "../helpers/utils";
+import { checkUnauthorized, generateGetParams } from "../helpers/utils";
 
 export const getProducts = async (limit, offset, clientSearch) => {
   try {
@@ -8,6 +8,7 @@ export const getProducts = async (limit, offset, clientSearch) => {
     return response.data;
   } catch (error) {
     console.error("error get products ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -23,6 +24,7 @@ export const getProductPrice = async (
     return response.data;
   } catch (error) {
     console.error("error get product price ->", error);
+    checkUnauthorized(error);
     if (error.request.status === 404) {
       return {
         error: true,

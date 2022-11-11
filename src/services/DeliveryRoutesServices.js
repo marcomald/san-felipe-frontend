@@ -1,5 +1,5 @@
 import Axios from "axios";
-import { generateGetParamsGeoruta } from "../helpers/utils";
+import { checkUnauthorized, generateGetParamsGeoruta } from "../helpers/utils";
 
 export const getDeliveryRoutes = async (limit, offset, search, date) => {
   try {
@@ -8,6 +8,7 @@ export const getDeliveryRoutes = async (limit, offset, search, date) => {
     return response.data;
   } catch (error) {
     console.error("error get georutas ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -22,6 +23,17 @@ export const getDeliveryRouteById = async (
     return response.data;
   } catch (error) {
     console.error("error get georutas by id ->", error);
+    checkUnauthorized(error);
+  }
+};
+
+export const getDeliveryRouteProducts = async georuta_id => {
+  try {
+    const response = await Axios.get(`/georuta/${georuta_id}/products`);
+    return response.data;
+  } catch (error) {
+    console.error("error get products of georutas by id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -31,6 +43,7 @@ export const createDeliveryRoutes = async deliveryRoute => {
     return response.data;
   } catch (error) {
     console.error("error creating geo rutas ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -40,6 +53,7 @@ export const deleteDeliveryRoute = async deliveryRouteId => {
     return response.data;
   } catch (error) {
     console.error("error deleting geo rutas ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -52,5 +66,6 @@ export const updateDeliveryRoutes = async (deliveryRouteId, deliveryRoute) => {
     return response.data;
   } catch (error) {
     console.error("error updating geo rutas ->", error);
+    checkUnauthorized(error);
   }
 };

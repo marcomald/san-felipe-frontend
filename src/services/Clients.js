@@ -1,5 +1,5 @@
 import Axios from "axios";
-import { generateGetParams } from "../helpers/utils";
+import { checkUnauthorized, generateGetParams } from "../helpers/utils";
 
 export const getClients = async (limit, offset, clientSearch) => {
   try {
@@ -8,6 +8,7 @@ export const getClients = async (limit, offset, clientSearch) => {
     return response.data;
   } catch (error) {
     console.error("error get clients ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -17,6 +18,7 @@ export const updateClient = async (client, clientID) => {
     return response.data;
   } catch (error) {
     console.error("error creating client ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -26,6 +28,7 @@ export const deleteClient = async clientID => {
     return response.data;
   } catch (error) {
     console.error("error creating client ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -35,6 +38,7 @@ export const createClient = async client => {
     return response.data;
   } catch (error) {
     console.error("error creating client ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -44,6 +48,7 @@ export const getClientByID = async clientId => {
     return response.data;
   } catch (error) {
     console.error("error get client by id ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -55,6 +60,7 @@ export const validateExistClientByDocument = async clientDocument => {
     return response.data;
   } catch (error) {
     console.error("error get client by document ->", error);
+    checkUnauthorized(error);
   }
 };
 
@@ -67,5 +73,6 @@ export const updateClientComment = async (clientId, comment, formapago_id) => {
     return response.data;
   } catch (error) {
     console.error("error updating client comment ->", error);
+    checkUnauthorized(error);
   }
 };

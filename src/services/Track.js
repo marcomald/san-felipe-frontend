@@ -1,4 +1,5 @@
 import Axios from "axios";
+import { checkUnauthorized } from "helpers/utils";
 
 export const getTrackByVendedor = async (vendedorId, date) => {
   try {
@@ -8,5 +9,6 @@ export const getTrackByVendedor = async (vendedorId, date) => {
     return response.data;
   } catch (error) {
     console.error("error get track by vendedorId and date ->", error);
+    checkUnauthorized(error);
   }
 };
