@@ -26,8 +26,8 @@ import Button from "components/CustomButtons/Button.js";
 import Search from "@material-ui/icons/Search";
 import "leaflet/dist/images/marker-shadow.png";
 import {
-  createClient,
-  validateExistClientByDocument
+  createClient
+  // validateExistClientByDocument
 } from "../../services/Clients";
 import Add from "@material-ui/icons/Add";
 import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
@@ -209,22 +209,22 @@ export default function ClientForm(props) {
       hasError = true;
     }
 
-    const existClient = await validateExistClientByDocument(client.ruc_cedula);
-    if (existClient) {
-      hasError = true;
-      setNotification({
-        color: "danger",
-        text: "Error! Ya existe un cliente con la cedula/ruc ingresada",
-        open: true
-      });
-      setTimeout(function() {
-        setNotification({
-          ...notification,
-          open: false
-        });
-      }, 10000);
-      return hasError;
-    }
+    // const existClient = await validateExistClientByDocument(client.ruc_cedula);
+    // if (existClient) {
+    //   hasError = true;
+    //   setNotification({
+    //     color: "danger",
+    //     text: "Error! Ya existe un cliente con la cedula/ruc ingresada",
+    //     open: true
+    //   });
+    //   setTimeout(function() {
+    //     setNotification({
+    //       ...notification,
+    //       open: false
+    //     });
+    //   }, 10000);
+    //   return hasError;
+    // }
 
     if (hasError) {
       setNotification({
