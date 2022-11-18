@@ -141,7 +141,11 @@ export default function DeliveryRoutesForm(props) {
       ordersClients.forEach(order => {
         const geometry = JSON.parse(order.point);
         boundsArray.push(geometry.coordinates);
-        const marker = new L.CircleMarker(geometry.coordinates);
+        let options = {};
+        if (order.negocio_id === "05") {
+          options = { fillColor: "#754C00", color: "#754C00" };
+        }
+        const marker = new L.CircleMarker(geometry.coordinates, options);
         marker.bindPopup(
           `
           <div>
