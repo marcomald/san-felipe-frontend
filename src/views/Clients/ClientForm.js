@@ -33,6 +33,7 @@ import Add from "@material-ui/icons/Add";
 import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
 import { PAYMENT_LIST } from "helpers/constants";
 import LoaderComponent from "components/Loader/Loader";
+import { DOCUMENT_TYPE } from "helpers/constants";
 
 // eslint-disable-next-line react/display-name
 
@@ -79,10 +80,10 @@ export default function ClientForm(props) {
   });
   const classes = useStyles();
 
-  const handleRoute = (key, value) => {
-    const updatedRoute = { ...client };
-    updatedRoute[key] = value;
-    setClient(updatedRoute);
+  const handleClient = (key, value) => {
+    const updatedClient = { ...client };
+    updatedClient[key] = value;
+    setClient(updatedClient);
   };
 
   useEffect(() => {
@@ -252,6 +253,7 @@ export default function ClientForm(props) {
       });
       const created = await createClient({
         ...client,
+        tipcli: client.tipcli.value,
         ayudante_id: "00",
         grupocli_id: "01",
         empresa_id: "FSF",
@@ -292,6 +294,32 @@ export default function ClientForm(props) {
       return;
     }
     setVisitFrequency([...freuency, day]);
+  };
+
+  const onHandleTypeDocument = value => {
+    const updatedClient = { ...client };
+    setClient({ ...updatedClient, ruc_cedula: "", tipcli: value });
+  };
+
+  const onHandleIdentification = value => {
+    if (client.tipcli.value === "C") {
+      const reg = new RegExp(/^$|^[0-9]+$/);
+      if (reg.test(value) && value.length <= 10) {
+        handleClient("ruc_cedula", value);
+      }
+    }
+    if (client.tipcli.value === "R") {
+      const reg = new RegExp(/^$|^[0-9]+$/);
+      if (reg.test(value) && value.length <= 13) {
+        handleClient("ruc_cedula", value);
+      }
+    }
+    if (client.tipcli.value === "O") {
+      const reg = new RegExp(/^$|^[a-z0-9]+$/i);
+      if (reg.test(value) && value.length <= 15) {
+        handleClient("ruc_cedula", value);
+      }
+    }
   };
 
   return (
@@ -344,10 +372,11 @@ export default function ClientForm(props) {
                           type: "text"
                         }}
                         value={client.nombre}
-                        onChange={e => handleRoute("nombre", e.target.value)}
+                        onChange={e => handleClient("nombre", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={60}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -359,27 +388,35 @@ export default function ClientForm(props) {
                         }}
                         value={client.razon_social}
                         onChange={e =>
-                          handleRoute("razon_social", e.target.value)
+                          handleClient("razon_social", e.target.value)
                         }
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={50}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <Selector
+                        placeholder="Tipo de Identificación"
+                        options={DOCUMENT_TYPE}
+                        onChange={onHandleTypeDocument}
+                        value={client.tipcli}
                       />
                     </GridItem>
                     <GridItem md={6}>
                       <CustomInput
-                        labelText="Ruc/Cedula"
+                        labelText={client?.tipcli?.label ?? "Identificación"}
                         id="ruc/ci"
                         inputProps={{
                           type: "text"
                         }}
                         value={client.ruc_cedula}
-                        onChange={e =>
-                          handleRoute("ruc_cedula", e.target.value)
-                        }
+                        onChange={e => onHandleIdentification(e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        disabled={!client.tipcli}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -390,10 +427,13 @@ export default function ClientForm(props) {
                           type: "text"
                         }}
                         value={client.direccion}
-                        onChange={e => handleRoute("direccion", e.target.value)}
+                        onChange={e =>
+                          handleClient("direccion", e.target.value)
+                        }
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={60}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -404,10 +444,11 @@ export default function ClientForm(props) {
                           type: "text"
                         }}
                         value={client.num_casa}
-                        onChange={e => handleRoute("num_casa", e.target.value)}
+                        onChange={e => handleClient("num_casa", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={10}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -418,10 +459,11 @@ export default function ClientForm(props) {
                           type: "text"
                         }}
                         value={client.telefono}
-                        onChange={e => handleRoute("telefono", e.target.value)}
+                        onChange={e => handleClient("telefono", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={20}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -432,10 +474,11 @@ export default function ClientForm(props) {
                           type: "text"
                         }}
                         value={client.celular}
-                        onChange={e => handleRoute("celular", e.target.value)}
+                        onChange={e => handleClient("celular", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={20}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -447,18 +490,19 @@ export default function ClientForm(props) {
                         }}
                         value={client.correo_elec}
                         onChange={e =>
-                          handleRoute("correo_elec", e.target.value)
+                          handleClient("correo_elec", e.target.value)
                         }
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={60}
                       />
                     </GridItem>
                     <GridItem md={6}>
                       <Selector
                         placeholder="Negocio"
                         options={business}
-                        onChange={value => handleRoute("negocio_id", value)}
+                        onChange={value => handleClient("negocio_id", value)}
                         value={client.negocio_id}
                       />
                     </GridItem>
@@ -467,7 +511,7 @@ export default function ClientForm(props) {
                       <Selector
                         placeholder="Territorio"
                         options={territories}
-                        onChange={value => handleRoute("territorio_id", value)}
+                        onChange={value => handleClient("territorio_id", value)}
                         value={client.territorio_id}
                       />
                     </GridItem>
@@ -475,7 +519,7 @@ export default function ClientForm(props) {
                       <Selector
                         placeholder="Precio"
                         options={priceList}
-                        onChange={value => handleRoute("listapre_id", value)}
+                        onChange={value => handleClient("listapre_id", value)}
                         value={client.listapre_id}
                       />
                     </GridItem>
@@ -483,11 +527,11 @@ export default function ClientForm(props) {
                       <Selector
                         placeholder="Forma de pago"
                         options={PAYMENT_LIST}
-                        onChange={value => handleRoute("formapago_id", value)}
+                        onChange={value => handleClient("formapago_id", value)}
                         value={client.formapago_id}
                       />
                     </GridItem>
-                    <GridItem md={12}>
+                    <GridItem md={6}>
                       <CustomInput
                         labelText="Comentario"
                         id="contacto"
@@ -495,10 +539,11 @@ export default function ClientForm(props) {
                           type: "text"
                         }}
                         value={client.contacto}
-                        onChange={e => handleRoute("contacto", e.target.value)}
+                        onChange={e => handleClient("contacto", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={50}
                       />
                     </GridItem>
                     <GridItem md={12}>

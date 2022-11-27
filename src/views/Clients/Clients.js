@@ -177,12 +177,12 @@ export default function Clients(props) {
                   return [
                     cl.ruc_cedula,
                     cl.nombre,
-                    cl.estado.toUpperCase() === "A" ? "Activo" : "Inactivo",
+                    cl.direccion,
                     fillButtons(cl)
                   ];
                 })}
                 limite={10}
-                headers={["RUC/CI", "Nombre", "Estado", "Acccion"]}
+                headers={["RUC/CI", "Nombre", "Dirección", "Acccion"]}
                 onOffsetChange={valueOffset => {
                   setOffset(valueOffset);
                 }}

@@ -29,7 +29,8 @@ export default function CustomInput(props) {
     helperText,
     onChange,
     value,
-    disabled
+    disabled,
+    limit
   } = props;
 
   const labelClasses = classNames({
@@ -49,7 +50,7 @@ export default function CustomInput(props) {
     [classes.input]: true,
     [classes.whiteInput]: white
   });
-  var formControlClasses;
+  let formControlClasses;
   if (formControlProps !== undefined) {
     formControlClasses = classNames(
       formControlProps.className,
@@ -58,10 +59,22 @@ export default function CustomInput(props) {
   } else {
     formControlClasses = classes.formControl;
   }
-  var helpTextClasses = classNames({
+  const helpTextClasses = classNames({
     [classes.labelRootError]: error,
     [classes.labelRootSuccess]: success && !error
   });
+
+  const onChangeValue = e => {
+    const value = e.target.value;
+    if (limit) {
+      if (value.length <= limit) {
+        onChange(e);
+      }
+    } else {
+      onChange(e);
+    }
+  };
+
   return (
     <FormControl {...formControlProps} className={formControlClasses}>
       {labelText !== undefined ? (
@@ -83,7 +96,7 @@ export default function CustomInput(props) {
         id={id}
         {...inputProps}
         value={value || ""}
-        onChange={onChange}
+        onChange={onChangeValue}
         disabled={disabled}
       />
       {helperText !== undefined ? (
@@ -108,5 +121,6 @@ CustomInput.propTypes = {
   helperText: PropTypes.node,
   value: PropTypes.string,
   disabled: PropTypes.bool,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  limit: PropTypes.number
 };

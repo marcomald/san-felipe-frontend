@@ -4,7 +4,11 @@ import { generateGetParams } from "helpers/utils";
 
 export const createOrder = async orders => {
   try {
-    const response = await Axios.post("/orders", orders);
+    const response = await Axios.post("/orders/single", orders, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
     return response.data;
   } catch (error) {
     console.error("error creating order by id ->", error);

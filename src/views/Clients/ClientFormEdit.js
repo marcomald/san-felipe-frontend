@@ -30,6 +30,7 @@ import Add from "@material-ui/icons/Add";
 import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
 import { PAYMENT_LIST } from "helpers/constants";
 import LoaderComponent from "components/Loader/Loader";
+import { DOCUMENT_TYPE } from "helpers/constants";
 
 // eslint-disable-next-line react/display-name
 
@@ -78,7 +79,7 @@ export default function ClientFormEdit(props) {
   });
   const classes = useStyles();
 
-  const handleRoute = (key, value) => {
+  const handleClient = (key, value) => {
     const updatedRoute = { ...client };
     updatedRoute[key] = value;
     setClient(updatedRoute);
@@ -104,9 +105,12 @@ export default function ClientFormEdit(props) {
     const selectedTerritory = territories.find(
       item => item.territorio_id === firstClient.territorio_id
     );
-
+    const selectedDocumentType = DOCUMENT_TYPE.find(
+      item => item.value === firstClient.tipcli
+    );
     setClient({
       ...firstClient,
+      tipcli: selectedDocumentType,
       formapago_id: PAYMENT_LIST.find(
         payment => payment.value === firstClient.formapago_id
       ),
@@ -395,7 +399,7 @@ export default function ClientFormEdit(props) {
                         }}
                         value={client.cliente_id}
                         onChange={e =>
-                          handleRoute("cliente_id", e.target.value)
+                          handleClient("cliente_id", e.target.value)
                         }
                         formControlProps={{
                           fullWidth: true
@@ -412,10 +416,11 @@ export default function ClientFormEdit(props) {
                           type: "text"
                         }}
                         value={client.nombre}
-                        onChange={e => handleRoute("nombre", e.target.value)}
+                        onChange={e => handleClient("nombre", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={60}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -427,23 +432,33 @@ export default function ClientFormEdit(props) {
                         }}
                         value={client.razon_social}
                         onChange={e =>
-                          handleRoute("razon_social", e.target.value)
+                          handleClient("razon_social", e.target.value)
                         }
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={50}
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
+                      <Selector
+                        placeholder="Tipo de Identificación"
+                        options={DOCUMENT_TYPE}
+                        onChange={() => true}
+                        value={client.tipcli}
+                        disabled
                       />
                     </GridItem>
                     <GridItem md={6}>
                       <CustomInput
-                        labelText="Ruc/Cedula"
+                        labelText={client?.tipcli?.label ?? "RUC/Cedula"}
                         id="ruc/ci"
                         inputProps={{
                           type: "text"
                         }}
                         value={client.ruc_cedula}
                         onChange={e =>
-                          handleRoute("ruc_cedula", e.target.value)
+                          handleClient("ruc_cedula", e.target.value)
                         }
                         formControlProps={{
                           fullWidth: true
@@ -459,10 +474,13 @@ export default function ClientFormEdit(props) {
                           type: "text"
                         }}
                         value={client.direccion}
-                        onChange={e => handleRoute("direccion", e.target.value)}
+                        onChange={e =>
+                          handleClient("direccion", e.target.value)
+                        }
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={60}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -473,10 +491,11 @@ export default function ClientFormEdit(props) {
                           type: "text"
                         }}
                         value={client.num_casa}
-                        onChange={e => handleRoute("num_casa", e.target.value)}
+                        onChange={e => handleClient("num_casa", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={10}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -487,10 +506,11 @@ export default function ClientFormEdit(props) {
                           type: "text"
                         }}
                         value={client.telefono}
-                        onChange={e => handleRoute("telefono", e.target.value)}
+                        onChange={e => handleClient("telefono", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={20}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -501,10 +521,11 @@ export default function ClientFormEdit(props) {
                           type: "text"
                         }}
                         value={client.celular}
-                        onChange={e => handleRoute("celular", e.target.value)}
+                        onChange={e => handleClient("celular", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={20}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -516,18 +537,19 @@ export default function ClientFormEdit(props) {
                         }}
                         value={client.correo_elec}
                         onChange={e =>
-                          handleRoute("correo_elec", e.target.value)
+                          handleClient("correo_elec", e.target.value)
                         }
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={60}
                       />
                     </GridItem>
                     <GridItem md={6}>
                       <Selector
                         placeholder="Negocio"
                         options={business}
-                        onChange={value => handleRoute("negocio_id", value)}
+                        onChange={value => handleClient("negocio_id", value)}
                         value={client.negocio_id}
                       />
                     </GridItem>
@@ -536,7 +558,7 @@ export default function ClientFormEdit(props) {
                       <Selector
                         placeholder="Territorio"
                         options={territories}
-                        onChange={value => handleRoute("territorio_id", value)}
+                        onChange={value => handleClient("territorio_id", value)}
                         value={client.territorio_id}
                       />
                     </GridItem>
@@ -544,7 +566,7 @@ export default function ClientFormEdit(props) {
                       <Selector
                         placeholder="Precio"
                         options={priceList}
-                        onChange={value => handleRoute("listapre_id", value)}
+                        onChange={value => handleClient("listapre_id", value)}
                         value={client.listapre_id}
                       />
                     </GridItem>
@@ -552,11 +574,11 @@ export default function ClientFormEdit(props) {
                       <Selector
                         placeholder="Forma de pago"
                         options={PAYMENT_LIST}
-                        onChange={value => handleRoute("formapago_id", value)}
+                        onChange={value => handleClient("formapago_id", value)}
                         value={client.formapago_id}
                       />
                     </GridItem>
-                    <GridItem md={12}>
+                    <GridItem md={6}>
                       <CustomInput
                         labelText="Comentario"
                         id="contacto"
@@ -564,10 +586,11 @@ export default function ClientFormEdit(props) {
                           type: "text"
                         }}
                         value={client.contacto}
-                        onChange={e => handleRoute("contacto", e.target.value)}
+                        onChange={e => handleClient("contacto", e.target.value)}
                         formControlProps={{
                           fullWidth: true
                         }}
+                        limit={50}
                       />
                     </GridItem>
                     <GridItem md={12}>

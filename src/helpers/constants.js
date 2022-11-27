@@ -12,11 +12,11 @@ export const ORIGIN_ORDER_LIST = [
 export const PAYMENT_LIST = [
   { value: "01", label: "Contado" },
   { value: "02", label: "Crédito" },
-  { value: "03", label: "Descuento en rol" },
-  { value: "04", label: "Anticipo" },
-  { value: "05", label: "Contra entrega" },
-  { value: "06", label: "Cheque" },
-  { value: "07", label: "Depósito" },
-  { value: "08", label: "Transferencia" },
-  { value: "09", label: "RECIVECI" }
+  { value: "03", label: "Prepagado" }
+];
+
+export const DOCUMENT_TYPE = [
+  { value: "C", label: "Cédula" },
+  { value: "R", label: "RUC" },
+  { value: "O", label: "Pasaporte" }
 ];

@@ -496,6 +496,20 @@ export default function OrdersFormEdit(props) {
                       />
                     </GridItem>
                     <GridItem md={6}>
+                      <CustomInput
+                        labelText="Dirección de cliente"
+                        id="address"
+                        inputProps={{
+                          type: "text"
+                        }}
+                        value={order?.client?.direccion ?? ""}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
+                        disabled
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
                       <Selector
                         placeholder="Origen"
                         options={ORIGIN_ORDER_LIST}
@@ -505,7 +519,7 @@ export default function OrdersFormEdit(props) {
                     </GridItem>
                     <GridItem md={6}>
                       <Selector
-                        placeholder="Forma de pago"
+                        placeholder="Tipo de pago"
                         options={PAYMENT_LIST}
                         onChange={value => handleForm("formapago_id", value)}
                         value={order?.formapago_id}
@@ -520,7 +534,7 @@ export default function OrdersFormEdit(props) {
                         showTimeSelect
                       />
                     </GridItem>
-                    <GridItem md={12}>
+                    <GridItem md={6}>
                       <div className="margin-top">
                         <CustomInput
                           labelText="Comentario"

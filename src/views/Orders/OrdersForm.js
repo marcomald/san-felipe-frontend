@@ -338,35 +338,42 @@ export default function OrdersForm(props) {
 
   const createNewOrder = async () => {
     setLoading(true);
-    const created = await createOrder([
-      {
-        empresa_id: order.client.empresa_id,
-        sucursal_id: order.client.sucursal_id,
-        semana: moment().week(),
-        fecha_pedido: moment().format("YYYY-MM-DD"),
-        cliente_id: order.client.cliente_id,
-        origen: order.origin.value,
-        fecha_entrega: moment(order.fecha_entrega).format(
-          "YYYY-MM-DD HH:mm:ss"
-        ),
-        total: totalOrder,
-        estado_pedido: "creado",
-        formapago_id: order.formapago_id.value,
-        creado_desde: "web",
-        estado: "A",
-        comentario: "",
-        georuta_id: null,
-        detail: order.products.map(product => ({
+    const formData = new FormData();
+    const newOrder = {
+      empresa_id: order.client.empresa_id,
+      sucursal_id: order.client.sucursal_id,
+      semana: moment().week(),
+      fecha_pedido: moment().format("YYYY-MM-DD"),
+      cliente_id: order.client.cliente_id,
+      origen: order.origin.value,
+      fecha_entrega: moment(order.fecha_entrega).format("YYYY-MM-DD HH:mm:ss"),
+      total: totalOrder,
+      estado_pedido: "creado",
+      formapago_id: order.formapago_id.value,
+      creado_desde: "web",
+      estado: "A",
+      comentario: "",
+      georuta_id: null,
+      detail: JSON.stringify(
+        order.products.map(product => ({
           price_id: product.price.precio_id,
           cantidad: product.cantidad ?? 0,
           tipo_venta: "01",
           descuento: 0,
           total: calculateTotalPerProduct(product),
           producto_id: product.product.producto_id
-        })),
-        userId: getUserId()
-      }
-    ]);
+        }))
+      ),
+      userId: getUserId()
+    };
+    Object.keys(newOrder).map(orderField => {
+      console.log(orderField, newOrder[orderField]);
+      formData.append(orderField, newOrder[orderField]);
+    });
+    if (order?.prepago_imagen) {
+      formData.append("file", order.prepago_imagen);
+    }
+    const created = await createOrder(formData);
     if (created.error) {
       setNotification({
         color: "warning",
@@ -380,10 +387,11 @@ export default function OrdersForm(props) {
           open: false
         });
       }, 7000);
+      setLoading(false);
       return;
     }
     await updateClientContact();
-    setOrder({});
+    // setOrder({});
     setTotalOrder(0);
     setNotification({
       color: "info",
@@ -464,6 +472,20 @@ export default function OrdersForm(props) {
                       />
                     </GridItem>
                     <GridItem md={6}>
+                      <CustomInput
+                        labelText="Dirección de cliente"
+                        id="address"
+                        inputProps={{
+                          type: "text"
+                        }}
+                        value={order?.client?.direccion ?? ""}
+                        formControlProps={{
+                          fullWidth: true
+                        }}
+                        disabled
+                      />
+                    </GridItem>
+                    <GridItem md={6}>
                       <Selector
                         placeholder="Origen"
                         options={ORIGIN_ORDER_LIST}
@@ -473,7 +495,7 @@ export default function OrdersForm(props) {
                     </GridItem>
                     <GridItem md={6}>
                       <Selector
-                        placeholder="Forma de pago"
+                        placeholder="Tipo de pago"
                         options={PAYMENT_LIST}
                         onChange={value => handleForm("formapago_id", value)}
                         value={order?.formapago_id}
@@ -488,7 +510,7 @@ export default function OrdersForm(props) {
                         showTimeSelect
                       />
                     </GridItem>
-                    <GridItem md={12}>
+                    <GridItem md={6}>
                       <div className="margin-top">
                         <CustomInput
                           labelText="Comentario"
@@ -506,6 +528,35 @@ export default function OrdersForm(props) {
                         />
                       </div>
                     </GridItem>
+                    {order?.formapago_id?.value === "03" && (
+                      <GridItem md={6}>
+                        <br />
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center"
+                          }}
+                        >
+                          <Button color="rose" key="AddButton1">
+                            <label htmlFor="files" style={{ color: "white" }}>
+                              Selecciona la imagen del prepago
+                            </label>
+                          </Button>
+                          <p style={{ marginLeft: "1rem" }}>
+                            {order?.prepago_imagen?.name ?? ""}
+                          </p>
+                          <input
+                            type="file"
+                            onChange={e =>
+                              handleForm("prepago_imagen", e.target.files[0])
+                            }
+                            id="files"
+                            style={{ visibility: "hidden" }}
+                            accept="image/*"
+                          />
+                        </div>
+                      </GridItem>
+                    )}
                   </GridContainer>
                   <br />
                   <Button
