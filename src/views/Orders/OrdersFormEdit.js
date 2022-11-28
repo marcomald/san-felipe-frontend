@@ -282,7 +282,7 @@ export default function OrdersFormEdit(props) {
       const productPrice = await getProductPrice(
         productSelected.product.producto_id,
         order.client.sucursal_id,
-        order.client.listapre_id ?? "02"
+        order.client.cliente_id
       );
       if (productPrice.error) {
         setNotification({

@@ -12,14 +12,10 @@ export const getProducts = async (limit, offset, clientSearch) => {
   }
 };
 
-export const getProductPrice = async (
-  producto_id,
-  sucursal_id,
-  listapre_id
-) => {
+export const getProductPrice = async (producto_id, sucursal_id, client_id) => {
   try {
     const response = await Axios.get(
-      `/prices/product/${producto_id}/branch-office/${sucursal_id}/list-price/${listapre_id}`
+      `/prices/product/${producto_id}/branch-office/${sucursal_id}/client/${client_id}`
     );
     return response.data;
   } catch (error) {
