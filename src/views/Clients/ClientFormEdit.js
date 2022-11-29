@@ -480,7 +480,7 @@ export default function ClientFormEdit(props) {
                         formControlProps={{
                           fullWidth: true
                         }}
-                        limit={60}
+                        limit={199}
                       />
                     </GridItem>
                     <GridItem md={6}>
@@ -590,7 +590,7 @@ export default function ClientFormEdit(props) {
                         formControlProps={{
                           fullWidth: true
                         }}
-                        limit={50}
+                        limit={199}
                       />
                     </GridItem>
                     <GridItem md={12}>
