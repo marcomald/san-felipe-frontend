@@ -252,7 +252,7 @@ export default function OrdersFormEdit(props) {
       products: orderDetail.map(detail => ({
         cantidad: detail.d_cantidad,
         price: {
-          precio: detail.price_precio,
+          precio: detail.d_total / detail.d_cantidad,
           precio_id: detail.price_precio_id
         },
         product: {
@@ -443,6 +443,8 @@ export default function OrdersFormEdit(props) {
     };
     setOrder(orderData);
   };
+
+  console.log("productSElected", productSelected);
 
   return (
     <AdminLayout>
