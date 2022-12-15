@@ -187,7 +187,13 @@ export default function DespatchList(props) {
                   ];
                 })}
                 limite={10}
-                headers={["# Número", "Ruta", "Fecha", "Estado", "Acccion"]}
+                headers={[
+                  "Número Despacho",
+                  "Ruta",
+                  "Fecha",
+                  "Estado",
+                  "Acccion"
+                ]}
                 onOffsetChange={valueOffset => {
                   setOffset(valueOffset);
                 }}
