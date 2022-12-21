@@ -42,6 +42,37 @@ export const getDespatchs = async (limit, offset, date, georutaId) => {
   }
 };
 
+export const getClosures = async (limit, offset, date, georutaId) => {
+  try {
+    const queryParams = generateGetParams(limit, offset, "", date, georutaId);
+    const response = await Axios.get("/despatch/closure" + queryParams);
+    return response.data;
+  } catch (error) {
+    console.error("error get closure ->", error);
+    checkUnauthorized(error);
+  }
+};
+
+export const getClosureDetail = async dispatchNumber => {
+  try {
+    const response = await Axios.get("/despatch/closure/" + dispatchNumber);
+    return response.data;
+  } catch (error) {
+    console.error("error get closure dispatch detail->", error);
+    checkUnauthorized(error);
+  }
+};
+
+export const completeClosure = async dispatchNumber => {
+  try {
+    const response = await Axios.put(`/despatch/closure/${dispatchNumber}`, {});
+    return response.data;
+  } catch (error) {
+    console.error("error approbando despatch ->", error.response);
+    checkUnauthorized(error);
+  }
+};
+
 export const getDespatchById = async despatchId => {
   try {
     const response = await Axios.get("/despatch/" + despatchId);

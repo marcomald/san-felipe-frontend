@@ -177,7 +177,7 @@ export default function DespatchForm(props) {
       setLoading(true);
       const created = await createDespatch({
         estado: "A",
-        date: moment(despatch.georoute.fecha).format("YYYY-MM-DD"),
+        date: moment.utc(despatch.georoute.fecha).format("YYYY-MM-DD"),
         georuta_id: despatch.georoute.georuta_id,
         detail: despatch.products.map(product => ({
           order_amount: product.total,

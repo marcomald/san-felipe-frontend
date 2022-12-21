@@ -22,6 +22,8 @@ import TrackingList from "views/Tracking/TrackingList";
 import DespatchList from "views/Despatch/DespatchList";
 import DespatchForm from "views/Despatch/DespatchForm";
 import DespatchFormEdit from "views/Despatch/DespatchFormEdit";
+import { ClousureList } from "views/Clousure/ClousureList";
+import { ClosureForm } from "views/Clousure/ClosureForm";
 
 const PrivateRoutes = permissions => {
   const allowedRoutes = [];
@@ -176,6 +178,30 @@ const PrivateRoutes = permissions => {
             exact
             component={DespatchFormEdit}
             key="create-despacho"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/cierre-diario"
+            exact
+            component={ClousureList}
+            key="list-despatch"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/cierre-diario/:id/ver"
+            exact
+            component={ClosureForm}
+            key="see-despatch"
+          />
+        );
+        allowedRoutes.push(
+          <Route
+            path="/mantenimiento/cierre-diario/:id/aprobar"
+            exact
+            component={ClosureForm}
+            key="approve-despatch"
           />
         );
         break;

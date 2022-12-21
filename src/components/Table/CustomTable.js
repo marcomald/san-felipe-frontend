@@ -11,168 +11,165 @@ import FormStyles from "assets/jss/material-dashboard-pro-react/views/extendedFo
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import {
-    ContainerLimitTable,
-    ContainerInputSearch,
-    ContainerSelectLimit,
-    ContainerPagination,
-} from "./style"
+  ContainerLimitTable,
+  ContainerInputSearch,
+  ContainerSelectLimit,
+  ContainerPagination
+} from "./style";
 
 const useStylesForm = makeStyles(FormStyles);
-const limitForPage = [1, 2, 3, 4, 10, 20]
+const limitForPage = [1, 2, 3, 4, 10, 20];
 
 export default function CustomTable(props) {
-    const {
-        limite,
-        data,
-        headers,
-        total,
-        changeLimit,
-        offset,
-        onOffsetChange,
-        onSearchChange,
-        searchValue,
-        placeholderSearch,
-        labelSearch,
-        showSearch
-    } = props
-    const [limit, setLimit] = useState(limite ? limite : 5)
+  const {
+    limite,
+    data,
+    headers,
+    total,
+    changeLimit,
+    offset,
+    onOffsetChange,
+    onSearchChange,
+    searchValue,
+    placeholderSearch,
+    labelSearch,
+    showSearch
+  } = props;
+  const [limit, setLimit] = useState(limite ? limite : 5);
 
-    const FormClasses = useStylesForm();
-    const pagination = [
-        { text: "ANTERIOR" },
-        { text: "SIGUIENTE" }
-    ];
+  const FormClasses = useStylesForm();
+  const pagination = [{ text: "ANTERIOR" }, { text: "SIGUIENTE" }];
 
-    const totalPages = Math.ceil(total / limit)
-    const currentPage = Math.ceil((+offset - 1 / limit) / +limit) + 1;
-    const registersForPage = limit * currentPage <= total ? limit * currentPage : total
+  const totalPages = Math.ceil(total / limit);
+  const currentPage = Math.ceil((+offset - 1 / limit) / +limit) + 1;
+  const registersForPage =
+    limit * currentPage <= total ? limit * currentPage : total;
 
-    const onClickPagination = (id) => {
-        let offsetAux
-        switch (id) {
-            case "ANTERIOR":
-                offsetAux = +offset - limit;
-                if (offsetAux < 0) {
-                    offsetAux = 0;
-                }
-                onOffsetChange(offsetAux);
-                break
-            case "SIGUIENTE":
-                if (currentPage >= totalPages) {
-                    onOffsetChange(offset);
-                    return;
-                }
-                offsetAux = +offset + limit;
-                if (offsetAux >= total) {
-                    offsetAux = (+offset + limit) - total;
-                }
-                onOffsetChange(offsetAux);
-                break
-            default:
-                break
+  const onClickPagination = id => {
+    let offsetAux;
+    switch (id) {
+      case "ANTERIOR":
+        offsetAux = +offset - limit;
+        if (offsetAux < 0) {
+          offsetAux = 0;
         }
-
+        onOffsetChange(offsetAux);
+        break;
+      case "SIGUIENTE":
+        if (currentPage >= totalPages) {
+          onOffsetChange(offset);
+          return;
+        }
+        offsetAux = +offset + limit;
+        if (offsetAux >= total) {
+          offsetAux = +offset + limit - total;
+        }
+        onOffsetChange(offsetAux);
+        break;
+      default:
+        break;
     }
+  };
 
-    const onChangeLimit = (valueLimit) => {
-        setLimit(valueLimit)
-        changeLimit(valueLimit)
-    }
+  const onChangeLimit = valueLimit => {
+    setLimit(valueLimit);
+    changeLimit(valueLimit);
+  };
 
-    return (<React.Fragment>
-        <div>
-
-            <ContainerLimitTable >
-                <ContainerSelectLimit>
-                    <FormControl
-                        fullWidth
-                        className={FormClasses.selectFormControl}
+  return (
+    <React.Fragment>
+      <div>
+        <ContainerLimitTable>
+          <ContainerSelectLimit>
+            <FormControl fullWidth className={FormClasses.selectFormControl}>
+              <InputLabel
+                htmlFor="limit-select"
+                className={FormClasses.selectLabel}
+              >
+                Registros por pagina
+              </InputLabel>
+              <Select
+                MenuProps={{
+                  className: FormClasses.selectMenu
+                }}
+                classes={{
+                  select: FormClasses.select
+                }}
+                value={limit}
+                onChange={e => onChangeLimit(e.target.value)}
+                inputProps={{
+                  name: "limitSelect",
+                  id: "limit-select"
+                }}
+              >
+                <MenuItem
+                  disabled
+                  classes={{
+                    root: FormClasses.selectMenuItem
+                  }}
+                >
+                  Eliga una opcion
+                </MenuItem>
+                {limitForPage.map((limitOption, index) => {
+                  return (
+                    <MenuItem
+                      key={index}
+                      classes={{
+                        root: FormClasses.selectMenuItem,
+                        selected: FormClasses.selectMenuItemSelected
+                      }}
+                      value={limitOption}
                     >
-                        <InputLabel
-                            htmlFor="limit-select"
-                            className={FormClasses.selectLabel}
-                        >
-                            Registros por pagina
-                    </InputLabel>
-                        <Select
-                            MenuProps={{
-                                className: FormClasses.selectMenu,
-                            }}
-                            classes={{
-                                select: FormClasses.select
-                            }}
-                            value={limit}
-                            onChange={(e) => onChangeLimit(e.target.value)}
-                            inputProps={{
-                                name: "limitSelect",
-                                id: "limit-select"
-                            }}
-                        >
-                            <MenuItem
-                                disabled
-                                classes={{
-                                    root: FormClasses.selectMenuItem
-                                }}
-                            >
-                                Eliga una opcion
-                                </MenuItem>
-                            {
-                                limitForPage.map((limitOption, index) => {
-                                    return (
-                                        <MenuItem
-                                            key={index}
-                                            classes={{
-                                                root: FormClasses.selectMenuItem,
-                                                selected: FormClasses.selectMenuItemSelected
-                                            }}
-                                            value={limitOption}
-                                        >
-                                            {limitOption}
-                                        </MenuItem>
-                                    )
-                                })
-                            }
-                        </Select>
-                    </FormControl>
-                </ContainerSelectLimit>
-                <ContainerInputSearch>
-                    {showSearch &&
-                        <CustomInput
-                            labelText={labelSearch}
-                            id="name_seller_search"
-                            formControlProps={{
-                                fullWidth: true,
+                      {limitOption}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </ContainerSelectLimit>
+          <ContainerInputSearch>
+            {showSearch && (
+              <CustomInput
+                labelText={labelSearch}
+                id="name_seller_search"
+                formControlProps={{
+                  fullWidth: true
+                }}
+                inputProps={{
+                  type: "text",
+                  placeholder: placeholderSearch
+                }}
+                value={searchValue}
+                onChange={e => onSearchChange(e.target.value)}
+              />
+            )}
+          </ContainerInputSearch>
+        </ContainerLimitTable>
+      </div>
 
-                            }}
-                            inputProps={{
-                                type: "text",
-                                placeholder: placeholderSearch,
-                            }}
-                            value={searchValue}
-                            onChange={(e) => onSearchChange(e.target.value)}
-                        />
-                    }
-                </ContainerInputSearch>
-            </ContainerLimitTable>
-        </div>
+      <Table
+        striped
+        tableHeaderColor="primary"
+        tableHead={headers}
+        tableData={data}
+      />
+      <div>
+        {data.length === 0 && <small>No existen datos ingresados.</small>}
+      </div>
 
-        <Table
-            striped
-            tableHeaderColor="primary"
-            tableHead={headers}
-            tableData={data}
-        />
-        <div>
-            {data.length === 0 && <small>No existen datos ingresados.</small>}
-        </div>
-
-        {total > 0 && <ContainerPagination>
-            <Pagination
-                pages={pagination}
-                color="primary"
-                onclickButton={onClickPagination}
-            />
-            <h4>Pagina {currentPage} de {totalPages}, mostrando del {+offset + 1} al {registersForPage} de {total} registros.</h4>
-        </ContainerPagination>}
-    </React.Fragment>)
+      {total > 0 && (
+        <ContainerPagination>
+          <Pagination
+            pages={pagination}
+            color="primary"
+            onclickButton={onClickPagination}
+          />
+          <h4>
+            Pagina {currentPage} de {totalPages}, mostrando del {+offset + 1} al{" "}
+            {registersForPage} de {total} registros.
+          </h4>
+        </ContainerPagination>
+      )}
+    </React.Fragment>
+  );
 }

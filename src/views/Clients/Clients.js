@@ -182,7 +182,7 @@ export default function Clients(props) {
                   ];
                 })}
                 limite={10}
-                headers={["RUC/CI", "Nombre", "Dirección", "Acccion"]}
+                headers={["RUC/CI", "Nombre", "Dirección", "Acción"]}
                 onOffsetChange={valueOffset => {
                   setOffset(valueOffset);
                 }}

@@ -192,7 +192,7 @@ export default function DespatchList(props) {
                   "Ruta",
                   "Fecha",
                   "Estado",
-                  "Acccion"
+                  "Acción"
                 ]}
                 onOffsetChange={valueOffset => {
                   setOffset(valueOffset);
