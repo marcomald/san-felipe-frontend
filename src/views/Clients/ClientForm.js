@@ -73,6 +73,10 @@ export default function ClientForm(props) {
   const [priceList, setPriceList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [map, setMap] = useState();
+  const [identificationError, setIdentificationError] = useState({
+    error: false,
+    message: ""
+  });
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -209,6 +213,9 @@ export default function ClientForm(props) {
     if (visitFrequency.length <= 0) {
       hasError = true;
     }
+    if (identificationError.error) {
+      hasError = true;
+    }
 
     // const existClient = await validateExistClientByDocument(client.ruc_cedula);
     // if (existClient) {
@@ -320,6 +327,30 @@ export default function ClientForm(props) {
         handleClient("ruc_cedula", value);
       }
     }
+    validateIdentification(value);
+  };
+
+  const validateIdentification = value => {
+    if (client.tipcli.value === "C") {
+      if (value.length < 10) {
+        setIdentificationError({
+          error: true,
+          message: "El campo debe tener 10 caracteres"
+        });
+      } else {
+        setIdentificationError({ error: false, message: "" });
+      }
+    }
+    if (client.tipcli.value === "R") {
+      if (value.length < 13) {
+        setIdentificationError({
+          error: true,
+          message: "El campo debe tener 13 caracteres"
+        });
+      } else {
+        setIdentificationError({ error: false, message: "" });
+      }
+    }
   };
 
   return (
@@ -418,6 +449,11 @@ export default function ClientForm(props) {
                         }}
                         disabled={!client.tipcli}
                       />
+                      {identificationError.error && (
+                        <span style={{ color: "red" }}>
+                          {identificationError.message}
+                        </span>
+                      )}
                     </GridItem>
                     <GridItem md={6}>
                       <CustomInput
