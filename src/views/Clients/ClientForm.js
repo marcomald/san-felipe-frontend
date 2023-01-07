@@ -20,7 +20,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 import { getTerritories } from "../../services/Territory";
 import { getBusiness } from "../../services/Business";
-import { formatToSelectOption } from "../../helpers/utils";
+import { formatToSelectOption, getUserId } from "../../helpers/utils";
 import { getPriceList } from "../../services/PriceList";
 import Button from "components/CustomButtons/Button.js";
 import Search from "@material-ui/icons/Search";
@@ -274,7 +274,8 @@ export default function ClientForm(props) {
         latitud: coords.latitud,
         longitud: coords.longitud,
         frecvisita_id,
-        formapago_id: client.formapago_id.value
+        formapago_id: client.formapago_id.value,
+        user_id: getUserId()
       });
       if (created) {
         setClient({});
