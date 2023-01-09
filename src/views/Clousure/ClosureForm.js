@@ -16,6 +16,8 @@ import LoaderComponent from "components/Loader/Loader";
 import { makeStyles } from "@material-ui/core";
 import { getClosureDetail } from "services/Despatch";
 import { completeClosure } from "services/Despatch";
+import XLSX from "sheetjs-style";
+import * as FileSaver from "file-saver";
 
 const customStyles = {
   ...styles,
@@ -25,8 +27,8 @@ const customStyles = {
   },
   cardIconTitle: {
     ...cardTitle,
-    marginTop: "15px",
-    marginBottom: "0px"
+    marginBottom: "0px",
+    marginRight: "1rem"
   },
   buttonContainer: {
     display: "flex",
@@ -135,9 +137,24 @@ export const ClosureForm = props => {
               <CardIcon color="rose">
                 <AssignmentInd />
               </CardIcon>
-              <h4 className={classes.cardIconTitle}>
-                Retorno de dinero ({getTotalMoney()})
-              </h4>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  paddingTop: "1rem"
+                }}
+              >
+                <h4 className={classes.cardIconTitle}>
+                  Retorno de dinero ({getTotalMoney()})
+                </h4>
+                <ExportExcel
+                  excelData={money.map(item => ({
+                    "FORMA DE PAGO ": item.descripcion,
+                    RECAUDADO: item.monto
+                  }))}
+                  fileName={"RetornoDeDinero"}
+                />
+              </div>
             </CardHeader>
             <CardBody>
               <CustomTable
@@ -159,9 +176,27 @@ export const ClosureForm = props => {
               <CardIcon color="rose">
                 <AssignmentInd />
               </CardIcon>
-              <h4 className={classes.cardIconTitle}>
-                Retorno de productos ({getTotalProducts()})
-              </h4>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  paddingTop: "1rem"
+                }}
+              >
+                <h4 className={classes.cardIconTitle}>
+                  Retorno de productos ({getTotalProducts()})
+                </h4>
+                <ExportExcel
+                  excelData={products.map(item => ({
+                    CODIGO: item.des_corta,
+                    NOMBRE: item.descripcion,
+                    DESPACHADOS: item.cant_despacho,
+                    ENTREGADOS: item.cant_entregada,
+                    RETORNO: +item?.cant_despacho - +item?.cant_entregada
+                  }))}
+                  fileName={"RetornoDeProductosx"}
+                />
+              </div>
             </CardHeader>
             <CardBody>
               <CustomTable
@@ -204,5 +239,26 @@ export const ClosureForm = props => {
         close
       />
     </AdminLayout>
+  );
+};
+
+// eslint-disable-next-line react/prop-types
+const ExportExcel = ({ excelData, fileName }) => {
+  const fileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const fileExtension = ".xlsx";
+
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, fileName + fileExtension);
+  };
+
+  return (
+    <Button color="warning" id="addClientBtn" onClick={exportToExcel}>
+      Descargar
+    </Button>
   );
 };
