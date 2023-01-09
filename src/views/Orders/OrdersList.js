@@ -137,6 +137,7 @@ export default function Pedidos(props) {
             color={prop.color}
             className={classesTable.actionButton}
             key={key}
+            disabled={order.num_despacho}
             onClick={() => {
               if (prop.color === "danger") {
                 setOrder(order);
@@ -202,6 +203,8 @@ export default function Pedidos(props) {
     }, 6000);
     setShowDelete(false);
   };
+
+  console.log("orders", orders);
 
   return (
     <AdminLayout>
