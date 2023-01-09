@@ -152,13 +152,13 @@ export default function TrackingList() {
 
       if (orders) {
         const ordersToDelivery = orders.filter(
-          order => order.estado_pedido === "creado"
+          order => order.estado_pedido.toLowerCase() === "creado"
         );
         const ordersDelivered = orders.filter(
-          order => order.estado_pedido === "facturado"
+          order => order.estado_pedido.toLowerCase() === "facturado"
         );
         const ordersCanceled = orders.filter(
-          order => order.estado_pedido === "cancelado"
+          order => order.estado_pedido.toLowerCase() === "cancelado"
         );
         let total = 0;
         ordersDelivered.forEach(order => {
