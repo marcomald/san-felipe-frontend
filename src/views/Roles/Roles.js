@@ -74,7 +74,7 @@ export default function Roles(props) {
   const [rolEditAux, setRolEditAux] = React.useState({});
   const [rol, setRol] = React.useState({});
   const [offset, setOffset] = React.useState(0);
-  const [limit, setLimit] = React.useState(3);
+  const [limit, setLimit] = React.useState(10);
   const modalClasses = useStylesModal();
   const permisos = [
     { name: "Acceso a Clientes", key: "clientes" },
@@ -82,7 +82,9 @@ export default function Roles(props) {
     { name: "Acceso a Roles", key: "roles" },
     { name: "Acceso a Usuarios", key: "usuarios" },
     { name: "Acceso a Perfil", key: "userprofile" },
-    { name: "Acceso a Shippify", key: "shippify" }
+    { name: "Acceso a Shippify", key: "shippify" },
+    { name: "Acceso a Rastreo de Pedidos", key: "track" },
+    { name: "Acceso a Despacho y Cierre", key: "despatch" }
   ];
 
   useEffect(() => {
@@ -342,7 +344,7 @@ export default function Roles(props) {
                   return [
                     rl.nombre,
                     rl.descripcion,
-                    <ul>
+                    <ul key={index}>
                       {rl.permisos.map((per, index) => {
                         return <li key={index}>{per}</li>;
                       })}
