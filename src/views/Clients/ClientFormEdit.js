@@ -306,6 +306,7 @@ export default function ClientFormEdit(props) {
       const created = await updateClient(
         {
           ...client,
+          tipcli: client.tipcli?.value || "O",
           ayudante_id: "00",
           grupocli_id: "01",
           empresa_id: "FSF",
