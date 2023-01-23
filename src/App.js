@@ -4,8 +4,8 @@ import AuthContext from "./authContext";
 import Routes from "./Routes/Routes";
 
 axios.defaults.baseURL = process.env.REACT_APP_DISRTIMARKET_BACKEND_URL;
-const accessToken = window.sessionStorage.getItem("accessToken");
-const user = window.sessionStorage.getItem("user");
+const accessToken = window.localStorage.getItem("accessToken");
+const user = window.localStorage.getItem("user");
 
 function App() {
   const [login, setLogin] = useState({ token: accessToken, user });

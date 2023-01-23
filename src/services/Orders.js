@@ -28,7 +28,11 @@ export const deleteOrder = async ordedId => {
 
 export const editOrder = async (order, orderId) => {
   try {
-    const response = await Axios.put("/orders/" + orderId, order);
+    const response = await Axios.put("/orders/single/" + orderId, order, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
     return response.data;
   } catch (error) {
     console.error("error creating order by id ->", error);

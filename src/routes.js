@@ -11,7 +11,7 @@ import AssignmentInd from "@material-ui/icons/AssignmentInd";
 import Pedidos from "views/Orders/OrdersList";
 
 const filterPermissions = () => {
-  const user = window.sessionStorage.getItem("user");
+  const user = window.localStorage.getItem("user");
   const urlPath = window.location.pathname;
   if (!user) {
     if (urlPath !== "/login") {

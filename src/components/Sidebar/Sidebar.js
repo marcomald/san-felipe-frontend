@@ -122,8 +122,8 @@ class Sidebar extends React.Component {
   // this function creates the links and collapses that appear in the sidebar (left menu)
   createLinks = () => {
     const { classes, color, rtlActive } = this.props;
-    const user = window.sessionStorage.getItem("user")
-    const token = window.sessionStorage.getItem("accessToken")
+    const user = window.localStorage.getItem("user")
+    const token = window.localStorage.getItem("accessToken")
     if (!user || !token) {
       this.props.history.push('/login');
       return
@@ -426,7 +426,7 @@ class Sidebar extends React.Component {
   // --------------------------------------------------------------------
   render() {
 
-    const userLogged = JSON.parse(atob(window.sessionStorage.getItem("user")));
+    const userLogged = JSON.parse(atob(window.localStorage.getItem("user")));
     const {
       classes,
       logo,

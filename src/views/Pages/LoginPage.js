@@ -39,8 +39,8 @@ export default function LoginPage(props) {
   const classes = useStyles();
 
   useEffect(() => {
-    window.sessionStorage.removeItem("user");
-    window.sessionStorage.removeItem("accessToken");
+    window.localStorage.removeItem("user");
+    window.localStorage.removeItem("accessToken");
   }, [reloadLogin]);
 
   return (
@@ -115,8 +115,8 @@ export default function LoginPage(props) {
                               const response = await data.data;
                               const user = JSON.stringify(response.user);
                               const userEncode = window.btoa(user);
-                              window.sessionStorage.setItem("user", userEncode);
-                              window.sessionStorage.setItem(
+                              window.localStorage.setItem("user", userEncode);
+                              window.localStorage.setItem(
                                 "accessToken",
                                 response.access_token
                               );

@@ -367,35 +367,41 @@ export default function OrdersFormEdit(props) {
 
   const editCreatedOrder = async () => {
     setLoading(true);
-    await editOrder(
-      {
-        empresa_id: order.client.empresa_id,
-        sucursal_id: order.client.sucursal_id,
-        semana: moment().week(),
-        fecha_entrega: moment(order.fecha_entrega).format(
-          "YYYY-MM-DD HH:mm:ss"
-        ),
-        cliente_id: order.client.cliente_id,
-        origen: order.origin.value,
-        total: totalOrder,
-        estado_pedido: "Creado",
-        formapago_id: order.formapago_id.value,
-        creado_desde: order.creado_desde,
-        estado: "A",
-        comentario: "",
-        georuta_id: "",
-        detail: order.products.map(product => ({
+    const formData = new FormData();
+    const orderToUpdate = {
+      empresa_id: order.client.empresa_id,
+      sucursal_id: order.client.sucursal_id,
+      semana: moment().week(),
+      fecha_entrega: moment(order.fecha_entrega).format("YYYY-MM-DD HH:mm:ss"),
+      cliente_id: order.client.cliente_id,
+      origen: order.origin.value,
+      total: totalOrder,
+      estado_pedido: "creado",
+      formapago_id: order.formapago_id.value,
+      creado_desde: "web",
+      estado: "A",
+      comentario: "",
+      georuta_id: order.georuta_id,
+      detail: JSON.stringify(
+        order.products.map(product => ({
           price_id: product.price.precio_id,
           cantidad: product.cantidad ?? 0,
           tipo_venta: "01",
           descuento: 0,
           total: calculateTotalPerProduct(product),
           producto_id: product.product.producto_id
-        })),
-        userId: getUserId()
-      },
-      orderID
-    );
+        }))
+      ),
+      userId: getUserId()
+    };
+    Object.keys(orderToUpdate).map(orderField => {
+      console.log(orderField, orderToUpdate[orderField]);
+      formData.append(orderField, orderToUpdate[orderField]);
+    });
+    if (order?.prepago_imagen) {
+      formData.append("file", order.prepago_imagen);
+    }
+    await editOrder(formData, orderID);
     updateClientContact();
     setNotification({
       color: "info",
@@ -554,6 +560,35 @@ export default function OrdersFormEdit(props) {
                         />
                       </div>
                     </GridItem>
+                    {order?.formapago_id?.value === "03" && (
+                      <GridItem md={6}>
+                        <br />
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center"
+                          }}
+                        >
+                          <Button color="rose" key="AddButton1">
+                            <label htmlFor="files" style={{ color: "white" }}>
+                              Selecciona la imagen del prepago
+                            </label>
+                          </Button>
+                          <p style={{ marginLeft: "1rem" }}>
+                            {order?.prepago_imagen?.name ?? ""}
+                          </p>
+                          <input
+                            type="file"
+                            onChange={e =>
+                              handleForm("prepago_imagen", e.target.files[0])
+                            }
+                            id="files"
+                            style={{ visibility: "hidden" }}
+                            accept="image/*"
+                          />
+                        </div>
+                      </GridItem>
+                    )}
                   </GridContainer>
                   <br />
                   <Button

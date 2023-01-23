@@ -234,8 +234,8 @@ const PublicRoutes = () => (
 );
 
 const Routes = () => {
-  const user = window.sessionStorage.getItem("user");
-  const token = window.sessionStorage.getItem("accessToken");
+  const user = window.localStorage.getItem("user");
+  const token = window.localStorage.getItem("accessToken");
   if (!user || !token) {
     return PublicRoutes();
   }

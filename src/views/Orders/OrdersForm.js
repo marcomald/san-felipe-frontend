@@ -367,7 +367,6 @@ export default function OrdersForm(props) {
       userId: getUserId()
     };
     Object.keys(newOrder).map(orderField => {
-      console.log(orderField, newOrder[orderField]);
       formData.append(orderField, newOrder[orderField]);
     });
     if (order?.prepago_imagen) {

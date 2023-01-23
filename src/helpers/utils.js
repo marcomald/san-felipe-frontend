@@ -1,12 +1,11 @@
 export const getUserId = () => {
-  const user = window.sessionStorage.getItem("user");
+  const user = window.localStorage.getItem("user");
   const userDecode = JSON.parse(window.atob(user));
   return userDecode.userId;
 };
 
 export const checkUnauthorized = e => {
   if (e.request.status === 403) {
-    sessionStorage.clear();
     localStorage.clear();
     window.location.href = "/login";
     return;
