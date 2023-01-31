@@ -44,6 +44,7 @@ export const ClosureForm = props => {
   const [loading, setLoading] = React.useState(false);
   const [products, setProducts] = React.useState([]);
   const [money, setMoney] = React.useState([]);
+  const [orders, setOrders] = React.useState([]);
   const [notification, setNotification] = useState({
     color: "info",
     text: "",
@@ -60,6 +61,7 @@ export const ClosureForm = props => {
     const despatchDetail = await getClosureDetail(dispatchNumber);
     setProducts(despatchDetail?.products);
     setMoney(despatchDetail?.collectedMoney);
+    setOrders(despatchDetail?.orders);
     setLoading(false);
   };
 
@@ -105,7 +107,7 @@ export const ClosureForm = props => {
     <AdminLayout>
       <GridContainer>
         <GridItem xs={12} sm={6}>
-          <h1>Aprobar cierre de caja</h1>
+          <h1>{`${isApprovePage() ? "Aprobar" : "Ver"} Cierre De Caja`}</h1>
         </GridItem>
         <GridItem xs={12} sm={6}>
           <div className={classes.buttonContainer}>
@@ -118,6 +120,20 @@ export const ClosureForm = props => {
                 <Check /> APROBAR CIERRE
               </Button>
             )}
+            <ExportExcel
+              excelData={orders.map(order => ({
+                "Numero pedido": order.num_pedido,
+                Estado: order.estado_pedido,
+                "Nombre Cliente": order.nombre_cliente,
+                "Numer Factura": order.numero_factura,
+                "Total Pedido": order.total_pedido,
+                "Total Pagado": order.valor_pagado_total,
+                "Forma de Pago": order.forma_pago,
+                "Valor Pagado": order.valor_pago
+              }))}
+              fileName={"Pedidos"}
+              buttonName="Descargar Pedidos"
+            />
             <Button
               color="rose"
               id="addClientBtn"
@@ -243,7 +259,7 @@ export const ClosureForm = props => {
 };
 
 // eslint-disable-next-line react/prop-types
-const ExportExcel = ({ excelData, fileName }) => {
+const ExportExcel = ({ excelData, fileName, buttonName = "Descargar" }) => {
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileExtension = ".xlsx";
@@ -258,7 +274,7 @@ const ExportExcel = ({ excelData, fileName }) => {
 
   return (
     <Button color="warning" id="addClientBtn" onClick={exportToExcel}>
-      Descargar
+      {buttonName}
     </Button>
   );
 };
