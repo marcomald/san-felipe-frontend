@@ -97,7 +97,9 @@ export default function ClientFormEdit(props) {
 
   useEffect(() => {
     const selectedPriceList = priceList.find(
-      item => item.listapre_id === firstClient.listapre_id
+      item =>
+        item.listapre_id === firstClient.listapre_id &&
+        item.sucursal_id === firstClient.sucursal_id
     );
     const selectedBusiness = business.find(
       item => item.negocio_id === firstClient.negocio_id
