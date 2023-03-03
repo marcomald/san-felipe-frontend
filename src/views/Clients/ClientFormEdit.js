@@ -31,6 +31,7 @@ import CustomCheckBox from "../../components/CustomCheckBox/CustomCheckBox";
 import { PAYMENT_LIST } from "helpers/constants";
 import LoaderComponent from "components/Loader/Loader";
 import { DOCUMENT_TYPE } from "helpers/constants";
+import { RESPONSIBLE_LIST } from "helpers/constants";
 
 // eslint-disable-next-line react/display-name
 
@@ -115,6 +116,9 @@ export default function ClientFormEdit(props) {
       tipcli: selectedDocumentType,
       formapago_id: PAYMENT_LIST.find(
         payment => payment.value === firstClient.formapago_id
+      ),
+      ayudante_id: RESPONSIBLE_LIST.find(
+        ayudante => ayudante.value === firstClient.ayudante_id
       ),
       listapre_id: {
         ...selectedPriceList,
@@ -309,7 +313,7 @@ export default function ClientFormEdit(props) {
         {
           ...client,
           tipcli: client.tipcli?.value || "O",
-          ayudante_id: "00",
+          ayudante_id: client.ayudante_id.value,
           grupocli_id: "01",
           empresa_id: "FSF",
           sucursal_id: "002",
@@ -583,6 +587,14 @@ export default function ClientFormEdit(props) {
                       />
                     </GridItem>
                     <GridItem md={6}>
+                      <Selector
+                        placeholder="Responsable"
+                        options={RESPONSIBLE_LIST}
+                        onChange={value => handleClient("ayudante_id", value)}
+                        value={client.ayudante_id}
+                      />
+                    </GridItem>
+                    <GridItem md={12}>
                       <CustomInput
                         labelText="Comentario"
                         id="contacto"
