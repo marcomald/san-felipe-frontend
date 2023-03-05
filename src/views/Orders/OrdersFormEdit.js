@@ -438,6 +438,21 @@ export default function OrdersFormEdit(props) {
   };
 
   const onSelectClient = client => {
+    if (!client.point) {
+      setNotification({
+        color: "warning",
+        text:
+          "El cliente no tiene georeferencia, por favor actualice su ubicación en el mapa antes de crear el pedido.",
+        open: true
+      });
+      setTimeout(() => {
+        setNotification({
+          ...notification,
+          open: false
+        });
+      }, 7000);
+      return;
+    }
     const selectedPayment = PAYMENT_LIST.find(
       payment => payment.value === client.formapago_id
     );
