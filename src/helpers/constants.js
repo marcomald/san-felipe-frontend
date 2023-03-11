@@ -22,6 +22,10 @@ export const DOCUMENT_TYPE = [
 ];
 
 export const RESPONSIBLE_LIST = [
+  { value: "Q09", label: "DIEGO MIÑO" },
+  { value: "26", label: "JINSON INTRIAGO" },
+  { value: "M09", label: "ANDREA PAZMIÑO" },
+  { value: "Q10", label: "SANTIAGO CUARAN" },
   { value: "00", label: "NINGUNO" },
   { value: "03", label: "FERNANDO CASTRO" },
   { value: "04", label: "CESAR GUALLICHICO" },
@@ -40,7 +44,7 @@ export const RESPONSIBLE_LIST = [
   { value: "17", label: "JAIRO LOPEZ" },
   { value: "18", label: "RODRIGO FLORES" },
   { value: "22", label: "XAVIER MORALES" },
-  { value: "19", label: "HUMBERTO HINOJOZA" },
+  { value: "19", label: "HUMBERTO HINOJOZAS" },
   { value: "20", label: "SOFIA SILVA" },
   { value: "21", label: "FREDDY LOPEZ" },
   { value: "23", label: "PABLO MERA" },
@@ -49,7 +53,7 @@ export const RESPONSIBLE_LIST = [
   { value: "Q03", label: "ERICK PALOMO" },
   { value: "Q04", label: "JHANET AQUIETA" },
   { value: "Q05", label: "ANGELICA LOVATO" },
-  { value: "Q08", label: "JOSE GUAYRARA" },
+  { value: "Q08", label: "JOSE GUAYARA" },
   { value: "24", label: "SHIRLEY SOLORZANO" },
   { value: "01", label: "KARLYS OJEDA" },
   { value: "25", label: "PAUL TAPIA" },
