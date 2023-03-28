@@ -59,8 +59,11 @@ export const ClousureList = props => {
   const fetchDespatch = async () => {
     setLoading(true);
     const retrievedDespatch = await getClosures(limit, offset, "", "");
-    if (retrievedDespatch) {
-      setData(retrievedDespatch);
+    if (retrievedDespatch && retrievedDespatch.closure) {
+      setData({
+        despatchs: retrievedDespatch.closure.despatchs,
+        total: retrievedDespatch.total
+      });
     }
     setLoading(false);
   };
@@ -122,7 +125,7 @@ export const ClousureList = props => {
             </CardHeader>
             <CardBody>
               <CustomTable
-                data={data.despatchs.map(despatch => {
+                data={data?.despatchs?.map(despatch => {
                   return [
                     despatch?.despatch_number ?? 1,
                     despatch?.nombre,
@@ -150,7 +153,7 @@ export const ClousureList = props => {
                 onOffsetChange={valueOffset => {
                   setOffset(valueOffset);
                 }}
-                total={data.total ?? 0}
+                total={data?.total ?? 0}
                 changeLimit={limite => {
                   setLimit(limite);
                 }}
