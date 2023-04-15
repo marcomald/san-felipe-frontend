@@ -92,11 +92,13 @@ export default function DespatchFormEdit(props) {
   const fetchDespatch = async () => {
     setLoading(true);
     const retrievedDespatch = await getDespatchById(despatchID);
+    console.log("retrievedDespatch", retrievedDespatch);
     const georoute = await fetchGeoruta(retrievedDespatch.georuta_id);
     setGeoroutes([
       { ...georoute, label: georoute.nombre, value: georoute.georuta_id }
     ]);
     setDespatch({
+      num_despa: retrievedDespatch.despatch_number,
       date: moment(retrievedDespatch.date).toDate(),
       georoute: {
         ...georoute,
@@ -211,8 +213,9 @@ export default function DespatchFormEdit(props) {
       setLoading(true);
       const updated = await updateDespatch({
         despatch_id: despatchID,
+        num_despa: despatch.num_despa,
         estado: "A",
-        date: moment(despatch.georoute.fecha).format("YYYY-MM-DD"),
+        date: moment.utc(despatch.georoute.fecha).format("YYYY-MM-DD"),
         georuta_id: despatch.georoute.georuta_id,
         detail: despatch.products.map(product => ({
           order_amount: product.total,
